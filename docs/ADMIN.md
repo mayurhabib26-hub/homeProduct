@@ -82,7 +82,68 @@ UX affordance, not a permission.
 
 ## 4. Screens
 
-### 4.1 Dashboard
+### 4.1 Login
+
+The only login page in the system. Customers use guest checkout in v1, so
+there is no customer authentication until accounts ship
+([ROADMAP.md](./ROADMAP.md)).
+
+Seven elements. That is the whole page.
+
+| Element | Notes |
+|---|---|
+| Email field | `autocomplete="email"` — let password managers fill it |
+| Password field | `autocomplete="current-password"` |
+| Show/hide password toggle | Cheap, and cuts lockouts from typos on mobile keyboards |
+| Submit button | Disabled with a spinner while in flight |
+| One generic error line | `role="alert"`, linked by `aria-describedby` |
+| Small brand mark | Confirms you are on the right site. Not a hero. |
+| TOTP step | Second screen, for `owner`. Required once staff accounts exist. |
+
+#### Deliberately absent
+
+| Omitted | Why |
+|---|---|
+| **Sign up / register** | Admin accounts are created by the owner. There must be **no public registration route at all** — not hidden, not disabled, not present. |
+| **Forgot password** | An email-token reset flow is real attack surface for one or two users. Reset with a CLI script on the server. Add the flow when staff accounts exist and someone is actually locked out. |
+| **Remember me** | The session is already 8h sliding. A long-lived token on a panel that can issue refunds is a liability, not a convenience. |
+| Social / Google login | Two users. An OAuth dependency to save two seconds. |
+| CAPTCHA | Rate limiting and lockout already cover credential stuffing. Add Turnstile only if the logs show it happening. |
+| Password strength meter | Nobody creates an account here. |
+| Marketing copy, illustrations, "Welcome back" | It is a door, not a landing page. |
+
+#### Behaviour that is not visible
+
+- **Always the same error** — "Invalid email or password". Never "no such
+  user". The message must not tell an attacker which half was correct.
+- **Run bcrypt even when the email does not exist**, against a dummy hash.
+  Otherwise an unknown email returns in 5ms and a known one in 200ms, and the
+  response time enumerates your admin accounts.
+- **Rate limit** 5 attempts / 15 min / IP, then exponential lockout on the
+  account. Show a countdown when locked, not a dead button.
+- **Token in an `HttpOnly; Secure; SameSite=Lax` cookie.** Never
+  `localStorage` — anything with XSS reads that.
+- **`noindex`** on the route, plus a `robots.txt` disallow.
+- **Every attempt written to `audit_log`**, success and failure, with IP.
+- **Validate the post-login redirect.** If `?next=` is supported, accept only
+  relative paths beginning `/admin`. `?next=https://evil.com` is an open
+  redirect and a working phishing page.
+
+#### States
+
+Idle · submitting · invalid credentials · rate-limited with countdown ·
+awaiting TOTP · server unreachable.
+
+All six render something honest. A spinner that never resolves is how people
+end up restarting the server.
+
+#### Design
+
+Centred card, ~380px, on the `#FAF6F0` ground. System sans, not the Cormorant
+display face — this is the tool half of the product (§2). Visible focus ring
+on both fields, email autofocused on mount, `Enter` submits.
+
+### 4.2 Dashboard
 
 Answers "what needs my attention right now", not "how is the business doing
 this quarter".
@@ -101,7 +162,7 @@ Then:
 Backed by a materialised view refreshed every 5 minutes. The dashboard must
 never scan `orders` on page load.
 
-### 4.2 Orders — the screen that gets used most
+### 4.3 Orders — the screen that gets used most
 
 **List:** date, order number, customer, items count, total, payment method,
 status. Filter by status, date range, payment method, coupon, pincode. Search
@@ -121,7 +182,7 @@ Bulk select → mark packed, print pick lists, export.
 - Print: invoice (GST) and shipping label
 - Internal notes, never customer-visible
 
-### 4.3 Products
+### 4.4 Products
 
 List with thumbnail, name, category, variant count, price range, total stock,
 published toggle.
@@ -141,7 +202,7 @@ Editor:
 
 Deleting soft-deletes. Order history must survive a discontinued product.
 
-### 4.4 Inventory
+### 4.5 Inventory
 
 A dedicated screen because it is edited far more often than product copy.
 
@@ -152,7 +213,7 @@ rows, save on blur. Filters for low stock and out of stock. Bulk adjust
 Every change writes to `audit_log` with the before and after value. "Where did
 40 packets go" must be answerable.
 
-### 4.5 Coupons
+### 4.6 Coupons
 
 Create with code, type, value, min order, max discount, validity window, usage
 limit, per-customer limit. List shows usage against limit and revenue
@@ -161,14 +222,14 @@ attributed.
 Codes are stored uppercase and compared uppercase. This is where the hardcoded
 `SVTRADITION` / `WELCOME10` / `TASTEOFHOME` from the current bundle move to.
 
-### 4.6 Reviews
+### 4.7 Reviews
 
 Approval queue, unapproved first. Approve, reject, or reply. Shows whether the
 reviewer has a matching order (verified purchase).
 
 Approval recomputes the product's `rating` and `reviews_count`.
 
-### 4.7 Recipes
+### 4.8 Recipes
 
 CRUD over the content currently in `recipes.ts`. Markdown-ish editor for
 instructions, paired-product selector, publish toggle.
@@ -177,13 +238,13 @@ instructions, paired-product selector, publish toggle.
 
 ## 5. Security
 
-Detailed in [SECURITY.md](./SECURITY.md). Admin-specific:
+Detailed in [SECURITY.md](./SECURITY.md); login-specific controls in §4.1.
+Admin-wide:
 
 - Session 8 hours, sliding, revocable server-side
 - 2FA (TOTP) for `owner` — recommended at launch, **required** once staff
   accounts exist
 - `noindex` on all admin routes and a `robots.txt` disallow
-- Login rate limit: 5 attempts / 15 min / IP, then exponential lockout
 - Every mutation writes `audit_log` with admin id, IP, before, after
 - Customer data export is `owner`-only and itself audited
 - Consider IP allowlisting once the working locations are known — cheap, and
