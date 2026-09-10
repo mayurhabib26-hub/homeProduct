@@ -88,6 +88,9 @@ The only login page in the system. Customers use guest checkout in v1, so
 there is no customer authentication until accounts ship
 ([ROADMAP.md](./ROADMAP.md)).
 
+This section covers the **screen**. The mechanism — password handling, TOTP,
+sessions, lockout — is in [AUTH.md §3](./AUTH.md).
+
 Seven elements. That is the whole page.
 
 | Element | Notes |
@@ -114,17 +117,13 @@ Seven elements. That is the whole page.
 
 #### Behaviour that is not visible
 
+Full detail in [AUTH.md §3](./AUTH.md). What the screen must respect:
+
 - **Always the same error** — "Invalid email or password". Never "no such
   user". The message must not tell an attacker which half was correct.
-- **Run bcrypt even when the email does not exist**, against a dummy hash.
-  Otherwise an unknown email returns in 5ms and a known one in 200ms, and the
-  response time enumerates your admin accounts.
-- **Rate limit** 5 attempts / 15 min / IP, then exponential lockout on the
-  account. Show a countdown when locked, not a dead button.
-- **Token in an `HttpOnly; Secure; SameSite=Lax` cookie.** Never
-  `localStorage` — anything with XSS reads that.
+- **A locked-out state with a countdown**, not a dead button.
+- **Nothing in `localStorage`.** The session is a cookie the page never sees.
 - **`noindex`** on the route, plus a `robots.txt` disallow.
-- **Every attempt written to `audit_log`**, success and failure, with IP.
 - **Validate the post-login redirect.** If `?next=` is supported, accept only
   relative paths beginning `/admin`. `?next=https://evil.com` is an open
   redirect and a working phishing page.
@@ -238,8 +237,8 @@ instructions, paired-product selector, publish toggle.
 
 ## 5. Security
 
-Detailed in [SECURITY.md](./SECURITY.md); login-specific controls in §4.1.
-Admin-wide:
+Detailed in [SECURITY.md](./SECURITY.md); the login mechanism in
+[AUTH.md §3](./AUTH.md). Admin-wide:
 
 - Session 8 hours, sliding, revocable server-side
 - 2FA (TOTP) for `owner` — recommended at launch, **required** once staff

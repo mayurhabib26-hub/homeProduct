@@ -89,6 +89,8 @@ React escapes by default. The risks are the exceptions:
 
 ### 3.5 Authentication
 
+Full specification in [AUTH.md](./AUTH.md). Summary:
+
 **Admin:**
 - bcrypt, cost 12
 - JWT in an `HttpOnly; Secure; SameSite=Lax` cookie. Not `localStorage` —

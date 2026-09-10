@@ -77,6 +77,17 @@ Being fixed in Phase 0 ([docs/MIGRATION.md](./docs/MIGRATION.md)):
 - Every product image exists twice (`public/images/` and `src/assets/images/`)
 - `@google/genai` is a dependency with zero imports
 
+## Before you change auth code
+
+[AUTH.md](./docs/AUTH.md) is the authority on both systems. Two things that
+are easy to get wrong:
+
+- **Run bcrypt even when the admin email does not exist.** Returning early
+  enumerates accounts by response time.
+- **The OTP provider is a delivery pipe, nothing more.** We generate, store
+  the HMAC, count attempts, and verify. Turnkey provider OTP APIs move those
+  security properties somewhere we cannot audit them.
+
 ## Before you change payment or stock code
 
 Read [docs/PAYMENTS.md](./docs/PAYMENTS.md) fully, and make sure the

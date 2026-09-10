@@ -61,13 +61,14 @@ Start here if you are new:
 | 4 | [API.md](./API.md) | Every endpoint contract |
 | 5 | [PAYMENTS.md](./PAYMENTS.md) | Razorpay flow, webhooks, reconciliation |
 | 6 | [ADMIN.md](./ADMIN.md) | Admin panel specification |
-| 7 | [SECURITY.md](./SECURITY.md) | Threat model and controls |
-| 8 | [OBSERVABILITY.md](./OBSERVABILITY.md) | Logs, metrics, alerts, SLOs |
-| 9 | [DEPLOYMENT.md](./DEPLOYMENT.md) | Environments, CI/CD, runbooks |
-| 10 | [TESTING.md](./TESTING.md) | Test strategy and coverage gates |
-| 11 | [COMPLIANCE.md](./COMPLIANCE.md) | FSSAI, GST, Legal Metrology, consumer law |
-| 12 | [MIGRATION.md](./MIGRATION.md) | What changes in the existing codebase |
-| 13 | [ROADMAP.md](./ROADMAP.md) | Phased delivery plan |
+| 7 | [AUTH.md](./AUTH.md) | Admin login, customer OTP, delivery providers |
+| 8 | [SECURITY.md](./SECURITY.md) | Threat model and controls |
+| 9 | [OBSERVABILITY.md](./OBSERVABILITY.md) | Logs, metrics, alerts, SLOs |
+| 10 | [DEPLOYMENT.md](./DEPLOYMENT.md) | Environments, CI/CD, runbooks |
+| 11 | [TESTING.md](./TESTING.md) | Test strategy and coverage gates |
+| 12 | [COMPLIANCE.md](./COMPLIANCE.md) | FSSAI, GST, Legal Metrology, consumer law |
+| 13 | [MIGRATION.md](./MIGRATION.md) | What changes in the existing codebase |
+| 14 | [ROADMAP.md](./ROADMAP.md) | Phased delivery plan |
 
 ## Design principles
 
