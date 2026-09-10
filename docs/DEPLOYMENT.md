@@ -10,8 +10,8 @@ Environments, pipeline, and what to do when it breaks.
 |---|---|---|---|---|
 | Local | `vite dev` :5173 | `tsx watch` :4000 | Docker Postgres + Redis | Development |
 | Preview | Pages preview URL | Per-PR backend | Shared branch DB | PR review |
-| Staging | `staging.svhomeproducts.com` | Staging service | Production-shaped, anonymised | Pre-release verification |
-| Production | `svhomeproducts.com` | Production service | Managed, PITR | Live |
+| Staging | `staging.svhomeproducts.com` | Railway `staging` env | Own database, production-shaped, anonymised | Pre-release verification |
+| Production | `svhomeproducts.com` | Railway `production` env | Railway Postgres + hourly dumps to R2 | Live |
 
 **Staging uses Razorpay test keys. Production uses live keys. There is no
 environment where these mix.**
@@ -47,13 +47,100 @@ that only exists in development.
 |---|---|---|
 | Frontend | Cloudflare Pages | Static at the edge, effectively free, instant rollback |
 | CDN / WAF / rate limit | Cloudflare | Same zone as Pages, one place for routing rules |
-| Backend | Render or Railway (Mumbai) | Long-lived Node process, simple scaling, no Kubernetes |
-| Postgres | Neon or Supabase (Mumbai) | Managed backups, PITR, pooled connection string |
-| Redis | Upstash or provider add-on | Cache + queue |
-| Object storage | Cloudflare R2 | No egress fees, same edge as the CDN |
+| Backend, worker, Postgres, Redis | **Railway — one project** | Private networking between all four, one bill, one dashboard |
+| Object storage | Cloudflare R2 | No egress fees, and a **different vendor from the backups' source** |
 
-**Everything in `ap-south-1` / Mumbai.** Customers and warehouse are in India;
-a US-hosted database adds ~200ms to every query for no benefit.
+### Railway project layout
+
+```
+Railway project: sv-home-products
+├── service: api        backend/ — node dist/index.js
+├── service: worker     backend/ — node dist/worker.js
+├── service: postgres   + volume
+└── service: redis      + volume
+
+environments: production · staging
+```
+
+**One project, four services.** These are different things and the
+distinction is the whole point:
+
+- **One project** is the private-network boundary. Services inside it reach
+  each other over internal DNS (`postgres.railway.internal`) with no public
+  internet hop, no per-connection TLS handshake, and sub-millisecond latency.
+  Split them across projects and that benefit is gone.
+- **Separate services, never one container.** Node, Postgres, and Redis in a
+  single image means a deploy restarts your database, nothing scales
+  independently, and an API memory spike takes down storage.
+- **The worker is its own service** — same repository, different start
+  command. A backlog of 5,000 confirmation emails must not compete for CPU
+  with checkout.
+
+Four things that are easy to get wrong:
+
+1. **Same region for every service.** Private networking requires it, and a
+   cross-region hop between API and database costs more than anything else on
+   this list.
+2. **Use the internal hostnames**, not the public `*.railway.app` ones.
+   The public URL leaves the network, bills egress, and adds latency — and it
+   works, so a mistake here is silent.
+3. **Attach volumes to Postgres and Redis.** Without one the data is
+   ephemeral and disappears on redeploy.
+4. **Staging is a Railway environment**, with its own database. A shared
+   database between staging and production is how a test order lands in a real
+   invoice sequence.
+
+### Why Railway Postgres rather than a managed provider
+
+Neon or Supabase would give pooling, PITR, and branching without operating
+them. Railway Postgres is a container with a volume, so those are yours.
+
+The trade is worth taking at this scale:
+
+| Given up | Bites at | Mitigation |
+|---|---|---|
+| Built-in connection pooling | 4+ API instances | Keep the app pool at 5–10. Two instances × 10 = 20 connections — comfortable without PgBouncer. Add PgBouncer as a fifth service when scaling out. |
+| PITR to any second | A mid-day disaster | Hourly `pg_dump` to R2 — see [DATABASE.md §7](./DATABASE.md) |
+| Database branching | PR previews | Railway environments each carry their own database |
+| Managed failover | Stage 2+ | A restart is minutes; the traffic profile tolerates it |
+
+Pooling in particular is **not a Stage 1 problem**. Running PgBouncer now
+solves a problem that does not exist yet.
+
+This is also a reversible decision. If Railway Postgres becomes the
+constraint, moving to Neon is `pg_dump` → `pg_restore` → one connection
+string, with logical replication if the downtime matters.
+
+**Revisit when:** 4+ API instances make connections tight (add PgBouncer
+first), losing an hour of orders becomes unacceptable (Neon's PITR), or
+preview environments collide often enough to hurt (branching).
+
+### The single-vendor risk
+
+One project means one blast radius: a deleted project or a compromised
+Railway account takes all four services at once.
+
+That is acceptable **only because the backups live elsewhere.** The hourly
+`pg_dump` goes to Cloudflare R2 — a different vendor, different credentials.
+Backups stored inside the system they protect are not backups.
+
+### Regions
+
+**Verify current region availability before committing.** Railway's Asian
+region is Singapore; an India region may not be offered.
+
+Singapore adds roughly 40–60ms per API call from Indian users. Noticeable,
+not fatal — most of the storefront is served from Indian CDN edge PoPs, so it
+only affects API round trips.
+
+What is **not** negotiable is that the API and the database sit in the same
+region as each other. A page load makes several database round trips, and each
+one pays the cross-region penalty. API-in-Singapore with a database in Mumbai
+is worse than both in Singapore.
+
+If genuine India hosting is required, the options are Fly.io (Mumbai),
+DigitalOcean (Bangalore), or AWS/GCP Mumbai directly — all more setup than
+Railway.
 
 ### The routing decision that matters
 
@@ -203,9 +290,12 @@ Highest-severity incident. See [PAYMENTS.md §10](./PAYMENTS.md).
 **Infrastructure**
 - [ ] Domain, DNS, TLS, HSTS
 - [ ] Cloudflare routing: Pages + `/api/*` → origin
-- [ ] Postgres with PITR; a restore has been tested
+- [ ] All four Railway services in **one project, one region**, on internal hostnames
+- [ ] Volumes attached to Postgres and Redis
+- [ ] Hourly `pg_dump` to R2 running; **a restore has been tested**
 - [ ] Redis reachable, workers consuming
 - [ ] R2 bucket, CDN mapping, images uploaded
+- [ ] App connection pool capped at 5–10 per instance
 
 **Application**
 - [ ] Migrations applied, catalogue seeded, opening stock set per variant

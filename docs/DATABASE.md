@@ -39,6 +39,17 @@ identifiers are separate, human-readable, and stable.
 Raising a price in 2027 must not alter a 2026 invoice. This is a legal
 requirement under GST record-keeping, not a nicety.
 
+### Cap the connection pool at 5–10 per instance
+
+Railway Postgres has no built-in pooler. Two API instances with a pool of 10
+each is 20 connections — comfortable. Raising the pool "for performance" is
+how you reach `too many clients already`, which fails hard rather than
+degrading.
+
+Write the limit in config with a comment explaining why, or someone will
+raise it. Add PgBouncer as a separate service when the instance count grows
+past four — see [DEPLOYMENT.md §3](./DEPLOYMENT.md).
+
 ### Every timestamp is `timestamptz`
 
 Store UTC. Render IST. `timestamp without time zone` is how you discover in
@@ -335,10 +346,25 @@ Keep the seed script afterwards — it is how staging gets realistic data.
 
 | What | Frequency | Retention | Verified |
 |---|---|---|---|
-| Automated PITR snapshot | Continuous | 7 days | Provider-managed |
-| Full logical dump to R2 | Nightly | 30 days | **Monthly restore drill** |
+| **Logical dump to R2** | **Hourly** | 7 days hourly, 30 days daily | **Monthly restore drill** |
+| Railway snapshot | Daily | Provider default | Provider-managed |
 | Pre-migration dump | Per migration | 7 days | Before every schema change |
 
-An unverified backup is not a backup. The monthly drill — restore the nightly
+**The hourly dump is the primary recovery mechanism, not a backstop.**
+
+Railway Postgres is a container with a volume, so there is no
+point-in-time recovery to an arbitrary second — snapshots are daily. Without
+hourly dumps, a mid-afternoon disaster loses every order placed that day.
+
+This is cheap precisely because the database is small: under 1GB for years at
+this order volume, so a `pg_dump` takes seconds and the storage cost on R2 is
+negligible. Run it as a cron job on the worker service.
+
+**The dumps go to R2 — a different vendor from Railway.** This is what makes
+running everything in one Railway project acceptable: a deleted project or a
+compromised account cannot take the backups with it. Backups stored inside the
+system they protect are not backups.
+
+An unverified backup is not a backup either. The monthly drill — restore a
 dump into a scratch database and run the test suite against it — is the only
 thing that turns a hopeful assumption into a fact.

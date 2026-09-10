@@ -23,7 +23,8 @@ Naming these keeps the design honest and stops it inflating:
 
 - **Multi-tenant / marketplace.** One brand, one seller, one catalogue.
 - **Global multi-region writes.** Customers and warehouse are both in India.
-  One write region, `ap-south-1` / Mumbai.
+  One write region, as close to India as the host offers — see
+  [DEPLOYMENT.md §3](./DEPLOYMENT.md) on region availability.
 - **Real-time inventory sync with physical POS.** Stock is set by the admin.
 - **Microservices.** One API service. At this order volume, splitting it buys
   operational pain and nothing else.
@@ -45,7 +46,7 @@ graph TB
         R2[(R2 object storage<br/>product images)]
     end
 
-    subgraph "Origin — Mumbai region"
+    subgraph "Origin — Railway project, one region"
         LB[Load balancer]
         API1[API instance 1]
         API2[API instance 2]
@@ -407,10 +408,15 @@ Full detail in [SCALING.md](./SCALING.md). The short version:
 
 | Stage | Shape | Concurrent users | Monthly cost |
 |---|---|---|---|
-| 0 | One box, Postgres alongside | ~200 | ~₹700 |
-| 1 | CDN + managed Postgres + 2 API instances | ~2,000 | ~₹3,500 |
-| 2 | + Redis, PgBouncer, read replica, workers | ~10,000 | ~₹12,000 |
+| 0 | Single Railway service, Postgres alongside | ~200 | ~₹600 |
+| 1 | CDN + Railway project (api, worker, postgres, redis) × 2 instances | ~2,000 | ~₹3,000 |
+| 2 | + PgBouncer, read replica, scaled workers | ~10,000 | ~₹12,000 |
 | 3 | + autoscaling, partitioned orders, dedicated queue nodes | 50,000+ | ~₹45,000 |
+
+Stage 1 assumes everything except the frontend and object storage runs in one
+Railway project — see [DEPLOYMENT.md §3](./DEPLOYMENT.md). Splitting Postgres
+and Redis out to managed providers (Neon, Upstash) costs roughly ₹5,000/mo
+instead, and buys pooling, PITR, and branching you do not need until Stage 2.
 
 Build Stage 1 now. The architecture above **is** Stage 3 — the later stages
 add instances and managed services, they do not require rewriting anything.

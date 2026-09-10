@@ -83,10 +83,17 @@ Constraints transaction pooling imposes, which the code must respect:
 - Keep the app-side pool **small** (5–10 per instance). PgBouncer is doing
   the pooling now; a large app pool defeats it.
 
-Neon and Supabase both ship a pooled connection string. Use it. This is a
-connection-string change, not an architecture change — but only if the code
-respected the constraints from the start, which is why it is documented here
-rather than discovered at 2am.
+Railway Postgres ships no pooler, so at Stage 1 the answer is a **small app
+pool** (5–10 per instance) rather than PgBouncer — two instances stay well
+inside the connection limit. Add PgBouncer as its own service when the
+instance count passes four.
+
+Managed providers (Neon, Supabase) ship a pooled connection string instead,
+which makes this a connection-string change rather than an extra service. That
+convenience is a large part of what they are worth at Stage 2.
+
+Either way, the constraints above must be respected in the code from the
+start — which is why this is documented here rather than discovered at 2am.
 
 ### 2.3 Catalogue caching
 
@@ -189,17 +196,20 @@ Largely free, because the SPA is static. Still worth being deliberate:
 ## 4. Stage-by-stage build order
 
 ### Stage 0 — one box (launch)
-Single VM, Postgres alongside the API, Cloudflare in front. Fine for the
-first weeks. Cost ~₹700/mo. **Do not stay here past first real traffic** —
-Postgres and Node competing for the same CPU is a bad failure mode.
+One Railway service running the API with Postgres alongside, Cloudflare in
+front. Fine for the first weeks. ~₹600/mo. **Do not stay here past first real
+traffic** — Postgres and Node competing for the same CPU is a bad failure mode.
 
 ### Stage 1 — separate the tiers (do this before launch day)
-Frontend to Cloudflare Pages. Managed Postgres (Neon/Supabase). Two API
-instances behind a load balancer. Images to R2.
-**This is the minimum responsible production setup.** ~₹3,500/mo.
+Frontend to Cloudflare Pages. One Railway project with four services — api,
+worker, postgres, redis — on private networking, api scaled to two instances.
+Images to R2, with hourly database dumps going there too.
+**This is the minimum responsible production setup.** ~₹3,000/mo.
 
 ### Stage 2 — add the caching and async layers
-Redis. PgBouncer. A read replica. Worker processes on their own instances.
+PgBouncer as a fifth service. A read replica. Workers scaled out. This is
+also the point at which managed Postgres (Neon) starts earning its price —
+pooling, PITR, and branching without operating them.
 Handles any realistic festival or influencer spike. ~₹12,000/mo.
 
 ### Stage 3 — autoscale
