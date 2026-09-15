@@ -67,8 +67,9 @@ Start here if you are new:
 | 10 | [DEPLOYMENT.md](./DEPLOYMENT.md) | Environments, CI/CD, runbooks |
 | 11 | [TESTING.md](./TESTING.md) | Test strategy and coverage gates |
 | 12 | [COMPLIANCE.md](./COMPLIANCE.md) | FSSAI, GST, Legal Metrology, consumer law |
-| 13 | [MIGRATION.md](./MIGRATION.md) | What changes in the existing codebase |
-| 14 | [ROADMAP.md](./ROADMAP.md) | Phased delivery plan |
+| 13 | [PWA.md](./PWA.md) | Installability, caching rules, offline boundaries |
+| 14 | [MIGRATION.md](./MIGRATION.md) | What changes in the existing codebase |
+| 15 | [ROADMAP.md](./ROADMAP.md) | Phased delivery plan |
 
 ## Design principles
 

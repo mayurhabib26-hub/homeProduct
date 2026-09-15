@@ -18,6 +18,9 @@ Workspace split, routing, and the fixes that do not need a backend.
 - Remove the seeded fake cart and wishlist
 - Delete duplicate images and unused dependencies
 - Real WhatsApp number replacing the placeholder
+- **PWA installability** — manifest, icons, minimal service worker,
+  `viewport-fit=cover` and safe-area padding on the mobile bottom nav
+  ([PWA.md §8](./PWA.md))
 - CI: lint, typecheck, build
 
 **Ships to production.** The site is better than it is today, and every
@@ -121,6 +124,8 @@ gates Razorpay KYC. It is the true critical path.
 
 - Build-time prerender + edge meta injection for SEO
   ([ARCHITECTURE.md §9](./ARCHITECTURE.md))
+- **PWA caching and polish** — per-route strategies, install-prompt timing,
+  update flow with checkout suppression ([PWA.md](./PWA.md))
 - JSON-LD `Product` / `Offer` / `Recipe` schema
 - Sitemap, canonical URLs, per-page meta
 - GA4 with e-commerce events

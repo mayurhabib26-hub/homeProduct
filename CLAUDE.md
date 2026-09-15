@@ -88,6 +88,12 @@ are easy to get wrong:
   the HMAC, count attempts, and verify. Turnkey provider OTP APIs move those
   security properties somewhere we cannot audit them.
 
+## Before you change service worker or cache config
+
+[PWA.md §2](./docs/PWA.md) lists which routes may be cached. Order, payment,
+coupon-validation and cart-hydration routes are **network-only** — caching any
+of them silently undoes hard rule 1. There is no offline checkout, by design.
+
 ## Before you change payment or stock code
 
 Read [docs/PAYMENTS.md](./docs/PAYMENTS.md) fully, and make sure the

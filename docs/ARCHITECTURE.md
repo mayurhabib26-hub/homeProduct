@@ -301,7 +301,7 @@ and half is new.
 | Data | Store | Consistency | Notes |
 |---|---|---|---|
 | Products, variants, stock | Postgres primary | Strong | Stock reads during checkout hit the **primary**, never a replica |
-| Catalogue for browsing | Redis / CDN | Eventually consistent, ≤60s | A one-minute-stale price on a listing page is acceptable; checkout re-prices from primary |
+| Catalogue for browsing | Redis / CDN / service worker | Eventually consistent, ≤60s | A one-minute-stale price on a listing page is acceptable; checkout re-prices from primary. The service worker extends this existing window — it must never cache order, payment, or cart-hydration routes ([PWA.md §2](./PWA.md)). |
 | Cart | Browser localStorage | Client-only | Stores `{variantId, qty}` only — never prices or product snapshots |
 | Orders | Postgres primary | Strong | Never read from a replica in the payment path |
 | Order line items | Postgres, snapshotted | Immutable | Price and name copied at purchase time. Raising a price must not alter last year's invoice. |
