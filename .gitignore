@@ -13,3 +13,6 @@ coverage/
 
 # Local dev image uploads (R2 in production)
 frontend/public/uploads/
+
+# Generated invoices (R2 in production)
+backend/.documents/

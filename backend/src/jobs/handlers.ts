@@ -12,6 +12,10 @@ import { sendWhatsApp, sendEmail } from '../lib/notify.js';
 import { bookShipment, shiprocketConfigured } from '../lib/shiprocket.js';
 import { logger } from '../lib/logger.js';
 import { enqueue, type QueueName } from '../lib/queue.js';
+import { issueInvoice } from '../services/invoices.js';
+import { renderInvoicePdf } from '../services/invoice-pdf.js';
+import { storeDocument } from '../lib/storage.js';
+import { invoices } from '../db/schema.js';
 
 type Handler = (payload: Record<string, unknown>) => Promise<void>;
 
@@ -120,6 +124,32 @@ const handlers: Record<string, Handler> = {
     }
 
     logger.info({ orderNumber, awb: booking.awb, courier: booking.courier }, 'shipment booked');
+  },
+  /**
+   * Issue the tax invoice and store its PDF. Idempotent: issueInvoice returns
+   * the existing invoice rather than numbering a second one.
+   */
+  'invoice.issue': async (payload) => {
+    const orderNumber = String(payload.orderNumber);
+    const invoice = await issueInvoice(orderNumber);
+
+    if (invoice.pdfUrl) {
+      logger.info({ orderNumber, invoiceNumber: invoice.invoiceNumber }, 'invoice pdf already stored');
+      return;
+    }
+
+    const { order } = await loadOrder(orderNumber);
+    const pdf = await renderInvoicePdf(invoice, order);
+    const stored = await storeDocument(pdf, `${invoice.invoiceNumber.replace(/\//g, '-')}.pdf`);
+
+    const db = getDb();
+    await db.update(invoices).set({ pdfUrl: stored.url }).where(eq(invoices.id, invoice.id));
+    await db.update(orders).set({ invoiceUrl: stored.url }).where(eq(orders.id, order.id));
+
+    logger.info(
+      { orderNumber, invoiceNumber: invoice.invoiceNumber, bytes: stored.bytes },
+      'invoice issued and stored',
+    );
   },
 };
 

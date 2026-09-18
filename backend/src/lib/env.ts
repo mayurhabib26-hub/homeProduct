@@ -54,6 +54,21 @@ const schema = z.object({
 
   /** How many jobs a worker takes at once. */
   WORKER_CONCURRENCY: z.coerce.number().int().positive().max(20).default(3),
+
+  /**
+   * Seller identity on tax invoices and Legal Metrology declarations.
+   *
+   * These are legal declarations, not configuration niceties. Missing values
+   * are reported at boot rather than silently producing a non-compliant
+   * invoice. See docs/COMPLIANCE.md.
+   */
+  SELLER_LEGAL_NAME: z.string().default('S V Home Products'),
+  SELLER_ADDRESS: z.string().optional(),
+  SELLER_STATE: z.string().default('Karnataka'),
+  SELLER_GSTIN: z.string().optional(),
+  FSSAI_LICENCE: z.string().optional(),
+  GRIEVANCE_OFFICER: z.string().optional(),
+  GRIEVANCE_EMAIL: z.string().optional(),
 });
 
 const parsed = schema.safeParse(process.env);
@@ -87,3 +102,27 @@ if (isProduction && !env.JWT_SECRET) {
  * secret is one copy-paste away from production.
  */
 export const jwtSecret = env.JWT_SECRET ?? randomBytes(48).toString('hex');
+
+/**
+ * Compliance values required before a tax invoice can legally be raised.
+ * Reported loudly rather than defaulted, because a plausible-looking wrong
+ * GSTIN on an invoice is worse than a missing one.
+ */
+export const missingComplianceValues = (
+  [
+    ['SELLER_ADDRESS', env.SELLER_ADDRESS],
+    ['SELLER_GSTIN', env.SELLER_GSTIN],
+    ['FSSAI_LICENCE', env.FSSAI_LICENCE],
+    ['GRIEVANCE_OFFICER', env.GRIEVANCE_OFFICER],
+    ['GRIEVANCE_EMAIL', env.GRIEVANCE_EMAIL],
+  ] as const
+).filter(([, v]) => !v).map(([k]) => k);
+
+export const invoicingReady = missingComplianceValues.length === 0;
+
+if (!invoicingReady) {
+  console.warn(
+    `[compliance] Not set: ${missingComplianceValues.join(', ')}. ` +
+      'Invoices cannot be issued until these are configured.',
+  );
+}

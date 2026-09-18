@@ -240,6 +240,11 @@ export async function createOrder(input: CreateOrderInput) {
     await enqueue('notifications',
       { type: 'order.confirmation', orderNumber: created.orderNumber },
       { dedupeKey: `confirmation:${created.orderNumber}` });
+
+    // COD is invoiceable on confirmation; prepaid waits for settlement.
+    await enqueue('documents',
+      { type: 'invoice.issue', orderNumber: created.orderNumber },
+      { dedupeKey: `invoice:${created.orderNumber}` });
   }
 
   // Online payment needs a Razorpay order to hand the checkout widget. This

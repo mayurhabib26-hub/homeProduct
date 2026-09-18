@@ -39,6 +39,20 @@ export const products = pgTable(
     published: boolean('published').notNull().default(false),
     /** GST classification. Required before a product can be invoiced. */
     hsnCode: text('hsn_code'),
+    /** GST rate for this HSN, in percent. Confirm per product with a CA. */
+    gstRatePercent: integer('gst_rate_percent').notNull().default(5),
+
+    /**
+     * Legal Metrology declarations. Required on the listing page, legibly,
+     * before purchase. See docs/COMPLIANCE.md §3.
+     */
+    manufacturerName: text('manufacturer_name'),
+    manufacturerAddress: text('manufacturer_address'),
+    countryOfOrigin: text('country_of_origin').notNull().default('India'),
+    consumerCarePhone: text('consumer_care_phone'),
+    consumerCareEmail: text('consumer_care_email'),
+    shelfLifeMonths: integer('shelf_life_months'),
+
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
@@ -66,6 +80,10 @@ export const variants = pgTable(
     stockQty: integer('stock_qty').notNull().default(0),
     sku: text('sku'),
     active: boolean('active').notNull().default(true),
+
+    /** Net quantity, declared: 100 + 'g'. */
+    netQuantityValue: numeric('net_quantity_value', { precision: 10, scale: 2 }),
+    netQuantityUnit: text('net_quantity_unit'),
   },
   (t) => [
     uniqueIndex('variants_product_weight_idx').on(t.productId, t.weight),
@@ -394,4 +412,96 @@ export const jobs = pgTable(
     index('jobs_claim_idx').on(t.status, t.runAfter),
     uniqueIndex('jobs_dedupe_idx').on(t.dedupeKey),
   ],
+);
+
+/* ------------------------------------------------------------------ *
+ * Compliance — Phase 5
+ * ------------------------------------------------------------------ */
+
+/**
+ * Production batches.
+ *
+ * Manufacture date is per batch, not per product. Displaying one fixed date
+ * for something made continuously is a false declaration under the Legal
+ * Metrology (Packaged Commodities) Rules. See docs/COMPLIANCE.md §3.
+ */
+export const batches = pgTable(
+  'batches',
+  {
+    id: bigint('id', { mode: 'number' }).primaryKey().generatedAlwaysAsIdentity(),
+    variantId: bigint('variant_id', { mode: 'number' })
+      .notNull()
+      .references(() => variants.id, { onDelete: 'cascade' }),
+    batchCode: text('batch_code').notNull(),
+    mfgMonth: integer('mfg_month').notNull(),
+    mfgYear: integer('mfg_year').notNull(),
+    /** Derived from the product's shelf life at creation. */
+    bestBefore: timestamp('best_before', { withTimezone: true }).notNull(),
+    quantityMade: integer('quantity_made').notNull().default(0),
+    notes: text('notes'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex('batches_variant_code_idx').on(t.variantId, t.batchCode),
+    index('batches_variant_idx').on(t.variantId),
+    check('batches_month_range', sql`${t.mfgMonth} between 1 and 12`),
+  ],
+);
+
+/**
+ * Tax invoices.
+ *
+ * Numbering is sequential per financial year with no gaps — a gap is a
+ * question you get asked in a GST audit. Retained 8 years.
+ * See docs/COMPLIANCE.md §4.
+ */
+export const invoices = pgTable(
+  'invoices',
+  {
+    id: bigint('id', { mode: 'number' }).primaryKey().generatedAlwaysAsIdentity(),
+    orderId: bigint('order_id', { mode: 'number' })
+      .notNull()
+      .references(() => orders.id, { onDelete: 'restrict' }),
+    /** SV/2026-27/00001 */
+    invoiceNumber: text('invoice_number').notNull(),
+    /** Indian FY label, e.g. '2026-27'. */
+    financialYear: text('financial_year').notNull(),
+    sequence: integer('sequence').notNull(),
+    placeOfSupply: text('place_of_supply').notNull(),
+    /** True when seller and buyer are in the same state. */
+    intraState: boolean('intra_state').notNull(),
+    taxableValuePaise: bigint('taxable_value_paise', { mode: 'number' }).notNull(),
+    cgstPaise: bigint('cgst_paise', { mode: 'number' }).notNull().default(0),
+    sgstPaise: bigint('sgst_paise', { mode: 'number' }).notNull().default(0),
+    igstPaise: bigint('igst_paise', { mode: 'number' }).notNull().default(0),
+    totalPaise: bigint('total_paise', { mode: 'number' }).notNull(),
+    /** Per-line breakdown, frozen at issue. */
+    lines: jsonb('lines').notNull(),
+    pdfUrl: text('pdf_url'),
+    issuedAt: timestamp('issued_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex('invoices_number_idx').on(t.invoiceNumber),
+    uniqueIndex('invoices_order_idx').on(t.orderId),
+    uniqueIndex('invoices_fy_sequence_idx').on(t.financialYear, t.sequence),
+  ],
+);
+
+/**
+ * Marketing consent, separate from the transaction and never pre-ticked.
+ * Recorded with a timestamp because consent must be demonstrable.
+ * See docs/COMPLIANCE.md §6.
+ */
+export const marketingConsent = pgTable(
+  'marketing_consent',
+  {
+    id: bigint('id', { mode: 'number' }).primaryKey().generatedAlwaysAsIdentity(),
+    phone: text('phone').notNull(),
+    email: text('email'),
+    granted: boolean('granted').notNull(),
+    source: text('source').notNull(),
+    ip: text('ip'),
+    recordedAt: timestamp('recorded_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index('marketing_consent_phone_idx').on(t.phone)],
 );

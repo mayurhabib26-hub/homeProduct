@@ -128,6 +128,10 @@ export async function settlePayment(input: SettleInput) {
     { type: 'order.confirmation', orderNumber: order.orderNumber },
     { dedupeKey: `confirmation:${order.orderNumber}` });
 
+  await enqueue('documents',
+    { type: 'invoice.issue', orderNumber: order.orderNumber },
+    { dedupeKey: `invoice:${order.orderNumber}` });
+
   logger.info({ orderNumber: order.orderNumber, source: input.source }, 'payment settled');
   return { orderNumber: order.orderNumber, alreadySettled: false };
 }

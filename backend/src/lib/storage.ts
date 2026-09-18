@@ -103,3 +103,24 @@ async function putToR2(name: string, buffer: Buffer, mimeType: string) {
     throw new ApiError(502, 'UPLOAD_FAILED', 'Could not store the image. Please try again.');
   }
 }
+
+/**
+ * Store a generated document (currently invoices).
+ *
+ * Same backends as images, different retention: invoices are kept 8 years for
+ * GST, and are served through a signed or authenticated route rather than a
+ * public URL — an invoice carries a customer's name, address and phone.
+ */
+export async function storeDocument(buffer: Buffer, filename: string): Promise<StoredImage> {
+  const safe = filename.replace(/[^A-Za-z0-9._-]/g, '');
+
+  if (r2Configured) {
+    await putToR2(`invoices/${safe}`, buffer, 'application/pdf');
+    return { url: `invoices/${safe}`, bytes: buffer.length };
+  }
+
+  const dir = resolve(dirname(fileURLToPath(import.meta.url)), '../../.documents');
+  await mkdir(dir, { recursive: true });
+  await writeFile(join(dir, safe), buffer);
+  return { url: `invoices/${safe}`, bytes: buffer.length };
+}
