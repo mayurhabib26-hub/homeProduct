@@ -1,0 +1,26 @@
+# Local Postgres and Redis for development.
+#
+# Not required: backend/src/db/client.ts falls back to PGlite (Postgres
+# compiled to WASM, in-process, nothing to install) when DATABASE_URL is
+# unset. Use this when you have Docker and want to develop against the same
+# engine production runs. See docs/DATABASE.md.
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: sv
+      POSTGRES_PASSWORD: sv
+      POSTGRES_DB: sv_dev
+    ports: ['5432:5432']
+    volumes: ['pgdata:/var/lib/postgresql/data']
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U sv']
+      interval: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports: ['6379:6379']
+
+volumes:
+  pgdata:
