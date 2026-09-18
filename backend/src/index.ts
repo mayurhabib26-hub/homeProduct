@@ -1,23 +1,19 @@
-// Express API skeleton. Routes, services and the database land in Phase 1 —
-// see docs/ROADMAP.md.
+import { createApp } from './app.js';
+import { env } from './lib/env.js';
+import { logger } from './lib/logger.js';
 
-import express from 'express';
-
-const app = express();
-const port = Number(process.env.PORT ?? 4000);
-
-// Liveness: no dependency checks, deliberately. A slow database must not
-// cause the load balancer to kill healthy instances. See docs/API.md §7.
-app.get('/api/health', (_req, res) => {
-  res.json({ status: 'ok' });
+const server = createApp().listen(env.PORT, () => {
+  logger.info({ port: env.PORT, env: env.NODE_ENV }, 'API listening');
 });
 
-const server = app.listen(port, () => {
-  console.log(`API listening on :${port}`);
-});
-
-// Finish in-flight requests before exiting, or every deploy drops whatever
-// was mid-checkout. See docs/DEPLOYMENT.md §6.
-process.on('SIGTERM', () => {
+/**
+ * Finish in-flight requests before exiting, or every deploy drops whatever
+ * was mid-checkout. See docs/DEPLOYMENT.md §6.
+ */
+const shutdown = (signal: string) => {
+  logger.info({ signal }, 'shutting down');
   server.close(() => process.exit(0));
-});
+  setTimeout(() => process.exit(1), 30_000).unref();
+};
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));
