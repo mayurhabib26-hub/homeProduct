@@ -1,0 +1,36 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      # npm ci, never npm install — reproducible, and it fails loudly if the
+      # lockfile and manifests have drifted. docs/DEPLOYMENT.md §4.
+      - run: npm ci
+
+      - name: Typecheck
+        run: npm run lint
+
+      - name: Unit checks
+        run: node --experimental-strip-types shared/src/money.test.ts
+
+      - name: Build
+        run: npm run build
+
+      - name: Bundle budget
+        run: node scripts/check-bundle-size.mjs
+
+      - name: Dependency audit
+        run: npm audit --audit-level=high

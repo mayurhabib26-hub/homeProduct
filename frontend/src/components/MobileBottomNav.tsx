@@ -11,8 +11,14 @@ export const MobileBottomNav: React.FC = () => {
   } = useShop();
   const { pathname } = useLocation();
 
+  // paddingBottom below keeps this clear of the iPhone home indicator when
+  // the PWA runs standalone. Pairs with viewport-fit=cover in index.html —
+  // without both, the nav renders under the indicator.
   return (
-    <div className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-[#FAF6F0]/95 backdrop-blur-md border-t border-[#EBD9BC] px-3 py-2 flex items-center justify-around shadow-md font-sans">
+    <div
+      className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-[#FAF6F0]/95 backdrop-blur-md border-t border-[#EBD9BC] px-3 pt-2 flex items-center justify-around shadow-md font-sans"
+      style={{ paddingBottom: 'calc(0.5rem + env(safe-area-inset-bottom))' }}
+    >
       <Link to="/"
                 className={`flex flex-col items-center gap-1 p-1 transition-colors ${
                 pathname === '/' ? 'text-[#87380F] font-semibold' : 'text-[#483828]/70 hover:text-[#87380F]'

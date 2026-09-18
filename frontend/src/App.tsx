@@ -15,6 +15,7 @@ import { MobileBottomNav } from './components/MobileBottomNav';
 import { ToastNotification } from './components/ToastNotification';
 import { ScrollProgressBar } from './components/ScrollProgressBar';
 import { ScrollToTop } from './components/ScrollToTop';
+import { UpdatePrompt } from './components/UpdatePrompt';
 import { motion, AnimatePresence } from 'motion/react';
 
 // Pages
@@ -75,6 +76,7 @@ const AppContent: React.FC = () => {
       <MobileBottomNav />
       <ToastNotification />
       <ScrollToTop />
+      <UpdatePrompt />
     </div>
   );
 };
