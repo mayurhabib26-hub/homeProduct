@@ -61,8 +61,13 @@ for (const p of PRODUCTS) {
       spiceLevel: p.spiceLevel,
       image: p.image,
       gallery: p.gallery,
-      rating: String(p.rating),
-      reviewsCount: p.reviewsCount,
+      // Derived from real review rows below, never from the original data.
+      // The hardcoded storefront claimed 89-148 reviews per product while
+      // four existed in total. Displaying a review count that is not backed
+      // by reviews is a fabricated-review claim under the Consumer
+      // Protection (E-Commerce) Rules. See docs/COMPLIANCE.md §5.
+      rating: '0',
+      reviewsCount: 0,
       featured: p.featured ?? false,
       isSignature: p.isSignature ?? false,
       published: true,
@@ -101,6 +106,13 @@ for (const p of PRODUCTS) {
     });
   }
 }
+
+// Derive rating and review count from the reviews actually inserted.
+await db.execute(sql`
+  update products p set
+    reviews_count = (select count(*) from reviews r where r.product_id = p.id and r.approved),
+    rating = coalesce((select round(avg(r.rating)::numeric, 1)
+                         from reviews r where r.product_id = p.id and r.approved), 0)`);
 
 for (const r of RECIPES) {
   await db.insert(recipes).values({

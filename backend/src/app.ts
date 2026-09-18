@@ -9,6 +9,7 @@ import { catalogueRouter } from './routes/catalogue.js';
 import { ordersRouter } from './routes/orders.js';
 import { adminAuthRouter } from './routes/admin-auth.js';
 import { adminRouter } from './routes/admin.js';
+import { adminProductsRouter } from './routes/admin-products.js';
 import { webhooksRouter } from './routes/webhooks.js';
 import { getDb } from './db/client.js';
 import { sql } from 'drizzle-orm';
@@ -56,6 +57,7 @@ export function createApp() {
   app.use('/api', ordersRouter);
   app.use('/api', adminAuthRouter);
   app.use('/api', adminRouter);
+  app.use('/api', adminProductsRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

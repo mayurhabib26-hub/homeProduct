@@ -53,6 +53,28 @@ export interface DashboardStats {
   stuckOrders: { orderNumber: string; createdAt: string }[];
 }
 
+export interface AdminProduct {
+  slug: string; name: string; regionalName?: string | null; shortDescription: string;
+  category: string; categoryLabel: string; badge?: string | null; about: string;
+  ingredients: string[]; howToUse: string[]; storage: string;
+  nutrition: Record<string, string>; spiceLevel: string;
+  image: string; gallery: string[]; featured: boolean; isSignature: boolean;
+  published: boolean; hsnCode?: string | null;
+  variants: { id: number; weight: string; pricePaise: number; stockQty: number; active: boolean }[];
+}
+
+export interface AdminCoupon {
+  code: string; type: 'percent' | 'flat'; value: number;
+  minOrderPaise: number; maxDiscountPaise: number | null;
+  usageLimit: number | null; usedCount: number; active: boolean;
+  expiresAt: string | null;
+}
+
+export interface AdminReview {
+  id: number; name: string; rating: number; comment: string;
+  approved: boolean; createdAt: string; productName: string;
+}
+
 export const adminApi = {
   login: (email: string, password: string) =>
     call<AdminIdentity>('/admin/login', { method: 'POST', body: JSON.stringify({ email, password }) }),
@@ -72,6 +94,36 @@ export const adminApi = {
   inventory: () => call<InventoryRow[]>('/admin/inventory'),
   updateVariant: (id: number, body: Record<string, unknown>) =>
     call<InventoryRow>(`/admin/variants/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
+
+  products: () => call<AdminProduct[]>('/admin/products'),
+  product: (slug: string) => call<AdminProduct>(`/admin/products/${slug}`),
+  updateProduct: (slug: string, body: Record<string, unknown>) =>
+    call<AdminProduct>(`/admin/products/${slug}`, { method: 'PATCH', body: JSON.stringify(body) }),
+  unpublishProduct: (slug: string) =>
+    call<unknown>(`/admin/products/${slug}`, { method: 'DELETE' }),
+
+  uploadImage: async (file: File) => {
+    // FormData sets its own multipart boundary — do not send a content-type.
+    const body = new FormData();
+    body.append('image', file);
+    const res = await fetch(`${BASE}/admin/uploads`, { method: 'POST', credentials: 'same-origin', body });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      const e = (json as { error?: { code?: string; message?: string } }).error;
+      throw new AdminApiError(e?.code ?? 'UPLOAD_FAILED', e?.message ?? 'Upload failed.');
+    }
+    return (json as { data: { url: string; bytes: number } }).data;
+  },
+
+  coupons: () => call<AdminCoupon[]>('/admin/coupons'),
+  createCoupon: (body: Record<string, unknown>) =>
+    call<AdminCoupon>('/admin/coupons', { method: 'POST', body: JSON.stringify(body) }),
+  setCouponActive: (code: string, active: boolean) =>
+    call<AdminCoupon>(`/admin/coupons/${code}`, { method: 'PATCH', body: JSON.stringify({ active }) }),
+
+  reviews: () => call<AdminReview[]>('/admin/reviews'),
+  setReviewApproved: (id: number, approved: boolean) =>
+    call<AdminReview>(`/admin/reviews/${id}`, { method: 'PATCH', body: JSON.stringify({ approved }) }),
 };
 
 export type { OrderTotals };

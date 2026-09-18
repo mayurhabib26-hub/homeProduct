@@ -10,3 +10,6 @@ coverage/
 
 # PGlite local database
 .pglite/
+
+# Local dev image uploads (R2 in production)
+frontend/public/uploads/

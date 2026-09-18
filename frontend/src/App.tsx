@@ -40,6 +40,9 @@ const AdminDashboardPage = lazy(() => import('./pages/admin/AdminDashboardPage')
 const AdminOrdersPage = lazy(() => import('./pages/admin/AdminOrdersPage').then((m) => ({ default: m.AdminOrdersPage })));
 const AdminOrderDetailPage = lazy(() => import('./pages/admin/AdminOrdersPage').then((m) => ({ default: m.AdminOrderDetailPage })));
 const AdminInventoryPage = lazy(() => import('./pages/admin/AdminInventoryPage').then((m) => ({ default: m.AdminInventoryPage })));
+const AdminProductsPage = lazy(() => import('./pages/admin/AdminProductsPage').then((m) => ({ default: m.AdminProductsPage })));
+const AdminCouponsPage = lazy(() => import('./pages/admin/AdminCouponsPage').then((m) => ({ default: m.AdminCouponsPage })));
+const AdminReviewsPage = lazy(() => import('./pages/admin/AdminReviewsPage').then((m) => ({ default: m.AdminReviewsPage })));
 
 const AppContent: React.FC = () => {
   const location = useLocation();
@@ -139,6 +142,9 @@ export default function App() {
             <Route path="orders" element={<Suspense fallback={<AdminFallback />}><AdminOrdersPage /></Suspense>} />
             <Route path="orders/:orderNumber" element={<Suspense fallback={<AdminFallback />}><AdminOrderDetailPage /></Suspense>} />
             <Route path="inventory" element={<Suspense fallback={<AdminFallback />}><AdminInventoryPage /></Suspense>} />
+            <Route path="products" element={<Suspense fallback={<AdminFallback />}><AdminProductsPage /></Suspense>} />
+            <Route path="coupons" element={<Suspense fallback={<AdminFallback />}><AdminCouponsPage /></Suspense>} />
+            <Route path="reviews" element={<Suspense fallback={<AdminFallback />}><AdminReviewsPage /></Suspense>} />
           </Route>
 
           <Route

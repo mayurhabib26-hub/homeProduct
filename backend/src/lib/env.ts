@@ -32,6 +32,13 @@ const schema = z.object({
    */
   JWT_SECRET: z.string().min(32).optional(),
   ADMIN_SESSION_HOURS: z.coerce.number().int().positive().default(8),
+
+  /** Cloudflare R2 for product images. Unset falls back to local disk (dev only). */
+  R2_ACCOUNT_ID: z.string().optional(),
+  R2_ACCESS_KEY_ID: z.string().optional(),
+  R2_SECRET_ACCESS_KEY: z.string().optional(),
+  R2_BUCKET: z.string().optional(),
+  R2_PUBLIC_URL: z.string().url().optional(),
 });
 
 const parsed = schema.safeParse(process.env);

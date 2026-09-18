@@ -44,7 +44,10 @@ export const AdminLayout: React.FC = () => {
           <nav className="flex items-center gap-1 flex-1">
             <NavLink to="/admin" end className={link}>Dashboard</NavLink>
             <NavLink to="/admin/orders" className={link}>Orders</NavLink>
+            <NavLink to="/admin/products" className={link}>Products</NavLink>
             <NavLink to="/admin/inventory" className={link}>Inventory</NavLink>
+            <NavLink to="/admin/coupons" className={link}>Coupons</NavLink>
+            <NavLink to="/admin/reviews" className={link}>Reviews</NavLink>
           </nav>
           <span className="text-xs text-[#483828]/60 mr-3">
             {me?.email} · <span className="uppercase tracking-wide">{me?.role}</span>
