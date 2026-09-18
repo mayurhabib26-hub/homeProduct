@@ -1,22 +1,26 @@
 import { Product } from '../types';
 
-// Authentic SV Home Products pouch mockups & photos
-import rasamPackImg from '../assets/images/rasam_powder_pack_1788375224417.jpg';
-import sambarPackImg from '../assets/images/sambar_powder_pack_1788375243187.jpg';
-import puliyogarePackImg from '../assets/images/puliyogare_mix_pack_1788375258621.jpg';
-import chutneyPudiPackImg from '../assets/images/chutney_pudi_pack_1788375278138.jpg';
-import bisiBelePackImg from '../assets/images/bisi_bele_pack_1788375294820.jpg';
-import comboTrioPackImg from '../assets/images/combo_kitchen_trio_1788375324949.jpg';
-import byadagiChilliPackImg from '../assets/images/byadagi_chilli_pack_1788375381792.jpg';
-import corianderPackImg from '../assets/images/coriander_powder_pack_1788375399451.jpg';
-import traditionalCraftImg from '../assets/images/traditional_spice_craft_1788376754739.jpg';
-import recipeTomatoRasamImg from '../assets/images/recipe_tomato_rasam.jpg';
-import recipePuliyogareRiceImg from '../assets/images/recipe_puliyogare_rice.jpg';
-import recipeVegetableSambarImg from '../assets/images/recipe_vegetable_sambar.jpg';
-import recipeBisiBeleBathImg from '../assets/images/recipe_bisi_bele_bath.jpg';
-import recipeChutneyPudiTiffinImg from '../assets/images/recipe_chutney_pudi_tiffin.jpg';
-import gallerySunDriedSpicesImg from '../assets/images/gallery_sun_dried_spices.jpg';
-import galleryByadagiChilliesImg from '../assets/images/gallery_byadagi_chillies.jpg';
+// Product photography and pouch mockups.
+// Plain URLs served from public/images/, not bundle imports — the admin panel
+// will set these from the database, which a build-time import cannot
+// represent. See docs/MIGRATION.md.
+
+const rasamPackImg = '/images/rasam_powder_pack_1788375224417.jpg';
+const sambarPackImg = '/images/sambar_powder_pack_1788375243187.jpg';
+const puliyogarePackImg = '/images/puliyogare_mix_pack_1788375258621.jpg';
+const chutneyPudiPackImg = '/images/chutney_pudi_pack_1788375278138.jpg';
+const bisiBelePackImg = '/images/bisi_bele_pack_1788375294820.jpg';
+const comboTrioPackImg = '/images/combo_kitchen_trio_1788375324949.jpg';
+const byadagiChilliPackImg = '/images/byadagi_chilli_pack_1788375381792.jpg';
+const corianderPackImg = '/images/coriander_powder_pack_1788375399451.jpg';
+const traditionalCraftImg = '/images/traditional_spice_craft_1788376754739.jpg';
+const recipeTomatoRasamImg = '/images/recipe_tomato_rasam.jpg';
+const recipePuliyogareRiceImg = '/images/recipe_puliyogare_rice.jpg';
+const recipeVegetableSambarImg = '/images/recipe_vegetable_sambar.jpg';
+const recipeBisiBeleBathImg = '/images/recipe_bisi_bele_bath.jpg';
+const recipeChutneyPudiTiffinImg = '/images/recipe_chutney_pudi_tiffin.jpg';
+const gallerySunDriedSpicesImg = '/images/gallery_sun_dried_spices.jpg';
+const galleryByadagiChilliesImg = '/images/gallery_byadagi_chillies.jpg';
 
 const comboTrioImg = comboTrioPackImg;
 
