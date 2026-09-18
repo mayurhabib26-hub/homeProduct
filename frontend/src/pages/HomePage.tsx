@@ -612,6 +612,7 @@ export const HomePage: React.FC = () => {
           SECTION 7 — SIGNATURE PRODUCT FEATURE (Rasam Powder)
           Terracotta background with cream typography
       ========================================================================= */}
+      {rasamProduct && (
       <section className="py-16 md:py-24 bg-[#87380F] text-[#FAF6F0] relative overflow-hidden">
         {/* Subtle decorative background ring */}
         <div className="absolute right-0 top-1/2 -translate-y-1/2 w-96 h-96 rounded-full border-8 border-white/5 pointer-events-none" />
@@ -624,7 +625,7 @@ export const HomePage: React.FC = () => {
                 <div className="relative max-w-md mx-auto">
                   <div className="aspect-[4/3] rounded-2xl overflow-hidden shadow-2xl border-4 border-[#FAF6F0]/20 bg-[#483828]">
                     <img
-                      src={rasamProduct.image}
+                      src={rasamProduct?.image}
                       alt="S V Home Products Authentic Rasam Powder"
                       className="w-full h-full object-cover"
                     />
@@ -696,6 +697,7 @@ export const HomePage: React.FC = () => {
           </div>
         </div>
       </section>
+      )}
 
       {/* =========================================================================
           SECTION 8 — HOW TO USE OUR PRODUCTS
