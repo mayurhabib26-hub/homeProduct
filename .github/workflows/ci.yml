@@ -33,6 +33,18 @@ jobs:
           npm run db:seed -w backend
           npm run db:test -w backend
 
+      - name: Pricing and signature verification
+        run: |
+          npm run test:pricing -w backend
+          npm run test:payments -w backend
+
+      # Guards the invariant that matters most. Against PGlite this proves the
+      # arithmetic, not contention — see the header in concurrency.test.ts.
+      - name: Stock guard and no-oversell
+        run: |
+          npm run test:stock -w backend
+          npm run test:concurrency -w backend
+
       - name: Build
         run: npm run build
 

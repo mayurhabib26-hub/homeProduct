@@ -15,6 +15,15 @@ const schema = z.object({
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace']).default('info'),
   /** Seconds the CDN may serve a cached catalogue response. */
   CATALOGUE_MAX_AGE: z.coerce.number().int().nonnegative().default(60),
+
+  /**
+   * Razorpay. Optional so the shop runs COD-only before KYC completes —
+   * online payment is refused with a clear message rather than half-working.
+   * The key id is public and reaches the browser; the secrets never do.
+   */
+  RAZORPAY_KEY_ID: z.string().optional(),
+  RAZORPAY_KEY_SECRET: z.string().optional(),
+  RAZORPAY_WEBHOOK_SECRET: z.string().optional(),
 });
 
 const parsed = schema.safeParse(process.env);
@@ -29,3 +38,10 @@ if (!parsed.success) {
 
 export const env = parsed.data;
 export const isProduction = env.NODE_ENV === 'production';
+
+/** Online payment is only offered when Razorpay is fully configured. */
+export const razorpayConfigured = Boolean(env.RAZORPAY_KEY_ID && env.RAZORPAY_KEY_SECRET);
+
+if (isProduction && !razorpayConfigured) {
+  console.warn('[env] Razorpay is not configured — the shop will accept COD orders only.');
+}

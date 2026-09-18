@@ -4,6 +4,8 @@ import { logger } from './lib/logger.js';
 import { requestId } from './middleware/request-id.js';
 import { errorHandler, notFoundHandler } from './middleware/error-handler.js';
 import { catalogueRouter } from './routes/catalogue.js';
+import { ordersRouter } from './routes/orders.js';
+import { webhooksRouter } from './routes/webhooks.js';
 import { getDb } from './db/client.js';
 import { sql } from 'drizzle-orm';
 
@@ -15,6 +17,10 @@ export function createApp() {
     // genReqId reuses the id set by our own middleware so the HTTP log line
   // and every application log line for a request share one id.
   app.use(pinoHttp({ logger, genReqId: (req) => String((req as unknown as { id: string }).id) }));
+  // Webhooks mount BEFORE express.json(): they need the raw bytes to verify
+  // their HMAC. Parsing first silently breaks every signature.
+  app.use('/api', webhooksRouter);
+
   app.use(express.json({ limit: '100kb' }));
 
   /**
@@ -39,6 +45,7 @@ export function createApp() {
   });
 
   app.use('/api', catalogueRouter);
+  app.use('/api', ordersRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

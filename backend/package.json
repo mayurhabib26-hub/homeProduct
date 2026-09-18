@@ -13,7 +13,11 @@
     "db:seed": "tsx src/db/seed.ts",
     "db:studio": "drizzle-kit studio",
     "db:verify": "tsx src/db/verify.ts",
-    "db:test": "tsx src/db/schema.test.ts"
+    "db:test": "tsx src/db/schema.test.ts",
+    "test:pricing": "tsx src/services/pricing.test.ts",
+    "test:stock": "tsx src/services/stock.test.ts",
+    "test:payments": "tsx src/services/payments.test.ts",
+    "test:concurrency": "tsx src/services/concurrency.test.ts"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.5.8",
