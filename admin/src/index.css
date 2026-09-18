@@ -1,0 +1,18 @@
+@import "tailwindcss";
+
+/*
+ * The admin is the tool half of the product: system sans rather than the
+ * storefront's display serif, dense layout, no decorative motion. It borrows
+ * the brand palette so it does not feel like a different company.
+ * See docs/ADMIN.md §2.
+ */
+body {
+  margin: 0;
+  background: #FAF6F0;
+  color: #483828;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Money and quantities line up in columns. */
+.tabular-nums { font-variant-numeric: tabular-nums; }

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { formatPaise } from '@sv/shared';
-import { adminApi, type AdminIdentity } from '../../api/admin';
+import { adminApi, type AdminIdentity } from '../api/client';
 import { useOutletContext } from 'react-router-dom';
 
 /** Status is colour AND text — colour alone fails WCAG and fails a printout. */
@@ -70,7 +70,7 @@ export const AdminOrdersPage: React.FC = () => {
               {data?.map((o) => (
                 <tr key={o.orderNumber} className="hover:bg-[#FAF6F0]/60">
                   <td className="px-4 py-2.5">
-                    <Link to={`/admin/orders/${o.orderNumber}`} className="font-mono text-[#87380F] hover:underline">
+                    <Link to={`/orders/${o.orderNumber}`} className="font-mono text-[#87380F] hover:underline">
                       {o.orderNumber}
                     </Link>
                   </td>
@@ -136,7 +136,7 @@ export const AdminOrderDetailPage: React.FC = () => {
 
   return (
     <div className="space-y-5">
-      <button onClick={() => navigate('/admin/orders')} className="text-xs text-[#87380F] hover:underline">
+      <button onClick={() => navigate('/orders')} className="text-xs text-[#87380F] hover:underline">
         ← All orders
       </button>
 

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { adminApi } from '../../api/admin';
-import { BrandLogo } from '../../components/BrandLogo';
+import { adminApi } from '../api/client';
+import { Wordmark } from '../components/Wordmark';
 
 /**
  * The only login page in the system. Seven elements, nothing else —
@@ -21,7 +21,7 @@ export const AdminLoginPage: React.FC = () => {
     setBusy(true);
     try {
       await adminApi.login(email, password);
-      navigate('/admin', { replace: true });
+      navigate('/', { replace: true });
     } catch (err) {
       // Whatever the server said — it deliberately never says which half
       // was wrong.
@@ -34,7 +34,7 @@ export const AdminLoginPage: React.FC = () => {
     <div className="min-h-screen bg-[#FAF6F0] grid place-items-center px-4 font-sans">
       <div className="w-full max-w-[380px]">
         <div className="flex justify-center mb-6">
-          <BrandLogo size="sm" showText={false} />
+          <Wordmark />
         </div>
 
         <form

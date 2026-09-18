@@ -1,7 +1,12 @@
 /** Admin API client. Cookies carry the session; nothing is kept in JS. */
 import type { OrderTotals } from '@sv/shared';
 
-const BASE = import.meta.env.VITE_API_URL ?? '/api';
+/**
+ * Absolute, because the admin runs on its own subdomain. There is no
+ * relative /api here — that was only possible when admin and API shared an
+ * origin. See docs/DEPLOYMENT.md §3.
+ */
+const BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:4000/api';
 
 export class AdminApiError extends Error {
   constructor(readonly code: string, message: string) {
@@ -12,7 +17,11 @@ export class AdminApiError extends Error {
 async function call<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
     ...init,
-    credentials: 'same-origin',
+    // 'include', not 'same-origin': the session cookie must travel to another
+    // subdomain. It stays SameSite=Lax because admin.<domain> and
+    // api.<domain> are the same *site* — only unrelated domains would force
+    // SameSite=None. See docs/AUTH.md §2.
+    credentials: 'include',
     headers: { 'content-type': 'application/json', ...init?.headers },
   });
   const body = await res.json().catch(() => ({}));
@@ -109,7 +118,11 @@ export const adminApi = {
     // FormData sets its own multipart boundary — do not send a content-type.
     const body = new FormData();
     body.append('image', file);
-    const res = await fetch(`${BASE}/admin/uploads`, { method: 'POST', credentials: 'same-origin', body });
+    const res = await fetch(`${BASE}/admin/uploads`, { method: 'POST', // 'include', not 'same-origin': the session cookie must travel to another
+    // subdomain. It stays SameSite=Lax because admin.<domain> and
+    // api.<domain> are the same *site* — only unrelated domains would force
+    // SameSite=None. See docs/AUTH.md §2.
+    credentials: 'include', body });
     const json = await res.json().catch(() => ({}));
     if (!res.ok) {
       const e = (json as { error?: { code?: string; message?: string } }).error;

@@ -1,0 +1,44 @@
+import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { AdminLayout } from './pages/AdminLayout';
+import { AdminLoginPage } from './pages/AdminLoginPage';
+import { AdminDashboardPage } from './pages/AdminDashboardPage';
+import { AdminOrdersPage, AdminOrderDetailPage } from './pages/AdminOrdersPage';
+import { AdminInventoryPage } from './pages/AdminInventoryPage';
+import { AdminProductsPage } from './pages/AdminProductsPage';
+import { AdminCouponsPage } from './pages/AdminCouponsPage';
+import { AdminReviewsPage } from './pages/AdminReviewsPage';
+
+/**
+ * Routes are at the root, not under /admin — this app IS the admin, served
+ * from its own subdomain.
+ */
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
+
+export const App: React.FC = () => (
+  <QueryClientProvider client={queryClient}>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/login" element={<AdminLoginPage />} />
+        <Route path="/" element={<AdminLayout />}>
+          <Route index element={<AdminDashboardPage />} />
+          <Route path="orders" element={<AdminOrdersPage />} />
+          <Route path="orders/:orderNumber" element={<AdminOrderDetailPage />} />
+          <Route path="products" element={<AdminProductsPage />} />
+          <Route path="inventory" element={<AdminInventoryPage />} />
+          <Route path="coupons" element={<AdminCouponsPage />} />
+          <Route path="reviews" element={<AdminReviewsPage />} />
+        </Route>
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </BrowserRouter>
+  </QueryClientProvider>
+);

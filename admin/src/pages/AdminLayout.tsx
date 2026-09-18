@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavLink, Outlet, useNavigate, Navigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { adminApi } from '../../api/admin';
+import { adminApi } from '../api/client';
 
 /**
  * Admin shell.
@@ -29,7 +29,7 @@ export const AdminLayout: React.FC = () => {
     );
   }
 
-  if (isError) return <Navigate to="/admin/login" replace />;
+  if (isError) return <Navigate to="/login" replace />;
 
   const link = ({ isActive }: { isActive: boolean }) =>
     `px-3 py-2 rounded text-sm transition-colors ${
@@ -42,12 +42,12 @@ export const AdminLayout: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 h-14 flex items-center gap-2">
           <span className="font-semibold text-sm mr-4">S V Admin</span>
           <nav className="flex items-center gap-1 flex-1">
-            <NavLink to="/admin" end className={link}>Dashboard</NavLink>
-            <NavLink to="/admin/orders" className={link}>Orders</NavLink>
-            <NavLink to="/admin/products" className={link}>Products</NavLink>
-            <NavLink to="/admin/inventory" className={link}>Inventory</NavLink>
-            <NavLink to="/admin/coupons" className={link}>Coupons</NavLink>
-            <NavLink to="/admin/reviews" className={link}>Reviews</NavLink>
+            <NavLink to="/" end className={link}>Dashboard</NavLink>
+            <NavLink to="/orders" className={link}>Orders</NavLink>
+            <NavLink to="/products" className={link}>Products</NavLink>
+            <NavLink to="/inventory" className={link}>Inventory</NavLink>
+            <NavLink to="/coupons" className={link}>Coupons</NavLink>
+            <NavLink to="/reviews" className={link}>Reviews</NavLink>
           </nav>
           <span className="text-xs text-[#483828]/60 mr-3">
             {me?.email} · <span className="uppercase tracking-wide">{me?.role}</span>
@@ -57,7 +57,7 @@ export const AdminLayout: React.FC = () => {
             onClick={async () => {
               await adminApi.logout();
               queryClient.clear();
-              navigate('/admin/login', { replace: true });
+              navigate('/login', { replace: true });
             }}
             className="text-xs px-3 py-1.5 border border-[#EBD9BC] rounded hover:bg-[#F3E7D0]/50 transition-colors"
           >

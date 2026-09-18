@@ -8,6 +8,7 @@
 import type { RequestHandler } from 'express';
 import { verifyAccess, type AdminIdentity, type AdminRole } from '../services/admin-auth.js';
 import { ApiError } from '../lib/errors.js';
+import { env } from '../lib/env.js';
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -26,14 +27,22 @@ export const REFRESH_COOKIE = 'sv_admin_refresh';
  * share an apex domain. A separate api. subdomain would force SameSite=None
  * and a worse CSRF posture. See docs/ARCHITECTURE.md §7.
  */
-export const cookieOptions = (maxAgeMs: number, secure: boolean) =>
-  ({
-    httpOnly: true,
-    secure,
-    sameSite: 'lax' as const,
-    path: '/',
-    maxAge: maxAgeMs,
-  });
+export const cookieOptions = (maxAgeMs: number, secure: boolean) => ({
+  httpOnly: true,
+  secure,
+  /**
+   * Still Lax, even though the admin is on another subdomain.
+   *
+   * SameSite is about the registrable domain, not the origin:
+   * admin.example.com -> api.example.com is same-site. Only an unrelated
+   * domain would force SameSite=None and a weaker CSRF posture.
+   */
+  sameSite: 'lax' as const,
+  path: '/',
+  maxAge: maxAgeMs,
+  /** Set in production so the cookie spans subdomains. */
+  ...(env.COOKIE_DOMAIN ? { domain: env.COOKIE_DOMAIN } : {}),
+});
 
 export const requireAdmin: RequestHandler = (req, _res, next) => {
   const token = req.cookies?.[ACCESS_COOKIE];

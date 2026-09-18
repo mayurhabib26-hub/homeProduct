@@ -3,12 +3,18 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "workspaces": ["shared", "frontend", "backend"],
+  "workspaces": [
+    "shared",
+    "frontend",
+    "admin",
+    "backend"
+  ],
   "scripts": {
     "dev": "npm run dev -w frontend",
-    "build": "npm run build -w shared && npm run build -w frontend",
-    "lint": "npm run lint -w shared && npm run lint -w frontend && npm run lint -w backend",
-    "clean": "rm -rf frontend/dist backend/dist shared/dist"
+    "build": "npm run build -w shared && npm run build -w frontend && npm run build -w admin",
+    "lint": "npm run lint -w shared && npm run lint -w frontend && npm run lint -w admin && npm run lint -w backend",
+    "clean": "rm -rf frontend/dist admin/dist backend/dist shared/dist",
+    "dev:admin": "npm run dev -w admin"
   },
   "devDependencies": {
     "typescript": "~5.8.2"

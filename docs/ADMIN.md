@@ -7,28 +7,49 @@ by hand at 11pm and the data becomes untrustworthy.
 
 ## 1. Where it lives
 
-Inside `frontend/`, under `/admin/*`, **lazy-loaded**.
+Its own workspace, its own build, its own subdomain.
 
 ```
-frontend/src/pages/admin/
-├─ AdminLayout.tsx
-├─ LoginPage.tsx
-├─ DashboardPage.tsx
-├─ OrdersPage.tsx  ·  OrderDetailPage.tsx
-├─ ProductsPage.tsx ·  ProductEditPage.tsx
-├─ InventoryPage.tsx
-├─ CouponsPage.tsx
-├─ ReviewsPage.tsx
-└─ RecipesPage.tsx
+admin/
+├─ src/pages/       AdminLayout, Login, Dashboard, Orders,
+│                   Products, Inventory, Coupons, Reviews
+├─ src/api/client.ts
+├─ src/components/Wordmark.tsx
+└─ index.html       noindex + robots.txt Disallow
 ```
 
-**One app, two audiences.** It reuses the Tailwind theme, `cn()`, form
-primitives, and the API client — a separate app would duplicate all of it.
+**Two apps, two audiences.** It was originally a lazy-loaded route inside the
+storefront, which kept admin code out of the customer's *download* but not out
+of the customer's *domain*. `shop.com/admin` still answered.
 
-The admin route tree is behind `React.lazy`, so **none of this code ships to
-customers**. It is a large share of the JavaScript and none of the storefront
-audience. Verify with a bundle analyser in CI; a lazy boundary that silently
-regresses is easy to miss.
+A separate deployable gives three things a lazy route cannot:
+
+- **No admin code in the storefront build at all** — not even unused chunks.
+  Verified in CI: the storefront bundle contains no reference to `Admin`.
+- **`admin.<domain>` can be IP-allowlisted at the CDN**, which removes
+  credential stuffing outright. `<domain>/admin` cannot be, without also
+  gating the shop.
+- **Independent deploys.** Shipping an admin fix does not touch the shop.
+
+### Cross-origin, deliberately
+
+The admin calls the API on another subdomain, so requests are cross-origin.
+This does **not** weaken the session:
+
+`SameSite` is about the registrable domain, not the origin, so
+`admin.example.com` → `api.example.com` is **same-site** and the cookie stays
+`SameSite=Lax`. Only an unrelated domain (`svadmin.com`) would force
+`SameSite=None` and a materially worse CSRF posture. Keep the admin on a
+subdomain of the same registrable domain.
+
+What that costs is CORS, which is an explicit allowlist in `ADMIN_ORIGIN` —
+never a wildcard, never a reflected origin. `*` is not even legal alongside
+credentials, and reflecting the origin would let any site drive an
+authenticated admin session.
+
+In development the admin runs on `:5174` and the API on `:4000`, which is
+also cross-origin — the same shape as production, so CORS and cookie problems
+surface locally rather than at deploy.
 
 ---
 

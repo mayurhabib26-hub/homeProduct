@@ -1,0 +1,3 @@
+# The admin panel is never indexed.
+User-agent: *
+Disallow: /

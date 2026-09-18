@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { formatPaise } from '@sv/shared';
-import { adminApi, type InventoryRow } from '../../api/admin';
+import { adminApi, type InventoryRow } from '../api/client';
 
 /**
  * A dedicated screen because stock is edited far more often than product

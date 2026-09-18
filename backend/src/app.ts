@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import { pinoHttp } from 'pino-http';
 import { logger } from './lib/logger.js';
 import { requestId } from './middleware/request-id.js';
+import { adminCors } from './middleware/cors.js';
 import { errorHandler, notFoundHandler } from './middleware/error-handler.js';
 import { catalogueRouter } from './routes/catalogue.js';
 import { ordersRouter } from './routes/orders.js';
@@ -23,6 +24,8 @@ export function createApp() {
   // headers. See docs/SECURITY.md §3.10.
   app.use(helmet({ contentSecurityPolicy: false }));
   app.use(cookieParser());
+  // Before the routers, so preflights are answered without reaching them.
+  app.use(adminCors);
   app.use(requestId);
     // genReqId reuses the id set by our own middleware so the HTTP log line
   // and every application log line for a request share one id.

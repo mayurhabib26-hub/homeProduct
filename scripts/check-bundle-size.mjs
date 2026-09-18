@@ -16,8 +16,13 @@ import { join } from 'node:path';
 const BUDGET_KB = 200;
 const DIR = 'frontend/dist/assets';
 
-/** Chunks reached only through React.lazy — not part of first load. */
-const LAZY = /^(Admin|admin|useMutation)/;
+/**
+ * Chunks reached only through React.lazy — not part of first load.
+ *
+ * The admin is no longer among them: it is a separate build on its own
+ * subdomain, so none of its code is in this directory at all.
+ */
+const LAZY = /^(useMutation)/;
 
 const files = readdirSync(DIR).filter((f) => f.endsWith('.js'));
 if (files.length === 0) {

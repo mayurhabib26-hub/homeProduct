@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { formatPaise } from '@sv/shared';
-import { adminApi } from '../../api/admin';
+import { adminApi } from '../api/client';
 
 /**
  * Answers "what needs my attention right now", not "how is the quarter
@@ -87,7 +87,7 @@ export const AdminDashboardPage: React.FC = () => {
           <ul className="divide-y divide-[#EBD9BC]">
             {s.stuckOrders.map((o) => (
               <li key={o.orderNumber} className="px-4 py-2.5 flex justify-between text-sm">
-                <Link to={`/admin/orders/${o.orderNumber}`} className="font-mono text-[#87380F] hover:underline">
+                <Link to={`/orders/${o.orderNumber}`} className="font-mono text-[#87380F] hover:underline">
                   {o.orderNumber}
                 </Link>
                 <span className="text-[#483828]/60 tabular-nums">

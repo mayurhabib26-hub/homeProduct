@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useOutletContext } from 'react-router-dom';
 import { formatPaise } from '@sv/shared';
-import { adminApi, type AdminIdentity, type AdminProduct } from '../../api/admin';
+import { adminApi, type AdminIdentity, type AdminProduct } from '../api/client';
 
 /**
  * Catalogue management. Publishing is gated on an HSN code, because an

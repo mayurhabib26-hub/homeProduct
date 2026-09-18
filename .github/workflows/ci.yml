@@ -65,5 +65,16 @@ jobs:
       - name: Bundle budget
         run: node scripts/check-bundle-size.mjs
 
+      # A lazy boundary can regress silently; a separate build cannot — but
+      # an accidental import would put admin code back in the shop.
+      - name: Storefront contains no admin code
+        run: |
+          if grep -rqi 'adminApi\|AdminLayout\|/admin/login' frontend/dist/assets/*.js; then
+            echo 'Admin code found in the storefront bundle.'
+            exit 1
+          fi
+          echo 'storefront bundle is admin-free'
+
+
       - name: Dependency audit
         run: npm audit --audit-level=high

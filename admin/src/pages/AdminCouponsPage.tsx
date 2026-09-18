@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useOutletContext } from 'react-router-dom';
 import { formatPaise, rupees } from '@sv/shared';
-import { adminApi, type AdminIdentity } from '../../api/admin';
+import { adminApi, type AdminIdentity } from '../api/client';
 
 /** Owner-only. Discounts move money. */
 export const AdminCouponsPage: React.FC = () => {

@@ -5,9 +5,9 @@ Context for AI assistants and new contributors. Read
 
 ## What this is
 
-A D2C e-commerce platform for a South Indian homemade-food brand. Three npm
-workspaces: `frontend/` (Vite React SPA), `backend/` (Express API), `shared/`
-(types and Zod schemas).
+A D2C e-commerce platform for a South Indian homemade-food brand. Four npm
+workspaces: `frontend/` (storefront SPA), `admin/` (admin SPA, its own
+subdomain), `backend/` (Express API), `shared/` (types and Zod schemas).
 
 ## Hard rules
 
@@ -26,8 +26,11 @@ Violating any of these is a bug, not a style preference.
    webhook route, mounted before `express.json()`. Constant-time comparison.
 5. **Nothing `VITE_`-prefixed is secret.** It ships in the browser bundle.
 6. **No PII in logs.** Log `orderNumber` and look the rest up.
-7. **`backend/` and `frontend/` never import from each other.** Only from
-   `shared/`, which contains no runtime side effects.
+7. **`backend/`, `frontend/` and `admin/` never import from each other.** Only
+   from `shared/`, which contains no runtime side effects.
+8. **CORS is an allowlist, never a reflection.** `ADMIN_ORIGIN` is explicit.
+   Reflecting the Origin header would let any site drive an authenticated
+   admin session, and `*` is not legal alongside credentials.
 
 ## Architecture in one paragraph
 
@@ -45,7 +48,7 @@ goes on a queue and never blocks a response. Full detail in
 | Schema and migrations | `backend/src/db/`, `backend/drizzle/` |
 | Types and validation | `shared/src/` |
 | Storefront pages | `frontend/src/pages/` |
-| Admin | `frontend/src/pages/admin/` — lazy-loaded, must not ship to customers |
+| Admin | `admin/` — separate build and subdomain; no admin code in the storefront bundle |
 
 ## Frontend standards
 

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { adminApi } from '../../api/admin';
+import { adminApi } from '../api/client';
 
 /**
  * Approval queue, unapproved first. An open review form on a food product is

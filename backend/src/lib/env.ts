@@ -33,6 +33,25 @@ const schema = z.object({
   JWT_SECRET: z.string().min(32).optional(),
   ADMIN_SESSION_HOURS: z.coerce.number().int().positive().default(8),
 
+  /**
+   * Origins allowed to call the API with credentials. Comma-separated.
+   *
+   * The admin runs on its own subdomain, so it is cross-origin. This is an
+   * explicit allowlist and never a wildcard — '*' is not even legal with
+   * credentials, and a reflected origin would let any site drive an
+   * authenticated admin session.
+   */
+  ADMIN_ORIGIN: z.string().default('http://localhost:5174'),
+
+  /**
+   * Cookie domain, e.g. '.svhomeproducts.com', so the session reaches both
+   * admin.<domain> and api.<domain>.
+   *
+   * Unset means a host-only cookie, which is correct for localhost —
+   * browsers reject domain cookies for it.
+   */
+  COOKIE_DOMAIN: z.string().optional(),
+
   /** Cloudflare R2 for product images. Unset falls back to local disk (dev only). */
   R2_ACCOUNT_ID: z.string().optional(),
   R2_ACCESS_KEY_ID: z.string().optional(),
