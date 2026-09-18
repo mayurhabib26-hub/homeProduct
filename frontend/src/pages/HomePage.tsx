@@ -3,7 +3,6 @@ import { motion } from 'motion/react';
 import { ScrollReveal } from '../components/ScrollReveal';
 import { useShop } from '../context/ShopContext';
 import {
-  PRODUCTS,
   rasamPackImg,
   sambarPackImg,
   puliyogarePackImg,
@@ -14,9 +13,10 @@ import {
   byadagiChilliPackImg,
   corianderPackImg,
   traditionalCraftImg,
-} from '../data/products';
-import { RECIPES } from '../data/recipes';
-import { INGREDIENTS_STORY, CLIENT_REVIEWS } from '../data/siteData';
+} from '../content/site';
+import { useProducts, useRecipes } from '../api/queries';
+import { ProductCardSkeleton } from '../components/QueryStates';
+import { INGREDIENTS_STORY, CLIENT_REVIEWS } from '../content/site';
 import { ProductCard } from '../components/ProductCard';
 import { Link } from 'react-router-dom';
 import { whatsappUrl } from '../lib/contact';
@@ -52,10 +52,13 @@ export const HomePage: React.FC = () => {
   const [newsletterSubscribed, setNewsletterSubscribed] = useState(false);
 
   // Selected favorites
-  const favouriteProducts = PRODUCTS.slice(0, 4);
+  const { data: catalogue, isLoading: productsLoading } = useProducts({ limit: 60 });
+  const { data: recipeList } = useRecipes();
+  const allProducts = catalogue?.data ?? [];
+  const favouriteProducts = allProducts.slice(0, 4);
 
   // Signature Rasam Product
-  const rasamProduct = PRODUCTS.find((p) => p.id === 'rasam-powder') || PRODUCTS[0];
+  const rasamProduct = allProducts.find((p) => p.slug === 'rasam-powder');
 
   const handleNewsletterSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -287,7 +290,7 @@ export const HomePage: React.FC = () => {
           {/* Product Cards Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {favouriteProducts.map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCard key={product.slug} product={product} />
             ))}
           </div>
 
@@ -484,7 +487,7 @@ export const HomePage: React.FC = () => {
                   <ChefHat size={24} />
                 </div>
                 <h3 className="font-serif text-lg font-bold text-[#483828] mb-1">
-                  TRADITIONAL RECIPES
+                  TRADITIONAL (recipeList ?? [])
                 </h3>
                 <p className="text-xs text-[#483828]/80 leading-relaxed font-sans">
                   Inspired by authentic South Indian kitchens and time-tested ratios that celebrate natural taste.
@@ -759,7 +762,7 @@ export const HomePage: React.FC = () => {
               <Link to="/recipes"
                 id="how-to-use-recipes-cta"
                 className="px-8 py-3.5 bg-[#483828] hover:bg-[#87380F] text-white rounded-md font-sans text-xs font-semibold tracking-widest uppercase transition-colors inline-flex items-center gap-2 cursor-pointer shadow-sm">
-                <span>EXPLORE ALL RECIPES</span>
+                <span>EXPLORE ALL (recipeList ?? [])</span>
                 <ArrowRight size={16} />
               </Link>
             </div>

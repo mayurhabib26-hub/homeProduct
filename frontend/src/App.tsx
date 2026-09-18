@@ -5,6 +5,7 @@
 
 import React from 'react';
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ShopProvider } from './context/ShopContext';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
@@ -81,12 +82,24 @@ const AppContent: React.FC = () => {
   );
 };
 
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      // The catalogue is not changing while someone reads a product page.
+      refetchOnWindowFocus: false,
+      retry: 2,
+    },
+  },
+});
+
 export default function App() {
   return (
-    <BrowserRouter>
-      <ShopProvider>
-        <AppContent />
-      </ShopProvider>
-    </BrowserRouter>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <ShopProvider>
+          <AppContent />
+        </ShopProvider>
+      </BrowserRouter>
+    </QueryClientProvider>
   );
 }

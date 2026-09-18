@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
-import { Product, CartItem, StoredCartItem, rupees, percentOf, formatPaise } from '@sv/shared';
-import { PRODUCTS } from '../data/products';
+import { type ProductSummary, CartItem, StoredCartItem, rupees, percentOf, formatPaise } from '@sv/shared';
+import { useProducts } from '../api/queries';
 import { whatsappUrl } from '../lib/contact';
 
 interface ShopContextType {
@@ -12,7 +12,7 @@ interface ShopContextType {
   couponCode: string;
   appliedDiscount: number;
   toastMessage: string | null;
-  addToCart: (product: Product, selectedWeight: string, quantity?: number) => void;
+  addToCart: (product: ProductSummary, selectedWeight: string, quantity?: number) => void;
   updateCartQuantity: (itemId: string, quantity: number) => void;
   removeFromCart: (itemId: string) => void;
   clearCart: () => void;
@@ -29,7 +29,7 @@ interface ShopContextType {
   shippingFee: number;
   freeShippingThresholdPaise: number;
   cartItemCount: number;
-  generateWhatsAppOrderUrl: (product?: Product, weight?: string, qty?: number) => string;
+  generateWhatsAppOrderUrl: (product?: ProductSummary, weight?: string, qty?: number) => string;
 }
 
 // Shipping rules. Server-side once orders move to the API — see docs/API.md.
@@ -87,10 +87,14 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
    * shown at a stale price — a discontinued item should disappear, not
    * quietly sell at last year's price.
    */
+  // The catalogue comes from the API; react-query caches it, so this does not
+  // refetch on every cart change.
+  const { data: catalogue } = useProducts({ limit: 60 });
+
   const cart: CartItem[] = useMemo(
     () =>
       storedCart.flatMap((line) => {
-        const product = PRODUCTS.find((p) => p.id === line.productId);
+        const product = (catalogue?.data ?? []).find((p) => p.slug === line.productId);
         const variant = product?.variants.find((v) => v.weight === line.selectedWeight);
         if (!product || !variant) return [];
         return [{
@@ -100,7 +104,7 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
           pricePaise: variant.pricePaise,
         }];
       }),
-    [storedCart],
+    [storedCart, catalogue],
   );
 
   const [wishlist, setWishlist] = useState<string[]>(() => {
@@ -145,21 +149,21 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, 3200);
   };
 
-  const addToCart = (product: Product, selectedWeight: string, quantity = 1) => {
+  const addToCart = (product: ProductSummary, selectedWeight: string, quantity = 1) => {
     const weight = product.variants.some((v) => v.weight === selectedWeight)
       ? selectedWeight
       : product.variants[0].weight;
 
     setStoredCart((prev) => {
       const existing = prev.find(
-        (line) => line.productId === product.id && line.selectedWeight === weight,
+        (line) => line.productId === product.slug && line.selectedWeight === weight,
       );
       if (existing) {
         return prev.map((line) =>
           line === existing ? { ...line, quantity: line.quantity + quantity } : line,
         );
       }
-      return [...prev, { productId: product.id, selectedWeight: weight, quantity }];
+      return [...prev, { productId: product.slug, selectedWeight: weight, quantity }];
     });
 
     showToast(`Added ${product.name} (${selectedWeight}) to cart`);
@@ -233,7 +237,7 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
     showToast('Coupon removed');
   };
 
-  const generateWhatsAppOrderUrl = (product?: Product, weight?: string, qty = 1) => {
+  const generateWhatsAppOrderUrl = (product?: ProductSummary, weight?: string, qty = 1) => {
     let messageText = '';
 
     if (product) {

@@ -36,7 +36,6 @@ They share only `shared/` and the HTTP contract in
 
 ```bash
 npm install
-docker compose up -d
 npm run db:migrate -w backend
 npm run db:seed -w backend
 npm run dev
@@ -44,6 +43,15 @@ npm run dev
 
 Frontend on :5173, API on :4000. Vite proxies `/api` to the backend, so
 development uses the same relative URLs as production.
+
+No database to install: with `DATABASE_URL` unset the backend uses PGlite —
+Postgres compiled to WASM, running in-process. It is the real engine, but it
+is **single-process**, so stop the API before running `db:migrate` or
+`db:seed`.
+
+To develop against the same server production runs, `docker compose up -d`
+and set `DATABASE_URL=postgres://sv:sv@localhost:5432/sv_dev`. The same
+migrations apply either way.
 
 ## Documentation
 

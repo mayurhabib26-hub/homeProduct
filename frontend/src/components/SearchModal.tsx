@@ -1,7 +1,6 @@
 import React from 'react';
 import { useShop } from '../context/ShopContext';
-import { PRODUCTS } from '../data/products';
-import { RECIPES } from '../data/recipes';
+import { useProducts, useRecipes } from '../api/queries';
 import { Search, X, ArrowRight, Sparkles } from 'lucide-react';
 import { formatPaise } from '@sv/shared';
 import { Link, useNavigate } from 'react-router-dom';
@@ -13,30 +12,28 @@ export const SearchModal: React.FC = () => {
     searchQuery,
     setSearchQuery,
   } = useShop();
+  const { data: catalogue } = useProducts({ search: searchQuery.trim() || undefined, limit: 60 });
+  const { data: recipeList } = useRecipes();
+  const allProducts = catalogue?.data ?? [];
+  const allRecipes = recipeList ?? [];
   const navigate = useNavigate();
 
   if (!isSearchOpen) return null;
 
   const query = searchQuery.toLowerCase().trim();
 
-  const matchedProducts = query
-    ? PRODUCTS.filter(
-        (p) =>
-          p.name.toLowerCase().includes(query) ||
-          p.shortDescription.toLowerCase().includes(query) ||
-          p.ingredients.some((ing) => ing.toLowerCase().includes(query)) ||
-          (p.regionalName && p.regionalName.toLowerCase().includes(query))
-      )
-    : PRODUCTS.slice(0, 4);
+  // Product search runs server-side: it covers ingredients, which the
+  // summary payload deliberately omits.
+  const matchedProducts = query ? allProducts : allProducts.slice(0, 4);
 
   const matchedRecipes = query
-    ? RECIPES.filter(
+    ? allRecipes.filter(
         (r) =>
           r.title.toLowerCase().includes(query) ||
           r.description.toLowerCase().includes(query) ||
           r.ingredients.some((i) => i.toLowerCase().includes(query))
       )
-    : RECIPES.slice(0, 3);
+    : allRecipes.slice(0, 3);
 
   const quickKeywords = ['Rasam', 'Puliyogare', 'Sambar', 'Gunpowder', 'Curry Leaves', 'Byadagi'];
 
@@ -125,8 +122,8 @@ export const SearchModal: React.FC = () => {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {matchedProducts.map((p) => (
                   <Link
-                    key={p.id}
-                    to={`/product/${p.id}`}
+                    key={p.slug}
+                    to={`/product/${p.slug}`}
                     onClick={() => setIsSearchOpen(false)}
                     className="flex items-center gap-3 p-2.5 rounded-lg bg-white border border-[#EBD9BC] hover:border-[#87380F] cursor-pointer transition-all hover:shadow-xs group"
                   >
@@ -163,8 +160,8 @@ export const SearchModal: React.FC = () => {
               <div className="space-y-2">
                 {matchedRecipes.map((r) => (
                   <Link
-                    key={r.id}
-                    to={`/recipes/${r.id}`}
+                    key={r.slug}
+                    to={`/recipes/${r.slug}`}
                     onClick={() => setIsSearchOpen(false)}
                     className="flex items-center justify-between p-3 rounded-lg bg-white border border-[#EBD9BC] hover:border-[#87380F] cursor-pointer transition-colors group"
                   >

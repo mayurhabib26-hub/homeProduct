@@ -46,6 +46,8 @@ export interface Product {
  * renamed product must not keep its old name forever. Price and product come
  * from the catalogue at render time — from the API, once there is one.
  */
+import type { ProductSummary } from './api.js';
+
 export interface StoredCartItem {
   productId: string;
   selectedWeight: string;
@@ -55,7 +57,7 @@ export interface StoredCartItem {
 /** A StoredCartItem resolved against the current catalogue. */
 export interface CartItem extends StoredCartItem {
   id: string;
-  product: Product;
+  product: ProductSummary;
   pricePaise: number;
 }
 

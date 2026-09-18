@@ -1,5 +1,32 @@
 import { CustomerReview } from '@sv/shared';
 
+/**
+ * Marketing content for the storefront pages.
+ *
+ * Deliberately NOT in the database: ingredient stories, testimonials and
+ * decorative imagery are page copy, changed by editing the page. The
+ * catalogue — products, variants, prices, stock, recipes — comes from the
+ * API. See docs/MIGRATION.md §7.
+ */
+
+export const rasamPackImg = '/images/rasam_powder_pack_1788375224417.jpg';
+export const sambarPackImg = '/images/sambar_powder_pack_1788375243187.jpg';
+export const puliyogarePackImg = '/images/puliyogare_mix_pack_1788375258621.jpg';
+export const chutneyPudiPackImg = '/images/chutney_pudi_pack_1788375278138.jpg';
+export const bisiBelePackImg = '/images/bisi_bele_pack_1788375294820.jpg';
+export const comboTrioPackImg = '/images/combo_kitchen_trio_1788375324949.jpg';
+export const byadagiChilliPackImg = '/images/byadagi_chilli_pack_1788375381792.jpg';
+export const corianderPackImg = '/images/coriander_powder_pack_1788375399451.jpg';
+export const traditionalCraftImg = '/images/traditional_spice_craft_1788376754739.jpg';
+export const recipeTomatoRasamImg = '/images/recipe_tomato_rasam.jpg';
+export const recipePuliyogareRiceImg = '/images/recipe_puliyogare_rice.jpg';
+export const recipeVegetableSambarImg = '/images/recipe_vegetable_sambar.jpg';
+export const recipeBisiBeleBathImg = '/images/recipe_bisi_bele_bath.jpg';
+export const recipeChutneyPudiTiffinImg = '/images/recipe_chutney_pudi_tiffin.jpg';
+export const gallerySunDriedSpicesImg = '/images/gallery_sun_dried_spices.jpg';
+export const galleryByadagiChilliesImg = '/images/gallery_byadagi_chillies.jpg';
+
+
 export interface IngredientStory {
   id: string;
   name: string;
@@ -175,3 +202,6 @@ export const INSTAGRAM_POSTS = [
     likes: 476,
   },
 ];
+
+/** Alias kept for the About page's combo hero. */
+export const comboTrioImg = comboTrioPackImg;

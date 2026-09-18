@@ -1,6 +1,6 @@
 import React from 'react';
 import { useShop } from '../context/ShopContext';
-import { comboTrioImg } from '../data/products';
+import { comboTrioImg } from '../content/site';
 import { ArrowRight, Sparkles, Heart, Shield, Flame, Wheat, Leaf } from 'lucide-react';
 import { ScrollReveal } from '../components/ScrollReveal';
 import { Link } from 'react-router-dom';

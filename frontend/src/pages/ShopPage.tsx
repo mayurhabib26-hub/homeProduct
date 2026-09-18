@@ -1,8 +1,10 @@
 import React, { useState, useMemo } from 'react';
-import { PRODUCTS } from '../data/products';
+import { rupees } from '@sv/shared';
 import { ProductCard } from '../components/ProductCard';
 import { Search, SlidersHorizontal, ArrowUpDown } from 'lucide-react';
 import { ScrollReveal } from '../components/ScrollReveal';
+import { useProducts } from '../api/queries';
+import { ProductGridSkeleton, ErrorState, EmptyState } from '../components/QueryStates';
 
 export const ShopPage: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
@@ -18,42 +20,33 @@ export const ShopPage: React.FC = () => {
     { id: 'combos', label: 'Combo Collections' },
   ];
 
-  const filteredProducts = useMemo(() => {
-    return PRODUCTS.filter((product) => {
-      // Category filter
-      if (selectedCategory !== 'all' && product.category !== selectedCategory) {
-        return false;
-      }
-      // Search term filter
-      if (
-        searchTerm &&
-        !product.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-        !product.shortDescription.toLowerCase().includes(searchTerm.toLowerCase()) &&
-        !product.ingredients.some((ing) => ing.toLowerCase().includes(searchTerm.toLowerCase()))
-      ) {
-        return false;
-      }
-      // Price filter (based on lowest variant price)
-      const lowestPrice = product.variants[0]?.pricePaise || 0;
-      if (priceFilter === 'under-150' && lowestPrice >= 150) return false;
-      if (priceFilter === '150-300' && (lowestPrice < 150 || lowestPrice > 300)) return false;
-      if (priceFilter === 'above-300' && lowestPrice <= 300) return false;
+  // Category, search and sort are the server's job — it owns the catalogue.
+  const { data, isLoading, isError, error, refetch } = useProducts({
+    category: selectedCategory,
+    search: searchTerm || undefined,
+    sort: sortBy,
+    limit: 60,
+  });
 
-      return true;
-    }).sort((a, b) => {
-      if (sortBy === 'price-asc') {
-        return a.variants[0].pricePaise - b.variants[0].pricePaise;
-      }
-      if (sortBy === 'price-desc') {
-        return b.variants[0].pricePaise - a.variants[0].pricePaise;
-      }
-      if (sortBy === 'rating') {
-        return b.rating - a.rating;
-      }
-      // 'bestselling'
-      return b.reviewsCount - a.reviewsCount;
+  // Price banding stays client-side: it is a view over what was returned, and
+  // round-tripping for it would make the filter feel laggy.
+  const filteredProducts = useMemo(() => {
+    const products = data?.data ?? [];
+    if (priceFilter === 'all') return products;
+
+    // Thresholds are paise. Comparing a paise price against 150 was the bug
+    // that made "under ₹150" match nothing.
+    const bands = {
+      'under-150': (p: number) => p < rupees(150),
+      '150-300': (p: number) => p >= rupees(150) && p <= rupees(300),
+      'above-300': (p: number) => p > rupees(300),
+    } as const;
+
+    return products.filter((product) => {
+      const lowest = product.variants[0]?.pricePaise ?? 0;
+      return bands[priceFilter](lowest);
     });
-  }, [selectedCategory, searchTerm, sortBy, priceFilter]);
+  }, [data, priceFilter]);
 
   return (
     <div className="bg-[#FAF6F0] min-h-screen py-10 md:py-16 font-sans">
@@ -168,7 +161,11 @@ export const ShopPage: React.FC = () => {
         </div>
 
         {/* Products Grid: 4 cols desktop, 2 cols tablet, 2 cols mobile */}
-        {filteredProducts.length === 0 ? (
+        {isLoading ? (
+          <ProductGridSkeleton count={8} />
+        ) : isError ? (
+          <ErrorState message={(error as Error)?.message} onRetry={() => refetch()} />
+        ) : filteredProducts.length === 0 ? (
           <div className="text-center py-20 bg-white rounded-xl border border-[#EBD9BC] p-8">
             <h3 className="font-serif text-2xl font-bold text-[#483828] mb-2">
               No matching spice powders found
@@ -190,7 +187,7 @@ export const ShopPage: React.FC = () => {
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
             {filteredProducts.map((product, idx) => (
-              <ScrollReveal key={product.id} animation="fade-up" delay={Math.min(idx * 0.05, 0.25)}>
+              <ScrollReveal key={product.slug} animation="fade-up" delay={Math.min(idx * 0.05, 0.25)}>
                 <ProductCard product={product} />
               </ScrollReveal>
             ))}

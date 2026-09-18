@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { useShop } from '../context/ShopContext';
-import { PRODUCTS } from '../data/products';
 import { ProductCard } from '../components/ProductCard';
 import { ScrollReveal } from '../components/ScrollReveal';
-import { formatPaise, type Product } from '@sv/shared';
-import {useParams, Link, useNavigate } from 'react-router-dom';
+import { formatPaise, type ProductDetail as ProductDetailData } from '@sv/shared';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useProduct } from '../api/queries';
+import { ErrorState } from '../components/QueryStates';
 import {
   Star,
   ShoppingBag,
@@ -30,7 +31,28 @@ import {
  */
 export const ProductDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
-  const product = PRODUCTS.find((p) => p.id === slug);
+  const { data: product, isLoading, isError, error, refetch } = useProduct(slug);
+
+  if (isLoading) {
+    return (
+      <div className="bg-[#FAF6F0] min-h-[60vh] py-10" role="status" aria-label="Loading product">
+        <div className="max-w-7xl mx-auto px-4 grid lg:grid-cols-2 gap-10 animate-pulse">
+          <div className="aspect-square rounded-xl bg-[#F3E7D0]/60" />
+          <div className="space-y-4 pt-6">
+            <div className="h-4 w-28 bg-[#F3E7D0] rounded" />
+            <div className="h-9 w-3/4 bg-[#F3E7D0] rounded" />
+            <div className="h-5 w-32 bg-[#F3E7D0] rounded" />
+            <div className="h-20 w-full bg-[#F3E7D0] rounded" />
+            <div className="h-12 w-full bg-[#F3E7D0] rounded" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (isError && (error as { code?: string })?.code !== 'NOT_FOUND') {
+    return <ErrorState message={(error as Error)?.message} onRetry={() => refetch()} />;
+  }
 
   if (!product) {
     return (
@@ -56,7 +78,7 @@ export const ProductDetailPage: React.FC = () => {
   return <ProductDetail product={product} />;
 };
 
-const ProductDetail: React.FC<{ product: Product }> = ({ product }) => {
+const ProductDetail: React.FC<{ product: ProductDetailData }> = ({ product }) => {
   const {
     addToCart,
     toggleWishlist,
@@ -81,10 +103,10 @@ const ProductDetail: React.FC<{ product: Product }> = ({ product }) => {
   const currentVariant =
     product.variants.find((v) => v.weight === selectedWeight) || product.variants[0];
 
-  const wishlisted = isWishlisted(product.id);
+  const wishlisted = isWishlisted(product.slug);
 
   // Recommendations: exclude current product
-  const recommendedProducts = PRODUCTS.filter((p) => p.id !== product.id).slice(0, 4);
+  const recommendedProducts = product.related;
 
   const handleBuyNow = () => {
     addToCart(product, selectedWeight, quantity);
@@ -139,7 +161,7 @@ const ProductDetail: React.FC<{ product: Product }> = ({ product }) => {
 
               <button
                 type="button"
-                onClick={() => toggleWishlist(product.id)}
+                onClick={() => toggleWishlist(product.slug)}
                 className="absolute top-4 right-4 w-10 h-10 rounded-full bg-[#FAF6F0]/90 text-[#483828] hover:text-[#87380F] flex items-center justify-center transition-colors shadow-xs"
                 aria-label="Wishlist"
               >
@@ -565,7 +587,7 @@ const ProductDetail: React.FC<{ product: Product }> = ({ product }) => {
 
             <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
               {recommendedProducts.map((rec) => (
-                <ProductCard key={rec.id} product={rec} />
+                <ProductCard key={rec.slug} product={rec} />
               ))}
             </div>
           </div>

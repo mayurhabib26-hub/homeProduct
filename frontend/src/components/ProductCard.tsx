@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import {Product, formatPaise } from '@sv/shared';
+import { type ProductSummary, formatPaise } from '@sv/shared';
 import { useShop } from '../context/ShopContext';
 import { Star, Heart, ShoppingBag, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface ProductCardProps {
-  product: Product;
+  product: ProductSummary;
   className?: string;
 }
 
@@ -17,7 +17,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, className = '
   const currentVariant =
     product.variants.find((v) => v.weight === selectedWeight) || product.variants[0];
 
-  const wishlisted = isWishlisted(product.id);
+  const wishlisted = isWishlisted(product.slug);
 
   return (
     <motion.div
@@ -29,7 +29,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, className = '
     >
       {/* Product Image Area */}
       <div className="relative aspect-[4/3] sm:aspect-square overflow-hidden bg-[#F3E7D0]/40">
-        <Link to={`/product/${product.id}`} className="block w-full h-full" tabIndex={-1} aria-hidden="true">
+        <Link to={`/product/${product.slug}`} className="block w-full h-full" tabIndex={-1} aria-hidden="true">
           <img
             src={product.image}
             alt={product.name}
@@ -51,7 +51,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, className = '
           type="button"
           onClick={(e) => {
             e.stopPropagation();
-            toggleWishlist(product.id);
+            toggleWishlist(product.slug);
           }}
           className="absolute top-3 right-3 w-8 h-8 rounded-full bg-[#FAF6F0]/90 backdrop-blur-xs text-[#483828] hover:text-[#87380F] flex items-center justify-center transition-colors shadow-xs cursor-pointer"
           aria-label={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
@@ -85,7 +85,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, className = '
           {/* Title */}
           <h3 className="font-serif text-lg sm:text-xl font-bold leading-tight line-clamp-1">
             <Link
-              to={`/product/${product.id}`}
+              to={`/product/${product.slug}`}
               className="text-[#483828] hover:text-[#87380F] transition-colors"
             >
               {product.name}
@@ -144,7 +144,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, className = '
 
             <button
               type="button"
-              id={`add-to-cart-${product.id}`}
+              id={`add-to-cart-${product.slug}`}
               onClick={() => addToCart(product, selectedWeight, 1)}
               className="px-3.5 py-2 bg-[#87380F] hover:bg-[#483828] text-[#FAF6F0] rounded-md text-xs font-semibold tracking-wider uppercase transition-colors duration-200 flex items-center gap-1.5 shadow-xs cursor-pointer"
             >

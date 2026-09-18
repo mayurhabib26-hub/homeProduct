@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { useShop } from '../context/ShopContext';
-import { useParams, useNavigate } from 'react-router-dom';
-import { RECIPES } from '../data/recipes';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import { type ApiRecipe } from '@sv/shared';
+import { useRecipes, useProducts } from '../api/queries';
+import { ErrorState, EmptyState } from '../components/QueryStates';
 import {Recipe, formatPaise } from '@sv/shared';
-import { PRODUCTS } from '../data/products';
+
 import { Clock, ChefHat, Users, ArrowRight, ShoppingBag, Check, X, Sparkles } from 'lucide-react';
 import { ScrollReveal } from '../components/ScrollReveal';
 
@@ -11,16 +13,20 @@ export const RecipesPage: React.FC = () => {
   const { addToCart } = useShop();
   const { slug: selectedRecipeId } = useParams<{ slug: string }>();
   const navigate = useNavigate();
+  const { data: recipeData, isError, error, refetch } = useRecipes();
+  const { data: catalogue } = useProducts({ limit: 60 });
+  const recipes = recipeData ?? [];
+  const allProducts = catalogue?.data ?? [];
   const [activeFilter, setActiveFilter] = useState<string>('all');
   const [checkedIngredients, setCheckedIngredients] = useState<{ [key: string]: boolean }>({});
 
-  const selectedRecipe = RECIPES.find((r) => r.id === selectedRecipeId);
+  const selectedRecipe = recipes.find((r) => r.slug === selectedRecipeId);
 
-  const filteredRecipes = RECIPES.filter((r) => {
+  const filteredRecipes = recipes.filter((r) => {
     if (activeFilter === 'all') return true;
     if (activeFilter === 'quick') return parseInt(r.prepTime) <= 20;
-    if (activeFilter === 'classics') return r.id.includes('rasam') || r.id.includes('sambar') || r.id.includes('puliyogare');
-    if (activeFilter === 'breakfast') return r.id.includes('idli') || r.id.includes('rice');
+    if (activeFilter === 'classics') return r.slug.includes('rasam') || r.slug.includes('sambar') || r.slug.includes('puliyogare');
+    if (activeFilter === 'breakfast') return r.slug.includes('idli') || r.slug.includes('rice');
     return true;
   });
 
@@ -31,8 +37,8 @@ export const RecipesPage: React.FC = () => {
     }));
   };
 
-  const getProductForRecipe = (recipe: Recipe) => {
-    return PRODUCTS.find((p) => p.id === recipe.pairedProductId);
+  const getProductForRecipe = (recipe: ApiRecipe) => {
+    return allProducts.find((p) => p.slug === recipe.pairedProductSlug);
   };
 
   return (
@@ -82,7 +88,7 @@ export const RecipesPage: React.FC = () => {
           {filteredRecipes.map((recipe, idx) => {
             const relatedProduct = getProductForRecipe(recipe);
             return (
-              <ScrollReveal key={recipe.id} animation="fade-up" delay={Math.min(idx * 0.08, 0.25)}>
+              <ScrollReveal key={recipe.slug} animation="fade-up" delay={Math.min(idx * 0.08, 0.25)}>
                 <div
                   className="group bg-white rounded-2xl overflow-hidden border border-[#EBD9BC] hover:border-[#B69A55] transition-all duration-300 shadow-xs hover:shadow-md flex flex-col justify-between h-full"
                 >
@@ -131,14 +137,13 @@ export const RecipesPage: React.FC = () => {
                   </div>
 
                   <div className="p-6 pt-0">
-                    <button
-                      type="button"
-                      onClick={() => navigate(`/recipes/${recipe.id}`)}
-                      className="w-full py-2.5 bg-[#FAF6F0] hover:bg-[#87380F] text-[#87380F] hover:text-white border border-[#EBD9BC] hover:border-[#87380F] rounded-md text-xs font-semibold tracking-wider uppercase transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                    <Link
+                      to={`/recipes/${recipe.slug}`}
+                      className="w-full py-2.5 bg-[#FAF6F0] hover:bg-[#87380F] text-[#87380F] hover:text-white border border-[#EBD9BC] hover:border-[#87380F] rounded-md text-xs font-semibold tracking-wider uppercase transition-colors flex items-center justify-center gap-2"
                     >
-                      <span>View Recipe & Steps</span>
+                      <span>View Recipe &amp; Steps</span>
                       <ArrowRight size={14} />
-                    </button>
+                    </Link>
                   </div>
                 </div>
               </ScrollReveal>

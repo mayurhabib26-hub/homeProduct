@@ -6,15 +6,25 @@
  * nothing to install. The same generated migrations run on both, so this is a
  * connection-string decision, not an architectural one.
  *
- * PGlite is not a mock: it is the Postgres engine. What it does not give you
- * is concurrency against a shared server, so anything whose correctness
- * depends on lock contention — the stock decrement in Phase 2 — must also be
- * exercised against a real Postgres before it ships. See docs/TESTING.md §3.
+ * PGlite is not a mock: it is the Postgres engine. Two things it does not
+ * give you:
+ *
+ *   It is single-process. The API server holds the data directory, so
+ *   `npm run db:seed` while the server is running writes somewhere the
+ *   server will not see. Stop the server first. Docker Postgres and Railway
+ *   have no such constraint.
+ *
+ *   It has no concurrency against a shared server, so anything whose
+ *   correctness depends on lock contention — the stock decrement in Phase 2 —
+ *   must also be exercised against a real Postgres before it ships.
+ *   See docs/TESTING.md §3.
  */
 import { drizzle as drizzlePg } from 'drizzle-orm/postgres-js';
 import { drizzle as drizzlePglite } from 'drizzle-orm/pglite';
 import { PGlite } from '@electric-sql/pglite';
 import postgres from 'postgres';
+import { fileURLToPath } from 'node:url';
+import { dirname, resolve } from 'node:path';
 import * as schema from './schema.js';
 
 /**
@@ -40,7 +50,11 @@ export function getDb(): Database {
     const sql = postgres(url, { max: 10 });
     db = drizzlePg(sql, { schema });
   } else {
-    const dir = url?.replace('pglite:', '') || './.pglite';
+    // Anchored to this file, not the working directory. A relative path
+    // meant `npm run -w backend` and a script run from the repo root opened
+    // two different databases, and the second one looked simply empty.
+    const dir = url?.replace('pglite:', '')
+      ?? resolve(dirname(fileURLToPath(import.meta.url)), '../../.pglite');
     db = drizzlePglite(new PGlite(dir), { schema }) as unknown as Database;
   }
 
