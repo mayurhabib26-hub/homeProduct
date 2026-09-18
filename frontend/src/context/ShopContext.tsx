@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Product, CartItem, rupees, percentOf, formatPaise } from '@sv/shared';
+import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
+import { Product, CartItem, StoredCartItem, rupees, percentOf, formatPaise } from '@sv/shared';
+import { PRODUCTS } from '../data/products';
 
 interface ShopContextType {
   cart: CartItem[];
@@ -26,6 +26,7 @@ interface ShopContextType {
   cartSubtotal: number;
   cartTotal: number;
   shippingFee: number;
+  freeShippingThresholdPaise: number;
   cartItemCount: number;
   generateWhatsAppOrderUrl: (product?: Product, weight?: string, qty?: number) => string;
 }
@@ -34,20 +35,72 @@ interface ShopContextType {
 const FREE_SHIPPING_THRESHOLD_PAISE = rupees(499);
 const SHIPPING_FEE_PAISE = rupees(60);
 
+const CART_KEY = 'sv_cart_v2';
+const LEGACY_CART_KEY = 'sv_cart';
+
+/**
+ * v1 carts embedded the whole product object, including its price at the time
+ * of adding. Keep the line, discard the snapshot — the catalogue is the only
+ * source of price now. Unreadable entries are dropped rather than guessed at.
+ */
+function migrateLegacyCart(): StoredCartItem[] {
+  try {
+    const legacy = localStorage.getItem(LEGACY_CART_KEY);
+    if (!legacy) return [];
+    const rows: Array<Record<string, unknown>> = JSON.parse(legacy);
+    const migrated = rows.flatMap((row) => {
+      const productId = typeof row.productId === 'string' ? row.productId : null;
+      const selectedWeight = typeof row.selectedWeight === 'string' ? row.selectedWeight : null;
+      const quantity = typeof row.quantity === 'number' ? row.quantity : 1;
+      if (!productId || !selectedWeight) return [];
+      return [{ productId, selectedWeight, quantity }];
+    });
+    localStorage.removeItem(LEGACY_CART_KEY);
+    return migrated;
+  } catch {
+    return [];
+  }
+}
+
 const ShopContext = createContext<ShopContextType | undefined>(undefined);
 
 export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [cart, setCart] = useState<CartItem[]>(() => {
+  // Only identifiers are stored. See StoredCartItem.
+  const [storedCart, setStoredCart] = useState<StoredCartItem[]>(() => {
     try {
-      const saved = localStorage.getItem('sv_cart');
+      const saved = localStorage.getItem(CART_KEY);
       // Annotated, not inferred: JSON.parse returns any, which would let a
-      // stale or malformed stored cart through the type system untouched.
-      const parsed: CartItem[] | null = saved ? JSON.parse(saved) : null;
-      return parsed ?? [];
+      // malformed stored cart through the type system untouched.
+      const parsed: StoredCartItem[] | null = saved ? JSON.parse(saved) : null;
+      if (parsed) return parsed;
+      return migrateLegacyCart();
     } catch {
       return [];
     }
   });
+
+  /**
+   * Resolve the stored cart against the catalogue on every render.
+   *
+   * Lines whose product or weight no longer exists are dropped rather than
+   * shown at a stale price — a discontinued item should disappear, not
+   * quietly sell at last year's price.
+   */
+  const cart: CartItem[] = useMemo(
+    () =>
+      storedCart.flatMap((line) => {
+        const product = PRODUCTS.find((p) => p.id === line.productId);
+        const variant = product?.variants.find((v) => v.weight === line.selectedWeight);
+        if (!product || !variant) return [];
+        return [{
+          ...line,
+          id: `${line.productId}-${line.selectedWeight}`,
+          product,
+          pricePaise: variant.pricePaise,
+        }];
+      }),
+    [storedCart],
+  );
 
   const [wishlist, setWishlist] = useState<string[]>(() => {
     try {
@@ -69,11 +122,11 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Sync cart to localStorage
   useEffect(() => {
     try {
-      localStorage.setItem('sv_cart', JSON.stringify(cart));
+      localStorage.setItem(CART_KEY, JSON.stringify(storedCart));
     } catch (e) {
       console.error(e);
     }
-  }, [cart]);
+  }, [storedCart]);
 
   // Sync wishlist to localStorage
   useEffect(() => {
@@ -92,27 +145,20 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const addToCart = (product: Product, selectedWeight: string, quantity = 1) => {
-    const variant = product.variants.find((v) => v.weight === selectedWeight) || product.variants[0];
-    const itemId = `${product.id}-${selectedWeight}`;
+    const weight = product.variants.some((v) => v.weight === selectedWeight)
+      ? selectedWeight
+      : product.variants[0].weight;
 
-    setCart((prev) => {
-      const existing = prev.find((item) => item.id === itemId);
+    setStoredCart((prev) => {
+      const existing = prev.find(
+        (line) => line.productId === product.id && line.selectedWeight === weight,
+      );
       if (existing) {
-        return prev.map((item) =>
-          item.id === itemId ? { ...item, quantity: item.quantity + quantity } : item
+        return prev.map((line) =>
+          line === existing ? { ...line, quantity: line.quantity + quantity } : line,
         );
       }
-      return [
-        ...prev,
-        {
-          id: itemId,
-          productId: product.id,
-          product,
-          selectedWeight,
-          pricePaise: variant.pricePaise,
-          quantity,
-        },
-      ];
+      return [...prev, { productId: product.id, selectedWeight: weight, quantity }];
     });
 
     showToast(`Added ${product.name} (${selectedWeight}) to cart`);
@@ -123,18 +169,22 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
       removeFromCart(itemId);
       return;
     }
-    setCart((prev) =>
-      prev.map((item) => (item.id === itemId ? { ...item, quantity } : item))
+    setStoredCart((prev) =>
+      prev.map((line) =>
+        `${line.productId}-${line.selectedWeight}` === itemId ? { ...line, quantity } : line,
+      ),
     );
   };
 
   const removeFromCart = (itemId: string) => {
-    setCart((prev) => prev.filter((item) => item.id !== itemId));
+    setStoredCart((prev) =>
+      prev.filter((line) => `${line.productId}-${line.selectedWeight}` !== itemId),
+    );
     showToast('Item removed from cart');
   };
 
   const clearCart = () => {
-    setCart([]);
+    setStoredCart([]);
   };
 
   const toggleWishlist = (productId: string) => {
@@ -227,6 +277,7 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
         cartSubtotal,
         cartTotal,
         shippingFee,
+        freeShippingThresholdPaise: FREE_SHIPPING_THRESHOLD_PAISE,
         cartItemCount,
         generateWhatsAppOrderUrl,
       }}

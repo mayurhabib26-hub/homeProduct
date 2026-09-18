@@ -39,13 +39,24 @@ export interface Product {
   isSignature?: boolean;
 }
 
-export interface CartItem {
-  id: string;
+/**
+ * What is persisted: identifiers only, never prices or product snapshots.
+ *
+ * A cart abandoned in January must not show January's prices in March, and a
+ * renamed product must not keep its old name forever. Price and product come
+ * from the catalogue at render time — from the API, once there is one.
+ */
+export interface StoredCartItem {
   productId: string;
-  product: Product;
   selectedWeight: string;
-  pricePaise: number;
   quantity: number;
+}
+
+/** A StoredCartItem resolved against the current catalogue. */
+export interface CartItem extends StoredCartItem {
+  id: string;
+  product: Product;
+  pricePaise: number;
 }
 
 export interface Recipe {

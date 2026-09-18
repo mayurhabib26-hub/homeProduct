@@ -437,7 +437,7 @@ export const CheckoutPage: React.FC = () => {
                   )}
                   <div className="flex justify-between">
                     <span>Pan-India Delivery</span>
-                    <span>{shippingFee === 0 ? <span className="text-[#647044] font-bold">FREE</span> : `₹${shippingFee}`}</span>
+                    <span>{shippingFee === 0 ? <span className="text-[#647044] font-bold">FREE</span> : formatPaise(shippingFee)}</span>
                   </div>
                   <div className="flex justify-between text-lg font-serif font-bold text-[#87380F] pt-2 border-t border-[#EBD9BC]">
                     <span>Total Amount Payable</span>

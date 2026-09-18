@@ -12,6 +12,7 @@ export const CartPage: React.FC = () => {
     cartSubtotal,
     cartTotal,
     shippingFee,
+    freeShippingThresholdPaise,
     appliedDiscount,
     couponCode,
     applyCoupon,
@@ -22,9 +23,8 @@ export const CartPage: React.FC = () => {
   const [inputCoupon, setInputCoupon] = useState('');
   const [couponError, setCouponError] = useState<string | null>(null);
 
-  const freeShippingThreshold = 499;
-  const remainingForFreeShipping = Math.max(0, freeShippingThreshold - cartSubtotal);
-  const freeShippingPercent = Math.min(100, (cartSubtotal / freeShippingThreshold) * 100);
+  const remainingForFreeShipping = Math.max(0, freeShippingThresholdPaise - cartSubtotal);
+  const freeShippingPercent = Math.min(100, (cartSubtotal / freeShippingThresholdPaise) * 100);
 
   const handleApplyCoupon = (e: React.FormEvent) => {
     e.preventDefault();
@@ -223,7 +223,7 @@ export const CartPage: React.FC = () => {
                 )}
                 <div className="flex justify-between">
                   <span>Delivery Charges</span>
-                  <span>{shippingFee === 0 ? <span className="text-[#647044] font-semibold">FREE</span> : `₹${shippingFee}`}</span>
+                  <span>{shippingFee === 0 ? <span className="text-[#647044] font-semibold">FREE</span> : formatPaise(shippingFee)}</span>
                 </div>
                 <div className="flex justify-between text-lg font-serif font-bold text-[#87380F] pt-3 border-t border-[#EBD9BC]">
                   <span>Total Amount</span>
