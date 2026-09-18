@@ -28,6 +28,7 @@ import { RecipesPage } from './pages/RecipesPage';
 import { ContactPage } from './pages/ContactPage';
 import { CartPage } from './pages/CartPage';
 import { CheckoutPage } from './pages/CheckoutPage';
+import { OrderConfirmationPage, TrackOrderPage } from './pages/OrderConfirmationPage';
 
 const AppContent: React.FC = () => {
   const location = useLocation();
@@ -62,6 +63,8 @@ const AppContent: React.FC = () => {
             <Route path="/contact" element={<ContactPage />} />
             <Route path="/cart" element={<CartPage />} />
             <Route path="/checkout" element={<CheckoutPage />} />
+            <Route path="/order/:orderNumber" element={<OrderConfirmationPage />} />
+            <Route path="/track" element={<TrackOrderPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </motion.main>

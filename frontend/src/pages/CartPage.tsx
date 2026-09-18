@@ -26,11 +26,11 @@ export const CartPage: React.FC = () => {
   const remainingForFreeShipping = Math.max(0, freeShippingThresholdPaise - cartSubtotal);
   const freeShippingPercent = Math.min(100, (cartSubtotal / freeShippingThresholdPaise) * 100);
 
-  const handleApplyCoupon = (e: React.FormEvent) => {
+  const handleApplyCoupon = async (e: React.FormEvent) => {
     e.preventDefault();
     setCouponError(null);
     if (!inputCoupon.trim()) return;
-    const res = applyCoupon(inputCoupon);
+    const res = await applyCoupon(inputCoupon);
     if (!res.success) {
       setCouponError(res.message);
     } else {

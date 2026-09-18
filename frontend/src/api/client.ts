@@ -6,7 +6,8 @@
  * the requestId — so a support ticket can be grepped. See docs/API.md §1.
  */
 import type {
-  ApiError, ApiRecipe, HydratedCartLine, Paginated, ProductDetail, ProductSummary,
+  ApiError, ApiRecipe, CreateOrderRequest, CreatedOrder, HydratedCartLine,
+  OrderLineRequest, Paginated, ProductDetail, ProductSummary, TrackedOrder,
 } from '@sv/shared';
 
 const BASE = import.meta.env.VITE_API_URL ?? '/api';
@@ -64,6 +65,39 @@ export const api = {
   },
   recipes: {
     list: () => request<{ data: ApiRecipe[] }>('/recipes').then((r) => r.data),
+  },
+  coupons: {
+    validate: (code: string, items: OrderLineRequest[]) =>
+      request<{ data: { code: string; discountPaise: number } }>('/coupons/validate', {
+        method: 'POST',
+        body: JSON.stringify({ code, items }),
+      }).then((r) => r.data),
+  },
+  orders: {
+    /**
+     * The Idempotency-Key is generated per checkout attempt, not per request,
+     * so a retry after a timeout returns the original order instead of
+     * creating a second one.
+     */
+    create: (body: CreateOrderRequest, idempotencyKey: string) =>
+      request<{ data: CreatedOrder }>('/orders', {
+        method: 'POST',
+        headers: { 'Idempotency-Key': idempotencyKey },
+        body: JSON.stringify(body),
+      }).then((r) => r.data),
+
+    verifyPayment: (payload: {
+      razorpayOrderId: string; razorpayPaymentId: string; razorpaySignature: string;
+    }) =>
+      request<{ data: { orderNumber: string } }>('/payments/verify', {
+        method: 'POST',
+        body: JSON.stringify(payload),
+      }).then((r) => r.data),
+
+    track: (orderNumber: string, phone: string) =>
+      request<{ data: TrackedOrder }>(
+        `/orders/${encodeURIComponent(orderNumber)}?phone=${encodeURIComponent(phone)}`,
+      ).then((r) => r.data),
   },
   cart: {
     hydrate: (items: { productSlug: string; weight: string; quantity: number }[]) =>

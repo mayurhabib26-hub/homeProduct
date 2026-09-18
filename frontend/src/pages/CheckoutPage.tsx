@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useShop } from '../context/ShopContext';
 import { CheckCircle2, ShieldCheck, ArrowRight, Phone, Truck, CreditCard, QrCode, Banknote } from 'lucide-react';
 import { formatPaise } from '@sv/shared';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { whatsappUrl } from '../lib/contact';
+import { api } from '../api/client';
+import { openCheckout } from '../lib/razorpay';
 
 export const CheckoutPage: React.FC = () => {
   const {
@@ -31,8 +33,16 @@ export const CheckoutPage: React.FC = () => {
 
   const [paymentMethod, setPaymentMethod] = useState<'upi' | 'card' | 'cod'>('upi');
   const [upiOption, setUpiOption] = useState<'gpay' | 'phonepe' | 'qr'>('gpay');
-  const [orderPlaced, setOrderPlaced] = useState(false);
-  const [orderNumber, setOrderNumber] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const navigate = useNavigate();
+
+  /**
+   * One key per checkout attempt, not per request. A retry after a timeout
+   * returns the original order instead of creating a second one — the server
+   * enforces this with a unique index. See docs/API.md §1.
+   */
+  const idempotencyKey = useRef(crypto.randomUUID());
 
   const indianStates = [
     'Karnataka',
@@ -48,79 +58,106 @@ export const CheckoutPage: React.FC = () => {
     'Other States',
   ];
 
-  const handlePlaceOrder = (e: React.FormEvent) => {
+  const handlePlaceOrder = async (e: React.FormEvent) => {
     e.preventDefault();
+    setSubmitError(null);
+
     if (!formData.fullName || !formData.phone || !formData.address || !formData.pincode) {
-      showToast('Please fill all mandatory shipping details');
+      setSubmitError('Please fill in your name, phone, address and pincode.');
+      return;
+    }
+    if (cart.length === 0) {
+      setSubmitError('Your cart is empty.');
       return;
     }
 
-    const generatedId = `SV-${new Date().getFullYear()}-${Math.floor(10000 + Math.random() * 90000)}`;
-    setOrderNumber(generatedId);
-    setOrderPlaced(true);
-    clearCart();
-    showToast('Order placed successfully! Thank you.');
+    setSubmitting(true);
+    try {
+      // No prices in this request, by design. The server reads them from the
+      // database — see docs/ARCHITECTURE.md §4.2.
+      const order = await api.orders.create(
+        {
+          items: cart.map((i) => ({
+            productSlug: i.productId,
+            weight: i.selectedWeight,
+            quantity: i.quantity,
+          })),
+          customer: {
+            name: formData.fullName,
+            phone: formData.phone,
+            email: formData.email || undefined,
+          },
+          shipping: {
+            address: formData.address,
+            landmark: formData.landmark || undefined,
+            city: formData.city,
+            state: formData.state,
+            pincode: formData.pincode,
+          },
+          couponCode: couponCode || undefined,
+          paymentMethod,
+        },
+        idempotencyKey.current,
+      );
+
+      if (order.payment === null) {
+        // COD: accepted immediately, nothing to collect online.
+        finishOrder(order.orderNumber);
+        return;
+      }
+
+      await openCheckout({
+        key: order.payment.keyId!,
+        amount: order.payment.amountPaise,
+        name: 'S V Home Products',
+        description: `Order ${order.orderNumber}`,
+        order_id: order.payment.razorpayOrderId!,
+        prefill: { name: formData.fullName, contact: formData.phone, email: formData.email },
+        theme: { color: '#87380F' },
+        handler: async (response) => {
+          try {
+            // The signature is verified server-side before anything is marked
+            // paid. This callback is attacker-controlled.
+            await api.orders.verifyPayment({
+              razorpayOrderId: response.razorpay_order_id,
+              razorpayPaymentId: response.razorpay_payment_id,
+              razorpaySignature: response.razorpay_signature,
+            });
+            finishOrder(order.orderNumber);
+          } catch {
+            // The webhook still settles this independently, so the money is
+            // not lost — say so rather than implying failure.
+            setSubmitting(false);
+            setSubmitError(
+              `We could not confirm payment for ${order.orderNumber} just now. If it was debited, it will be confirmed shortly — please keep this order number.`,
+            );
+          }
+        },
+        modal: {
+          ondismiss: () => {
+            setSubmitting(false);
+            setSubmitError('Payment was cancelled. Your cart is still here.');
+          },
+        },
+      });
+    } catch (err) {
+      setSubmitting(false);
+      setSubmitError(err instanceof Error ? err.message : 'We could not place your order. Please try again.');
+    }
   };
 
-  if (orderPlaced) {
-    return (
-      <div className="bg-[#FAF6F0] min-h-screen py-12 md:py-20 font-sans">
-        <div className="max-w-2xl mx-auto px-4">
-          <div className="bg-white p-8 sm:p-12 rounded-2xl border border-[#EBD9BC] shadow-md text-center space-y-6">
-            <div className="w-16 h-16 rounded-full bg-[#647044]/15 text-[#647044] flex items-center justify-center mx-auto">
-              <CheckCircle2 size={36} />
-            </div>
+  /**
+   * Confirmation lives on /order/:orderNumber, not here. CheckoutPage used to
+   * render its own success screen, which then competed with the real route
+   * after navigating — the URL changed while the old screen stayed mounted.
+   */
+  const finishOrder = (number: string) => {
+    clearCart();
+    setSubmitting(false);
+    showToast('Order placed. Thank you!');
+    navigate(`/order/${number}`, { replace: true, state: { justPlaced: true } });
+  };
 
-            <div>
-              <span className="text-xs uppercase tracking-widest font-sans font-semibold text-[#87380F]">
-                ORDER CONFIRMED
-              </span>
-              <h1 className="font-serif text-3xl sm:text-4xl font-bold text-[#483828] mt-1">
-                Thank You, {formData.fullName}!
-              </h1>
-              <p className="text-sm text-[#483828]/80 mt-2 font-sans">
-                Your order <strong className="text-[#87380F] font-mono">{orderNumber}</strong> has been received by our family kitchen and is being freshly prepared for dispatch.
-              </p>
-            </div>
-
-            <div className="bg-[#FAF6F0] p-5 rounded-xl border border-[#EBD9BC] text-left text-xs text-[#483828] space-y-2">
-              <div className="flex justify-between border-b border-[#EBD9BC] pb-2 font-semibold">
-                <span>Shipping Address:</span>
-                <span className="text-[#87380F]">{formData.city}, {formData.state}</span>
-              </div>
-              <p className="text-[#483828]/80 leading-relaxed pt-1">
-                {formData.address}, {formData.landmark ? `Near ${formData.landmark}, ` : ''}{formData.city} - {formData.pincode}
-              </p>
-              <p className="text-[#483828]/70">
-                Phone: {formData.phone} | Payment Method: <span className="uppercase font-semibold">{paymentMethod}</span>
-              </p>
-              <div className="pt-2 border-t border-[#EBD9BC] flex justify-between font-bold text-sm text-[#87380F]">
-                <span>Total Amount Paid/Due:</span>
-                <span>{formatPaise(cartTotal)}</span>
-              </div>
-            </div>
-
-            <div className="space-y-3 pt-2">
-              <a
-                href={whatsappUrl(`Namaste S V Home Products! I just placed order ${orderNumber}. Please confirm dispatch.`)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full py-3.5 bg-[#647044] hover:bg-[#4d5733] text-white rounded-md text-xs font-bold tracking-widest uppercase transition-colors flex items-center justify-center gap-2"
-              >
-                <Phone size={15} />
-                <span>CONFIRM & TRACK ON WHATSAPP</span>
-              </a>
-
-              <Link to="/"
-                className="w-full py-3 bg-[#FAF6F0] hover:bg-[#EBD9BC] text-[#483828] border border-[#EBD9BC] rounded-md text-xs font-bold tracking-widest uppercase transition-colors">
-                RETURN TO HOMEPAGE
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   if (cart.length === 0) {
     return (
@@ -450,11 +487,41 @@ export const CheckoutPage: React.FC = () => {
                 <button
                   type="submit"
                   id="place-order-button"
-                  className="w-full py-3.5 bg-[#87380F] hover:bg-[#662707] text-white rounded-md font-sans text-xs font-bold tracking-widest uppercase transition-colors shadow-md flex items-center justify-center gap-2 cursor-pointer"
+                  disabled={submitting || cart.length === 0}
+                  className="w-full py-3.5 bg-[#87380F] hover:bg-[#662707] disabled:bg-[#87380F]/50 disabled:cursor-not-allowed text-white rounded-md font-sans text-xs font-bold tracking-widest uppercase transition-colors shadow-md flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  <span>PLACE ORDER NOW</span>
-                  <ArrowRight size={16} />
+                  {submitting ? (
+                    <>
+                      <span
+                        className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"
+                        aria-hidden="true"
+                      />
+                      <span>PLACING YOUR ORDER…</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>{paymentMethod === 'cod' ? 'CONFIRM COD ORDER' : 'PAY & PLACE ORDER'}</span>
+                      <ArrowRight size={16} />
+                    </>
+                  )}
                 </button>
+
+                {submitError && (
+                  <div
+                    role="alert"
+                    className="mt-3 p-3 rounded-md bg-[#87380F]/8 border border-[#87380F]/25 text-xs text-[#87380F] leading-relaxed"
+                  >
+                    {submitError}
+                    <a
+                      href={generateWhatsAppOrderUrl()}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block mt-2 font-semibold underline"
+                    >
+                      Or place this order on WhatsApp instead
+                    </a>
+                  </div>
+                )}
 
                 <div className="text-center pt-1">
                   <a

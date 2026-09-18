@@ -101,6 +101,34 @@ async function resolveCoupon(code: string | undefined): Promise<CouponRule | nul
   };
 }
 
+/**
+ * Preview a discount for the cart, without reserving anything.
+ *
+ * The authoritative computation happens again inside createOrder — a coupon
+ * can expire in the seconds between preview and submit, and only the order
+ * transaction counts. See docs/API.md §3.
+ */
+export async function previewCoupon(code: string, items: OrderRequestLine[]) {
+  const coupon = await resolveCoupon(code);
+  if (!coupon) throw new ApiError(422, 'COUPON_NOT_FOUND', 'That coupon code is not valid.');
+
+  const lines = await priceLines(items);
+  const subtotal = lines.reduce((s, l) => s + l.lineTotalPaise, 0);
+
+  if (subtotal < coupon.minOrderPaise) {
+    throw new ApiError(
+      422,
+      'COUPON_MIN_ORDER_NOT_MET',
+      `This coupon needs a minimum order of ${formatPaiseForMessage(coupon.minOrderPaise)}.`,
+    );
+  }
+
+  const { discountPaise } = computeTotals(lines, coupon, 'upi');
+  return { code: coupon.code, discountPaise };
+}
+
+const formatPaiseForMessage = (p: number) => `₹${Math.round(p / 100)}`;
+
 export async function createOrder(input: CreateOrderInput) {
   const db = getDb();
 

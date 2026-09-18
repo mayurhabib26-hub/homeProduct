@@ -8,7 +8,8 @@
 import 'dotenv/config';
 import { sql } from 'drizzle-orm';
 import { getDb } from './client.js';
-import { products, variants, recipes, reviews } from './schema.js';
+import { products, variants, recipes, reviews, coupons } from './schema.js';
+import { rupees } from '@sv/shared';
 import { PRODUCTS } from './seed-data/products.js';
 import { RECIPES } from './seed-data/recipes.js';
 import { CLIENT_REVIEWS } from './seed-data/siteData.js';
@@ -27,6 +28,17 @@ const db = getDb();
 // Truncate rather than upsert: seeding replaces the catalogue wholesale, and
 // CASCADE keeps variants and reviews consistent with it.
 await db.execute(sql`truncate table ${products}, ${recipes} restart identity cascade`);
+await db.execute(sql`truncate table ${coupons}`);
+
+/**
+ * The codes that used to live in the frontend bundle, where anyone could read
+ * them in the sources tab and edit the discount in devtools.
+ */
+await db.insert(coupons).values([
+  { code: 'SVTRADITION', type: 'percent', value: 10, maxDiscountPaise: rupees(200), active: true },
+  { code: 'WELCOME10', type: 'percent', value: 10, maxDiscountPaise: rupees(150), active: true },
+  { code: 'TASTEOFHOME', type: 'flat', value: rupees(50), minOrderPaise: rupees(300), active: true },
+]);
 
 let variantCount = 0;
 

@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { type ProductSummary, CartItem, StoredCartItem, rupees, percentOf, formatPaise } from '@sv/shared';
 import { useProducts } from '../api/queries';
+import { api } from '../api/client';
 import { whatsappUrl } from '../lib/contact';
 
 interface ShopContextType {
@@ -21,7 +22,8 @@ interface ShopContextType {
   setIsCartDrawerOpen: (isOpen: boolean) => void;
   setIsSearchOpen: (isOpen: boolean) => void;
   setSearchQuery: (query: string) => void;
-  applyCoupon: (code: string) => { success: boolean; message: string };
+  applyCoupon: (code: string) => Promise<{ success: boolean; message: string }>;
+  isApplyingCoupon: boolean;
   removeCoupon: () => void;
   showToast: (msg: string) => void;
   cartSubtotal: number;
@@ -122,6 +124,7 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [searchQuery, setSearchQuery] = useState('');
   const [couponCode, setCouponCode] = useState('');
   const [appliedDiscount, setAppliedDiscount] = useState(0);
+  const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Sync cart to localStorage
@@ -212,23 +215,36 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const cartTotal = Math.max(0, cartSubtotal - appliedDiscount + shippingFee);
   const cartItemCount = cart.reduce((acc, item) => acc + item.quantity, 0);
 
-  const applyCoupon = (code: string) => {
-    const clean = code.trim().toUpperCase();
-    if (clean === 'SVTRADITION' || clean === 'WELCOME10') {
-      const discount = percentOf(cartSubtotal, 10);
-      setAppliedDiscount(discount);
-      setCouponCode(clean);
-      showToast('Coupon applied! 10% discount added.');
-      return { success: true, message: '10% discount applied successfully!' };
+  /**
+   * Validated by the server. The codes used to be hardcoded here, which meant
+   * anyone could read them in the bundle and edit the discount in devtools.
+   * This only previews — the order transaction re-validates and decides.
+   */
+  const applyCoupon = async (code: string) => {
+    if (cart.length === 0) {
+      return { success: false, message: 'Add something to your cart first.' };
     }
-    if (clean === 'TASTEOFHOME') {
-      const discount = rupees(50);
-      setAppliedDiscount(discount);
-      setCouponCode(clean);
-      showToast(`Coupon applied! ${formatPaise(discount)} flat discount.`);
-      return { success: true, message: `${formatPaise(discount)} flat discount applied!` };
+
+    setIsApplyingCoupon(true);
+    try {
+      const result = await api.coupons.validate(
+        code,
+        cart.map((i) => ({
+          productSlug: i.productId,
+          weight: i.selectedWeight,
+          quantity: i.quantity,
+        })),
+      );
+      setAppliedDiscount(result.discountPaise);
+      setCouponCode(result.code);
+      showToast(`Coupon applied — ${formatPaise(result.discountPaise)} off`);
+      return { success: true, message: `${formatPaise(result.discountPaise)} discount applied.` };
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'That coupon could not be applied.';
+      return { success: false, message };
+    } finally {
+      setIsApplyingCoupon(false);
     }
-    return { success: false, message: 'Invalid coupon code. Try SVTRADITION for 10% off.' };
   };
 
   const removeCoupon = () => {
@@ -276,6 +292,7 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setIsSearchOpen,
         setSearchQuery,
         applyCoupon,
+        isApplyingCoupon,
         removeCoupon,
         showToast,
         cartSubtotal,

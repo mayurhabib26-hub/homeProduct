@@ -98,3 +98,60 @@ export interface Paginated<T> {
   data: T[];
   meta: { total: number; page: number; limit: number };
 }
+
+/* --- orders ------------------------------------------------------------ */
+
+export interface OrderLineRequest {
+  productSlug: string;
+  weight: string;
+  quantity: number;
+}
+
+export interface CreateOrderRequest {
+  items: OrderLineRequest[];
+  customer: { name: string; phone: string; email?: string };
+  shipping: {
+    address: string; landmark?: string; city: string; state: string; pincode: string;
+  };
+  couponCode?: string;
+  paymentMethod: 'upi' | 'card' | 'netbanking' | 'cod';
+  notes?: string;
+}
+
+export interface OrderTotals {
+  subtotalPaise: number;
+  discountPaise: number;
+  shippingPaise: number;
+  taxPaise: number;
+}
+
+export interface CreatedOrder {
+  orderNumber: string;
+  status: string;
+  paymentStatus: string;
+  paymentMethod: string;
+  totalPaise: number;
+  breakdown: OrderTotals;
+  /** null for COD — nothing to collect online. */
+  payment: { provider: 'razorpay'; keyId?: string; razorpayOrderId?: string; amountPaise: number } | null;
+}
+
+export interface TrackedOrder {
+  orderNumber: string;
+  status: string;
+  paymentStatus: string;
+  paymentMethod: string;
+  placedAt: string;
+  paidAt?: string | null;
+  shippedAt?: string | null;
+  deliveredAt?: string | null;
+  trackingNumber?: string | null;
+  courier?: string | null;
+  shippingCity: string;
+  shippingState: string;
+  totals: OrderTotals & { totalPaise: number };
+  items: {
+    name: string; weight: string; quantity: number;
+    unitPricePaise: number; lineTotalPaise: number;
+  }[];
+}

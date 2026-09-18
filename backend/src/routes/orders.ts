@@ -79,6 +79,35 @@ ordersRouter.post(
   }),
 );
 
+const couponBody = z
+  .object({
+    code: z.string().min(2).max(40),
+    items: z
+      .array(
+        z.object({
+          productSlug: z.string().regex(/^[a-z0-9-]{1,80}$/),
+          weight: z.string().max(20),
+          quantity: z.number().int().positive().max(99),
+        }),
+      )
+      .min(1)
+      .max(50),
+  })
+  .strict();
+
+ordersRouter.post(
+  '/coupons/validate',
+  asyncRoute(async (req, res) => {
+    const parsed = couponBody.safeParse(req.body);
+    if (!parsed.success) throw badRequest('Invalid coupon request.');
+
+    // Never cached, and deliberately terse on failure: a fast, chatty
+    // validate endpoint is a coupon-code brute-forcer.
+    res.setHeader('Cache-Control', 'no-store');
+    res.json({ data: await ordersService.previewCoupon(parsed.data.code, parsed.data.items) });
+  }),
+);
+
 const verifyBody = z
   .object({
     razorpayOrderId: z.string().min(4).max(100),
