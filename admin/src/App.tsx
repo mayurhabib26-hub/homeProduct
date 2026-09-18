@@ -9,6 +9,7 @@ import { AdminInventoryPage } from './pages/AdminInventoryPage';
 import { AdminProductsPage } from './pages/AdminProductsPage';
 import { AdminCouponsPage } from './pages/AdminCouponsPage';
 import { AdminReviewsPage } from './pages/AdminReviewsPage';
+import { ErrorBoundary } from './components/ErrorBoundary';
 
 /**
  * Routes are at the root, not under /admin — this app IS the admin, served
@@ -26,6 +27,7 @@ const queryClient = new QueryClient({
 export const App: React.FC = () => (
   <QueryClientProvider client={queryClient}>
     <BrowserRouter>
+      <ErrorBoundary area="admin">
       <Routes>
         <Route path="/login" element={<AdminLoginPage />} />
         <Route path="/" element={<AdminLayout />}>
@@ -39,6 +41,7 @@ export const App: React.FC = () => (
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      </ErrorBoundary>
     </BrowserRouter>
   </QueryClientProvider>
 );

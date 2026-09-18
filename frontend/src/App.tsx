@@ -17,6 +17,7 @@ import { ToastNotification } from './components/ToastNotification';
 import { ScrollProgressBar } from './components/ScrollProgressBar';
 import { ScrollToTop } from './components/ScrollToTop';
 import { UpdatePrompt } from './components/UpdatePrompt';
+import { ErrorBoundary } from './components/ErrorBoundary';
 import { motion, AnimatePresence } from 'motion/react';
 
 // Pages
@@ -55,6 +56,7 @@ const AppContent: React.FC = () => {
           transition={{ duration: 0.28, ease: 'easeOut' }}
           className="flex-1"
         >
+          <ErrorBoundary area="page">
           <Routes location={location}>
             <Route path="/" element={<HomePage />} />
             <Route path="/shop" element={<ShopPage />} />
@@ -70,6 +72,7 @@ const AppContent: React.FC = () => {
             <Route path="/policies/:slug" element={<PolicyPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
+          </ErrorBoundary>
         </motion.main>
       </AnimatePresence>
 

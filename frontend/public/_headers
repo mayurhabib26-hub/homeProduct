@@ -1,0 +1,22 @@
+# Cloudflare Pages header rules for the storefront.
+#
+# CSP is the control that turns a stored-XSS bug from a catastrophe into an
+# inconvenience. Razorpay's checkout is the only third-party script allowed,
+# and it is named explicitly rather than opening up script-src.
+# See docs/SECURITY.md §3.10.
+
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://checkout.razorpay.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob: https:; connect-src 'self' https://api.razorpay.com https://lumberjack.razorpay.com; frame-src https://api.razorpay.com https://checkout.razorpay.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
+  Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(self "https://checkout.razorpay.com")
+  X-Frame-Options: DENY
+
+# Content-hashed filenames, so these can be cached forever.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# The shell must never be cached, or a deploy does not reach anyone.
+/index.html
+  Cache-Control: no-cache
