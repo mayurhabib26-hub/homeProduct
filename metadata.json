@@ -1,6 +1,0 @@
-{
-  "name": "S V Home Products",
-  "description": "Authentic South Indian homemade food products and handcrafted spice powders rooted in tradition and prepared with modern elegance.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}
