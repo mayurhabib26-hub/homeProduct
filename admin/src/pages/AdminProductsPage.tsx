@@ -66,7 +66,7 @@ const ProductRow: React.FC<{ product: AdminProduct; canPublish: boolean }> = ({ 
       </td>
       <td className="px-4 py-2.5">
         <div className="flex items-center justify-end gap-2">
-          <label className="text-[11px] px-2 py-1 border border-[#EBD9BC] rounded cursor-pointer hover:bg-[#F3E7D0]/50">
+          <label className="inline-flex items-center text-[11px] min-h-11 px-3 border border-[#EBD9BC] rounded cursor-pointer hover:bg-[#F3E7D0]/50">
             {uploading ? 'Uploading…' : 'Image'}
             <input
               type="file"
@@ -87,7 +87,7 @@ const ProductRow: React.FC<{ product: AdminProduct; canPublish: boolean }> = ({ 
                   : undefined
             }
             onClick={() => { setError(null); update.mutate({ published: !product.published }); }}
-            className={`text-[11px] px-2.5 py-1 rounded font-semibold uppercase tracking-wide disabled:opacity-40 disabled:cursor-not-allowed ${
+            className={`inline-flex items-center text-[11px] min-h-11 px-2.5 rounded font-semibold uppercase tracking-wide disabled:opacity-40 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-[#87380F]/40 ${
               product.published ? 'bg-[#647044]/15 text-[#42522a]' : 'bg-[#87380F] text-white'
             }`}
           >

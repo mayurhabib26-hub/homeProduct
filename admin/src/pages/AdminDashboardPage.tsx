@@ -90,7 +90,7 @@ export const AdminDashboardPage: React.FC = () => {
                 <Link to={`/orders/${o.orderNumber}`} className="font-mono text-[#87380F] hover:underline">
                   {o.orderNumber}
                 </Link>
-                <span className="text-[#483828]/60 tabular-nums">
+                <span className="text-[#483828]/60 tabular-nums px-4">
                   {new Date(o.createdAt).toLocaleDateString('en-IN')}
                 </span>
               </li>

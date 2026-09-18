@@ -54,7 +54,7 @@ export const AdminLoginPage: React.FC = () => {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               aria-describedby={error ? 'admin-login-error' : undefined}
-              className="w-full bg-[#FAF6F0] border border-[#EBD9BC] rounded-md px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#87380F]/40 focus:border-[#87380F]"
+              className="w-full bg-[#FAF6F0] border border-[#EBD9BC] rounded-md px-3 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#87380F]/40 focus:border-[#87380F]"
             />
           </div>
 
@@ -71,12 +71,13 @@ export const AdminLoginPage: React.FC = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 aria-describedby={error ? 'admin-login-error' : undefined}
-                className="w-full bg-[#FAF6F0] border border-[#EBD9BC] rounded-md px-3 py-2.5 pr-16 text-sm focus:outline-none focus:ring-2 focus:ring-[#87380F]/40 focus:border-[#87380F]"
+                className="w-full bg-[#FAF6F0] border border-[#EBD9BC] rounded-md px-3 py-3 pr-20 text-sm focus:outline-none focus:ring-2 focus:ring-[#87380F]/40 focus:border-[#87380F]"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword((v) => !v)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-[11px] font-semibold text-[#87380F] px-2 py-1"
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                className="absolute right-1 top-1/2 -translate-y-1/2 h-11 min-w-11 px-2 text-xs font-semibold text-[#87380F] rounded focus:outline-none focus:ring-2 focus:ring-[#87380F]/40"
               >
                 {showPassword ? 'Hide' : 'Show'}
               </button>
@@ -92,7 +93,7 @@ export const AdminLoginPage: React.FC = () => {
           <button
             type="submit"
             disabled={busy}
-            className="w-full py-2.5 bg-[#87380F] hover:bg-[#6d2d0c] disabled:opacity-60 text-white rounded-md text-xs font-bold tracking-widest uppercase transition-colors"
+            className="w-full min-h-11 py-3 bg-[#87380F] hover:bg-[#6d2d0c] disabled:opacity-60 text-white rounded-md text-xs font-bold tracking-widest uppercase transition-colors focus:outline-none focus:ring-2 focus:ring-[#87380F]/40 focus:ring-offset-2"
           >
             {busy ? 'Signing in…' : 'Sign in'}
           </button>

@@ -40,7 +40,7 @@ export const AdminOrdersPage: React.FC = () => {
           <button
             key={f || 'all'}
             onClick={() => setStatus(f)}
-            className={`px-3 py-1.5 rounded text-xs font-medium transition-colors ${
+            className={`inline-flex items-center justify-center min-h-11 min-w-11 px-3 rounded text-xs font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-[#87380F]/40 ${
               status === f ? 'bg-[#87380F] text-white' : 'bg-white border border-[#EBD9BC] hover:bg-[#F3E7D0]/50'
             }`}
           >
@@ -69,8 +69,13 @@ export const AdminOrdersPage: React.FC = () => {
             <tbody className="divide-y divide-[#EBD9BC]">
               {data?.map((o) => (
                 <tr key={o.orderNumber} className="hover:bg-[#FAF6F0]/60">
-                  <td className="px-4 py-2.5">
-                    <Link to={`/orders/${o.orderNumber}`} className="font-mono text-[#87380F] hover:underline">
+                  {/* The anchor fills the cell, so the tap target is the full
+                      row height without inflating a dense table. */}
+                  <td className="p-0">
+                    <Link
+                      to={`/orders/${o.orderNumber}`}
+                      className="flex items-center min-h-11 px-4 font-mono text-[#87380F] hover:underline focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[#87380F]/40"
+                    >
                       {o.orderNumber}
                     </Link>
                   </td>
@@ -209,12 +214,12 @@ export const AdminOrderDetailPage: React.FC = () => {
                 <label className="text-xs">
                   <span className="block mb-1 text-[#483828]/70">Tracking number</span>
                   <input value={tracking} onChange={(e) => setTracking(e.target.value)}
-                    className="border border-[#EBD9BC] rounded px-2 py-1.5 text-sm bg-[#FAF6F0]" />
+                    className="border border-[#EBD9BC] rounded px-2 min-h-11 text-sm bg-[#FAF6F0]" />
                 </label>
                 <label className="text-xs">
                   <span className="block mb-1 text-[#483828]/70">Courier</span>
                   <input value={courier} onChange={(e) => setCourier(e.target.value)}
-                    className="border border-[#EBD9BC] rounded px-2 py-1.5 text-sm bg-[#FAF6F0]" />
+                    className="border border-[#EBD9BC] rounded px-2 min-h-11 text-sm bg-[#FAF6F0]" />
                 </label>
               </>
             )}
@@ -228,7 +233,7 @@ export const AdminOrderDetailPage: React.FC = () => {
                     t === 'shipped' ? { status: t, trackingNumber: tracking || undefined, courier: courier || undefined } : { status: t },
                   );
                 }}
-                className="px-3 py-1.5 bg-[#87380F] hover:bg-[#6d2d0c] disabled:opacity-50 text-white rounded text-xs font-semibold uppercase tracking-wide"
+                className="inline-flex items-center min-h-11 px-3 bg-[#87380F] hover:bg-[#6d2d0c] disabled:opacity-50 text-white rounded text-xs font-semibold uppercase tracking-wide focus:outline-none focus:ring-2 focus:ring-[#87380F]/40"
               >
                 Mark {t}
               </button>
@@ -248,12 +253,12 @@ export const AdminOrderDetailPage: React.FC = () => {
               value={refundConfirm}
               onChange={(e) => setRefundConfirm(e.target.value)}
               placeholder={order.orderNumber}
-              className="border border-[#EBD9BC] rounded px-2 py-1.5 text-sm font-mono bg-[#FAF6F0]"
+              className="border border-[#EBD9BC] rounded px-2 min-h-11 text-sm font-mono bg-[#FAF6F0]"
             />
             <button
               disabled={refundConfirm !== order.orderNumber || refund.isPending}
               onClick={() => { setActionError(null); refund.mutate(); }}
-              className="px-3 py-1.5 bg-[#87380F] disabled:opacity-40 disabled:cursor-not-allowed text-white rounded text-xs font-semibold uppercase tracking-wide"
+              className="inline-flex items-center min-h-11 px-3 bg-[#87380F] disabled:opacity-40 disabled:cursor-not-allowed text-white rounded text-xs font-semibold uppercase tracking-wide focus:outline-none focus:ring-2 focus:ring-[#87380F]/40"
             >
               Refund {formatPaise(order.totalPaise)}
             </button>

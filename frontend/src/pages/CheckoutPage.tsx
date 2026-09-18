@@ -509,12 +509,13 @@ export const CheckoutPage: React.FC = () => {
                   )}
                 </button>
 
-                <label className="flex items-start gap-2.5 mt-4 mb-1 cursor-pointer">
+                {/* The label carries the 44px target; the checkbox itself is 16px. */}
+                <label className="flex items-start gap-2.5 mt-4 mb-1 py-2 min-h-11 cursor-pointer">
                   <input
                     type="checkbox"
                     checked={marketingConsent}
                     onChange={(e) => setMarketingConsent(e.target.checked)}
-                    className="mt-0.5 shrink-0"
+                    className="mt-0.5 shrink-0 w-4 h-4 accent-[#87380F]"
                   />
                   <span className="text-[11px] text-[#483828]/75 leading-relaxed">
                     Send me occasional offers and new product news on WhatsApp.

@@ -47,12 +47,12 @@ export const AdminCouponsPage: React.FC = () => {
         <label className="text-xs">
           <span className="block mb-1 text-[#483828]/70">Code</span>
           <input required value={form.code} onChange={(e) => setForm({ ...form, code: e.target.value })}
-            className="border border-[#EBD9BC] rounded px-2 py-1.5 text-sm font-mono uppercase bg-[#FAF6F0] w-36" />
+            className="border border-[#EBD9BC] rounded px-2 min-h-11 text-sm font-mono uppercase bg-[#FAF6F0] w-36" />
         </label>
         <label className="text-xs">
           <span className="block mb-1 text-[#483828]/70">Type</span>
           <select value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}
-            className="border border-[#EBD9BC] rounded px-2 py-1.5 text-sm bg-[#FAF6F0]">
+            className="border border-[#EBD9BC] rounded px-2 min-h-11 text-sm bg-[#FAF6F0]">
             <option value="percent">Percent</option>
             <option value="flat">Flat ₹</option>
           </select>
@@ -60,23 +60,23 @@ export const AdminCouponsPage: React.FC = () => {
         <label className="text-xs">
           <span className="block mb-1 text-[#483828]/70">{form.type === 'percent' ? 'Percent' : 'Amount ₹'}</span>
           <input required inputMode="numeric" value={form.value} onChange={(e) => setForm({ ...form, value: e.target.value })}
-            className="border border-[#EBD9BC] rounded px-2 py-1.5 text-sm tabular-nums bg-[#FAF6F0] w-24" />
+            className="border border-[#EBD9BC] rounded px-2 min-h-11 text-sm tabular-nums bg-[#FAF6F0] w-24" />
         </label>
         <label className="text-xs">
           <span className="block mb-1 text-[#483828]/70">Min order ₹</span>
           <input inputMode="numeric" value={form.minOrder} onChange={(e) => setForm({ ...form, minOrder: e.target.value })}
-            className="border border-[#EBD9BC] rounded px-2 py-1.5 text-sm tabular-nums bg-[#FAF6F0] w-24" />
+            className="border border-[#EBD9BC] rounded px-2 min-h-11 text-sm tabular-nums bg-[#FAF6F0] w-24" />
         </label>
         {form.type === 'percent' && (
           <label className="text-xs">
             <span className="block mb-1 text-[#483828]/70">Cap ₹</span>
             <input inputMode="numeric" placeholder="none" value={form.maxDiscount}
               onChange={(e) => setForm({ ...form, maxDiscount: e.target.value })}
-              className="border border-[#EBD9BC] rounded px-2 py-1.5 text-sm tabular-nums bg-[#FAF6F0] w-24" />
+              className="border border-[#EBD9BC] rounded px-2 min-h-11 text-sm tabular-nums bg-[#FAF6F0] w-24" />
           </label>
         )}
         <button type="submit" disabled={create.isPending}
-          className="px-4 py-1.5 bg-[#87380F] hover:bg-[#6d2d0c] disabled:opacity-50 text-white rounded text-xs font-semibold uppercase tracking-wide">
+          className="inline-flex items-center min-h-11 px-4 bg-[#87380F] hover:bg-[#6d2d0c] disabled:opacity-50 text-white rounded text-xs font-semibold uppercase tracking-wide focus:outline-none focus:ring-2 focus:ring-[#87380F]/40">
           {create.isPending ? 'Creating…' : 'Create'}
         </button>
       </form>
@@ -122,7 +122,7 @@ export const AdminCouponsPage: React.FC = () => {
                   <td className="px-4 py-2.5 text-right">
                     <button
                       onClick={() => { setError(null); toggle.mutate({ code: c.code, active: !c.active }); }}
-                      className="text-[11px] px-2.5 py-1 border border-[#EBD9BC] rounded hover:bg-[#F3E7D0]/50 font-semibold uppercase tracking-wide"
+                      className="inline-flex items-center text-[11px] min-h-11 px-2.5 border border-[#EBD9BC] rounded hover:bg-[#F3E7D0]/50 font-semibold uppercase tracking-wide focus:outline-none focus:ring-2 focus:ring-[#87380F]/40"
                     >
                       {c.active ? 'Disable' : 'Enable'}
                     </button>

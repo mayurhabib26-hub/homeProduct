@@ -35,7 +35,7 @@ export const AdminReviewsPage: React.FC = () => {
       </div>
       <button
         onClick={() => { setError(null); setApproved.mutate({ id: r.id, approved: !r.approved }); }}
-        className={`shrink-0 text-[11px] px-2.5 py-1 rounded font-semibold uppercase tracking-wide ${
+        className={`shrink-0 inline-flex items-center text-[11px] min-h-11 px-2.5 rounded font-semibold uppercase tracking-wide focus:outline-none focus:ring-2 focus:ring-[#87380F]/40 ${
           r.approved
             ? 'border border-[#EBD9BC] hover:bg-[#F3E7D0]/50'
             : 'bg-[#647044] hover:bg-[#4d5733] text-white'

@@ -31,15 +31,17 @@ export const AdminLayout: React.FC = () => {
 
   if (isError) return <Navigate to="/login" replace />;
 
+  // min-h-11 (44px) on every target: the project's accessibility floor, and
+  // the admin is used one-handed on a phone in a kitchen as often as at a desk.
   const link = ({ isActive }: { isActive: boolean }) =>
-    `px-3 py-2 rounded text-sm transition-colors ${
+    `inline-flex items-center min-h-11 px-3 rounded text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-[#87380F]/40 ${
       isActive ? 'bg-[#87380F] text-white font-semibold' : 'text-[#483828] hover:bg-[#EBD9BC]/50'
     }`;
 
   return (
     <div className="min-h-screen bg-[#FAF6F0] font-sans text-[#483828]">
       <header className="border-b border-[#EBD9BC] bg-white">
-        <div className="max-w-7xl mx-auto px-4 h-14 flex items-center gap-2">
+        <div className="max-w-7xl mx-auto px-4 min-h-16 py-2 flex flex-wrap items-center gap-2">
           <span className="font-semibold text-sm mr-4">S V Admin</span>
           <nav className="flex items-center gap-1 flex-1">
             <NavLink to="/" end className={link}>Dashboard</NavLink>
@@ -59,7 +61,7 @@ export const AdminLayout: React.FC = () => {
               queryClient.clear();
               navigate('/login', { replace: true });
             }}
-            className="text-xs px-3 py-1.5 border border-[#EBD9BC] rounded hover:bg-[#F3E7D0]/50 transition-colors"
+            className="text-xs min-h-11 px-3 border border-[#EBD9BC] rounded hover:bg-[#F3E7D0]/50 transition-colors focus:outline-none focus:ring-2 focus:ring-[#87380F]/40"
           >
             Sign out
           </button>

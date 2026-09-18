@@ -47,7 +47,7 @@ const StockCell: React.FC<{ row: InventoryRow }> = ({ row }) => {
         onChange={(e) => { setValue(e.target.value); setError(false); }}
         onBlur={commit}
         onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
-        className={`w-20 text-right tabular-nums border rounded px-2 py-1 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#87380F]/40 ${
+        className={`w-20 text-right tabular-nums border rounded px-2 min-h-11 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#87380F]/40 ${
           error ? 'border-[#87380F]' : 'border-[#EBD9BC]'
         }`}
       />
@@ -65,8 +65,14 @@ export const AdminInventoryPage: React.FC = () => {
 
   return (
     <div className="space-y-4">
-      <label className="flex items-center gap-2 text-sm">
-        <input type="checkbox" checked={onlyLow} onChange={(e) => setOnlyLow(e.target.checked)} />
+      {/* The label is the tap target, not the 13px checkbox inside it. */}
+      <label className="inline-flex items-center gap-2.5 min-h-11 px-1 text-sm cursor-pointer">
+        <input
+          type="checkbox"
+          checked={onlyLow}
+          onChange={(e) => setOnlyLow(e.target.checked)}
+          className="w-4 h-4 accent-[#87380F]"
+        />
         Show only low stock (≤ {LOW_STOCK})
       </label>
 
