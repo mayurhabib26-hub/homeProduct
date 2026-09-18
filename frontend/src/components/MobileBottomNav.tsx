@@ -1,15 +1,16 @@
 import React from 'react';
 import { useShop } from '../context/ShopContext';
+import { useLocation } from 'react-router-dom';
 import { Home, ShoppingBag, Search, Compass, BookOpen } from 'lucide-react';
 
 export const MobileBottomNav: React.FC = () => {
   const {
-    activePage,
     setActivePage,
     cartItemCount,
     setIsCartDrawerOpen,
     setIsSearchOpen,
   } = useShop();
+  const { pathname } = useLocation();
 
   return (
     <div className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-[#FAF6F0]/95 backdrop-blur-md border-t border-[#EBD9BC] px-3 py-2 flex items-center justify-around shadow-md font-sans">
@@ -17,7 +18,7 @@ export const MobileBottomNav: React.FC = () => {
         type="button"
         onClick={() => setActivePage('home')}
         className={`flex flex-col items-center gap-1 p-1 transition-colors ${
-          activePage === 'home' ? 'text-[#87380F] font-semibold' : 'text-[#483828]/70 hover:text-[#87380F]'
+          pathname === '/' ? 'text-[#87380F] font-semibold' : 'text-[#483828]/70 hover:text-[#87380F]'
         }`}
       >
         <Home size={19} />
@@ -28,7 +29,7 @@ export const MobileBottomNav: React.FC = () => {
         type="button"
         onClick={() => setActivePage('shop')}
         className={`flex flex-col items-center gap-1 p-1 transition-colors ${
-          activePage === 'shop' ? 'text-[#87380F] font-semibold' : 'text-[#483828]/70 hover:text-[#87380F]'
+          pathname === '/shop' ? 'text-[#87380F] font-semibold' : 'text-[#483828]/70 hover:text-[#87380F]'
         }`}
       >
         <Compass size={19} />
@@ -48,7 +49,7 @@ export const MobileBottomNav: React.FC = () => {
         type="button"
         onClick={() => setActivePage('recipes')}
         className={`flex flex-col items-center gap-1 p-1 transition-colors ${
-          activePage === 'recipes' ? 'text-[#87380F] font-semibold' : 'text-[#483828]/70 hover:text-[#87380F]'
+          pathname === '/recipes' ? 'text-[#87380F] font-semibold' : 'text-[#483828]/70 hover:text-[#87380F]'
         }`}
       >
         <BookOpen size={19} />

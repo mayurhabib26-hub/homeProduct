@@ -3,8 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect } from 'react';
-import { ShopProvider, useShop } from './context/ShopContext';
+import React from 'react';
+import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom';
+import { ShopProvider } from './context/ShopContext';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { CartDrawer } from './components/CartDrawer';
@@ -27,35 +28,7 @@ import { CartPage } from './pages/CartPage';
 import { CheckoutPage } from './pages/CheckoutPage';
 
 const AppContent: React.FC = () => {
-  const { activePage } = useShop();
-
-  // Scroll to top smoothly on page transition
-  useEffect(() => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  }, [activePage]);
-
-  const renderActivePage = () => {
-    switch (activePage) {
-      case 'home':
-        return <HomePage />;
-      case 'shop':
-        return <ShopPage />;
-      case 'product':
-        return <ProductDetailPage />;
-      case 'about':
-        return <AboutPage />;
-      case 'recipes':
-        return <RecipesPage />;
-      case 'contact':
-        return <ContactPage />;
-      case 'cart':
-        return <CartPage />;
-      case 'checkout':
-        return <CheckoutPage />;
-      default:
-        return <HomePage />;
-    }
-  };
+  const location = useLocation();
 
   return (
     <div className="min-h-screen flex flex-col bg-[#FAF6F0] text-[#483828] font-sans antialiased selection:bg-[#EBD9BC] selection:text-[#87380F]">
@@ -65,17 +38,30 @@ const AppContent: React.FC = () => {
       {/* Top sticky navigation */}
       <Navbar />
 
-      {/* Main page view with smooth transition */}
+      {/* Main page view with smooth transition.
+          Keyed on pathname so the transition survives the move off the old
+          activePage string — same animation, real URLs underneath. */}
       <AnimatePresence mode="wait">
         <motion.main
-          key={activePage}
+          key={location.pathname}
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -8 }}
           transition={{ duration: 0.28, ease: 'easeOut' }}
           className="flex-1"
         >
-          {renderActivePage()}
+          <Routes location={location}>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/shop" element={<ShopPage />} />
+            <Route path="/product/:slug" element={<ProductDetailPage />} />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/recipes" element={<RecipesPage />} />
+            <Route path="/recipes/:slug" element={<RecipesPage />} />
+            <Route path="/contact" element={<ContactPage />} />
+            <Route path="/cart" element={<CartPage />} />
+            <Route path="/checkout" element={<CheckoutPage />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Routes>
         </motion.main>
       </AnimatePresence>
 
@@ -95,8 +81,10 @@ const AppContent: React.FC = () => {
 
 export default function App() {
   return (
-    <ShopProvider>
-      <AppContent />
-    </ShopProvider>
+    <BrowserRouter>
+      <ShopProvider>
+        <AppContent />
+      </ShopProvider>
+    </BrowserRouter>
   );
 }

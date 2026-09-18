@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useShop } from '../context/ShopContext';
+import { useParams, useNavigate } from 'react-router-dom';
 import { RECIPES } from '../data/recipes';
 import {Recipe, formatPaise } from '@sv/shared';
 import { PRODUCTS } from '../data/products';
@@ -7,7 +8,9 @@ import { Clock, ChefHat, Users, ArrowRight, ShoppingBag, Check, X, Sparkles } fr
 import { ScrollReveal } from '../components/ScrollReveal';
 
 export const RecipesPage: React.FC = () => {
-  const { selectedRecipeId, setSelectedRecipeId, navigateToProduct, addToCart } = useShop();
+  const { navigateToProduct, addToCart } = useShop();
+  const { slug: selectedRecipeId } = useParams<{ slug: string }>();
+  const navigate = useNavigate();
   const [activeFilter, setActiveFilter] = useState<string>('all');
   const [checkedIngredients, setCheckedIngredients] = useState<{ [key: string]: boolean }>({});
 
@@ -130,7 +133,7 @@ export const RecipesPage: React.FC = () => {
                   <div className="p-6 pt-0">
                     <button
                       type="button"
-                      onClick={() => setSelectedRecipeId(recipe.id)}
+                      onClick={() => navigate(`/recipes/${recipe.id}`)}
                       className="w-full py-2.5 bg-[#FAF6F0] hover:bg-[#87380F] text-[#87380F] hover:text-white border border-[#EBD9BC] hover:border-[#87380F] rounded-md text-xs font-semibold tracking-wider uppercase transition-colors flex items-center justify-center gap-2 cursor-pointer"
                     >
                       <span>View Recipe & Steps</span>
@@ -148,7 +151,7 @@ export const RecipesPage: React.FC = () => {
           <div className="fixed inset-0 z-50 overflow-y-auto p-4 sm:p-6 md:p-10 font-sans">
             <div
               className="fixed inset-0 bg-[#483828]/70 backdrop-blur-xs transition-opacity"
-              onClick={() => setSelectedRecipeId(null)}
+              onClick={() => navigate('/recipes')}
             />
 
             <div className="relative max-w-3xl mx-auto bg-[#FAF6F0] rounded-2xl shadow-2xl border border-[#EBD9BC] overflow-hidden">
@@ -163,7 +166,7 @@ export const RecipesPage: React.FC = () => {
 
                 <button
                   type="button"
-                  onClick={() => setSelectedRecipeId(null)}
+                  onClick={() => navigate('/recipes')}
                   className="absolute top-4 right-4 w-9 h-9 rounded-full bg-[#FAF6F0]/90 text-[#483828] hover:text-[#87380F] flex items-center justify-center transition-colors"
                 >
                   <X size={18} />

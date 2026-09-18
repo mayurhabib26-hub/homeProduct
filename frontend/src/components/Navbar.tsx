@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrandLogo } from './BrandLogo';
 import { useShop } from '../context/ShopContext';
+import { useLocation } from 'react-router-dom';
 import {
   Search,
   ShoppingBag,
@@ -13,7 +14,6 @@ import {
 
 export const Navbar: React.FC = () => {
   const {
-    activePage,
     setActivePage,
     cartItemCount,
     setIsCartDrawerOpen,
@@ -21,6 +21,7 @@ export const Navbar: React.FC = () => {
     wishlist,
     generateWhatsAppOrderUrl,
   } = useShop();
+  const { pathname } = useLocation();
 
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -112,7 +113,7 @@ export const Navbar: React.FC = () => {
             {/* Center: Desktop Navigation Links */}
             <nav className="hidden lg:flex items-center gap-8 xl:gap-10">
               {navLinks.map((link) => {
-                const isActive = activePage === link.id;
+                const isActive = pathname === (link.id === 'home' ? '/' : `/${link.id}`);
                 return (
                   <button
                     key={link.id}
@@ -213,7 +214,7 @@ export const Navbar: React.FC = () => {
                       setMobileMenuOpen(false);
                     }}
                     className={`w-full text-left py-2.5 px-3 rounded-lg text-base font-medium flex items-center justify-between transition-colors ${
-                      activePage === link.id
+                      pathname === (link.id === 'home' ? '/' : `/${link.id}`)
                         ? 'bg-[#EBD9BC]/60 text-[#87380F] font-semibold'
                         : 'text-[#483828] hover:bg-[#F3E7D0]/40'
                     }`}

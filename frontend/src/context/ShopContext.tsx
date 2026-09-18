@@ -1,13 +1,10 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Product, CartItem, rupees, percentOf, formatPaise } from '@sv/shared';
 
 interface ShopContextType {
   cart: CartItem[];
   wishlist: string[]; // product IDs
-  activePage: string;
-  selectedProductId: string | null;
-  selectedRecipeId: string | null;
-  setSelectedRecipeId: (recipeId: string | null) => void;
   isCartDrawerOpen: boolean;
   isSearchOpen: boolean;
   searchQuery: string;
@@ -35,6 +32,16 @@ interface ShopContextType {
   cartItemCount: number;
   generateWhatsAppOrderUrl: (product?: Product, weight?: string, qty?: number) => string;
 }
+
+const PAGE_PATHS: Record<string, string> = {
+  home: '/',
+  shop: '/shop',
+  about: '/about',
+  recipes: '/recipes',
+  contact: '/contact',
+  cart: '/cart',
+  checkout: '/checkout',
+};
 
 // Shipping rules. Server-side once orders move to the API — see docs/API.md.
 const FREE_SHIPPING_THRESHOLD_PAISE = rupees(499);
@@ -65,9 +72,7 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   });
 
-  const [activePage, setActivePageState] = useState<string>('home');
-  const [selectedProductId, setSelectedProductId] = useState<string | null>('rasam-powder');
-  const [selectedRecipeId, setSelectedRecipeId] = useState<string | null>(null);
+  const navigate = useNavigate();
   const [isCartDrawerOpen, setIsCartDrawerOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -100,21 +105,21 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, 3200);
   };
 
+  /**
+   * Compatibility shim while call sites still say setActivePage('shop').
+   * The router is the source of truth now; this just translates the old page
+   * names to paths. Removed once every call site uses <Link>.
+   */
   const setActivePage = (page: string) => {
-    setActivePageState(page);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    navigate(PAGE_PATHS[page] ?? '/');
   };
 
   const navigateToProduct = (productId: string) => {
-    setSelectedProductId(productId);
-    setActivePageState('product-detail');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    navigate(`/product/${productId}`);
   };
 
   const navigateToRecipe = (recipeId: string) => {
-    setSelectedRecipeId(recipeId);
-    setActivePageState('recipes');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    navigate(`/recipes/${recipeId}`);
   };
 
   const addToCart = (product: Product, selectedWeight: string, quantity = 1) => {
@@ -232,10 +237,6 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
       value={{
         cart,
         wishlist,
-        activePage,
-        selectedProductId,
-        selectedRecipeId,
-        setSelectedRecipeId,
         isCartDrawerOpen,
         isSearchOpen,
         searchQuery,

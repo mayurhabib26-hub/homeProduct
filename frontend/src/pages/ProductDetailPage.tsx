@@ -3,7 +3,8 @@ import { useShop } from '../context/ShopContext';
 import { PRODUCTS } from '../data/products';
 import { ProductCard } from '../components/ProductCard';
 import { ScrollReveal } from '../components/ScrollReveal';
-import { formatPaise } from '@sv/shared';
+import { formatPaise, type Product } from '@sv/shared';
+import { useParams, Link } from 'react-router-dom';
 import {
   Star,
   ShoppingBag,
@@ -19,9 +20,44 @@ import {
   Share2,
 } from 'lucide-react';
 
+/**
+ * Resolves the slug, then renders. Split so the not-found case can return
+ * before any hook runs.
+ *
+ * The previous version fell back to PRODUCTS[0] when lookup failed, which is
+ * how the broken product route went unnoticed: a bad id rendered Rasam Powder
+ * as though nothing were wrong.
+ */
 export const ProductDetailPage: React.FC = () => {
+  const { slug } = useParams<{ slug: string }>();
+  const product = PRODUCTS.find((p) => p.id === slug);
+
+  if (!product) {
+    return (
+      <div className="bg-[#FAF6F0] min-h-[60vh] flex items-center justify-center px-4 font-sans">
+        <div className="text-center max-w-md">
+          <h1 className="font-serif text-3xl font-bold text-[#483828]">
+            We couldn't find that product
+          </h1>
+          <p className="text-sm text-[#483828]/75 mt-3">
+            It may have been renamed or is no longer stocked.
+          </p>
+          <Link
+            to="/shop"
+            className="inline-block mt-6 px-6 py-3 bg-[#87380F] hover:bg-[#6d2d0c] text-white rounded-md text-xs font-bold tracking-widest uppercase transition-colors"
+          >
+            Browse all products
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  return <ProductDetail product={product} />;
+};
+
+const ProductDetail: React.FC<{ product: Product }> = ({ product }) => {
   const {
-    selectedProductId,
     addToCart,
     toggleWishlist,
     isWishlisted,
@@ -30,7 +66,6 @@ export const ProductDetailPage: React.FC = () => {
     showToast,
   } = useShop();
 
-  const product = PRODUCTS.find((p) => p.id === selectedProductId) || PRODUCTS[0];
   const [selectedImage, setSelectedImage] = useState(product.image);
   const [selectedWeight, setSelectedWeight] = useState(product.variants[0]?.weight || '100g');
   const [quantity, setQuantity] = useState(1);
