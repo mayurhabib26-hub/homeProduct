@@ -43,8 +43,6 @@ import {
 
 export const HomePage: React.FC = () => {
   const {
-    navigateToProduct,
-    navigateToRecipe,
     addToCart,
     showToast,
   } = useShop();
@@ -162,13 +160,13 @@ export const HomePage: React.FC = () => {
                         Rasam • Puliyogare • Sambar • Podi
                       </p>
                     </div>
-                    <button
-                      onClick={() => navigateToProduct('rasam-powder')}
+                    <Link
+                      to="/product/rasam-powder"
                       className="text-xs text-[#87380F] font-semibold hover:underline flex items-center gap-1 font-sans"
                     >
                       <span>Explore</span>
                       <ArrowRight size={13} />
-                    </button>
+                    </Link>
                   </div>
                 </div>
 
@@ -672,23 +670,21 @@ export const HomePage: React.FC = () => {
                   </div>
 
                   <div className="pt-2 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                    <button
-                      type="button"
+                    <Link
+                      to="/product/rasam-powder"
                       id="signature-shop-rasam-btn"
-                      onClick={() => navigateToProduct('rasam-powder')}
-                      className="px-8 py-3.5 bg-[#FAF6F0] hover:bg-[#EBD9BC] text-[#87380F] rounded-md font-sans text-xs font-bold tracking-widest uppercase transition-colors shadow-lg cursor-pointer"
+                      className="px-8 py-3.5 bg-[#FAF6F0] hover:bg-[#EBD9BC] text-[#87380F] rounded-md font-sans text-xs font-bold tracking-widest uppercase transition-colors shadow-lg"
                     >
                       SHOP RASAM POWDER (FROM ₹110)
-                    </button>
+                    </Link>
 
-                    <button
-                      type="button"
+                    <Link
+                      to="/recipes/authentic-rasam"
                       id="signature-view-recipe-btn"
-                      onClick={() => navigateToRecipe('authentic-rasam')}
-                      className="px-6 py-3.5 border border-[#FAF6F0]/50 hover:border-[#FAF6F0] text-[#FAF6F0] rounded-md font-sans text-xs font-semibold tracking-widest uppercase transition-colors cursor-pointer"
+                      className="px-6 py-3.5 border border-[#FAF6F0]/50 hover:border-[#FAF6F0] text-[#FAF6F0] rounded-md font-sans text-xs font-semibold tracking-widest uppercase transition-colors"
                     >
                       VIEW RASAM RECIPE
-                    </button>
+                    </Link>
                   </div>
                 </div>
               </ScrollReveal>

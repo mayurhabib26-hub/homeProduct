@@ -11,9 +11,6 @@ interface ShopContextType {
   couponCode: string;
   appliedDiscount: number;
   toastMessage: string | null;
-  setActivePage: (page: string) => void;
-  navigateToProduct: (productId: string) => void;
-  navigateToRecipe: (recipeId: string) => void;
   addToCart: (product: Product, selectedWeight: string, quantity?: number) => void;
   updateCartQuantity: (itemId: string, quantity: number) => void;
   removeFromCart: (itemId: string) => void;
@@ -32,16 +29,6 @@ interface ShopContextType {
   cartItemCount: number;
   generateWhatsAppOrderUrl: (product?: Product, weight?: string, qty?: number) => string;
 }
-
-const PAGE_PATHS: Record<string, string> = {
-  home: '/',
-  shop: '/shop',
-  about: '/about',
-  recipes: '/recipes',
-  contact: '/contact',
-  cart: '/cart',
-  checkout: '/checkout',
-};
 
 // Shipping rules. Server-side once orders move to the API — see docs/API.md.
 const FREE_SHIPPING_THRESHOLD_PAISE = rupees(499);
@@ -72,7 +59,6 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   });
 
-  const navigate = useNavigate();
   const [isCartDrawerOpen, setIsCartDrawerOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -103,23 +89,6 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setTimeout(() => {
       setToastMessage(null);
     }, 3200);
-  };
-
-  /**
-   * Compatibility shim while call sites still say setActivePage('shop').
-   * The router is the source of truth now; this just translates the old page
-   * names to paths. Removed once every call site uses <Link>.
-   */
-  const setActivePage = (page: string) => {
-    navigate(PAGE_PATHS[page] ?? '/');
-  };
-
-  const navigateToProduct = (productId: string) => {
-    navigate(`/product/${productId}`);
-  };
-
-  const navigateToRecipe = (recipeId: string) => {
-    navigate(`/recipes/${recipeId}`);
   };
 
   const addToCart = (product: Product, selectedWeight: string, quantity = 1) => {
@@ -243,9 +212,6 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
         couponCode,
         appliedDiscount,
         toastMessage,
-        setActivePage,
-        navigateToProduct,
-        navigateToRecipe,
         addToCart,
         updateCartQuantity,
         removeFromCart,

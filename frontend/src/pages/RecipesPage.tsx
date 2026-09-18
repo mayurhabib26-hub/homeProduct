@@ -8,7 +8,7 @@ import { Clock, ChefHat, Users, ArrowRight, ShoppingBag, Check, X, Sparkles } fr
 import { ScrollReveal } from '../components/ScrollReveal';
 
 export const RecipesPage: React.FC = () => {
-  const { navigateToProduct, addToCart } = useShop();
+  const { addToCart } = useShop();
   const { slug: selectedRecipeId } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const [activeFilter, setActiveFilter] = useState<string>('all');

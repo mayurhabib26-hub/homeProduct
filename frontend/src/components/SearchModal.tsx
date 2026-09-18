@@ -4,7 +4,7 @@ import { PRODUCTS } from '../data/products';
 import { RECIPES } from '../data/recipes';
 import { Search, X, ArrowRight, Sparkles } from 'lucide-react';
 import { formatPaise } from '@sv/shared';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 export const SearchModal: React.FC = () => {
   const {
@@ -12,8 +12,6 @@ export const SearchModal: React.FC = () => {
     setIsSearchOpen,
     searchQuery,
     setSearchQuery,
-    navigateToProduct,
-    navigateToRecipe,
   } = useShop();
   const navigate = useNavigate();
 
@@ -126,12 +124,10 @@ export const SearchModal: React.FC = () => {
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 {matchedProducts.map((p) => (
-                  <div
+                  <Link
                     key={p.id}
-                    onClick={() => {
-                      setIsSearchOpen(false);
-                      navigateToProduct(p.id);
-                    }}
+                    to={`/product/${p.id}`}
+                    onClick={() => setIsSearchOpen(false)}
                     className="flex items-center gap-3 p-2.5 rounded-lg bg-white border border-[#EBD9BC] hover:border-[#87380F] cursor-pointer transition-all hover:shadow-xs group"
                   >
                     <img
@@ -150,7 +146,7 @@ export const SearchModal: React.FC = () => {
                         From {formatPaise(p.variants[0].pricePaise)}
                       </span>
                     </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             )}
@@ -166,12 +162,10 @@ export const SearchModal: React.FC = () => {
             ) : (
               <div className="space-y-2">
                 {matchedRecipes.map((r) => (
-                  <div
+                  <Link
                     key={r.id}
-                    onClick={() => {
-                      setIsSearchOpen(false);
-                      navigateToRecipe(r.id);
-                    }}
+                    to={`/recipes/${r.id}`}
+                    onClick={() => setIsSearchOpen(false)}
                     className="flex items-center justify-between p-3 rounded-lg bg-white border border-[#EBD9BC] hover:border-[#87380F] cursor-pointer transition-colors group"
                   >
                     <div className="flex items-center gap-3">
@@ -190,7 +184,7 @@ export const SearchModal: React.FC = () => {
                       </div>
                     </div>
                     <ArrowRight size={15} className="text-[#87380F] opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </div>
+                  </Link>
                 ))}
               </div>
             )}

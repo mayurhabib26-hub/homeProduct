@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import {Product, formatPaise } from '@sv/shared';
 import { useShop } from '../context/ShopContext';
 import { Star, Heart, ShoppingBag, ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 interface ProductCardProps {
   product: Product;
@@ -10,7 +11,7 @@ interface ProductCardProps {
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product, className = '' }) => {
-  const { addToCart, navigateToProduct, toggleWishlist, isWishlisted } = useShop();
+  const { addToCart, toggleWishlist, isWishlisted } = useShop();
   const [selectedWeight, setSelectedWeight] = useState(product.variants[0]?.weight || '100g');
 
   const currentVariant =
@@ -27,15 +28,16 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, className = '
       className={`group bg-[#FAF6F0] rounded-xl overflow-hidden border border-[#EBD9BC] hover:border-[#B69A55]/60 transition-all duration-300 hover:shadow-md flex flex-col justify-between ${className}`}
     >
       {/* Product Image Area */}
-      <div className="relative aspect-[4/3] sm:aspect-square overflow-hidden bg-[#F3E7D0]/40 cursor-pointer">
-        <img
-          src={product.image}
-          alt={product.name}
-          className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500 ease-out"
-          onClick={() => navigateToProduct(product.id)}
-          loading="lazy"
-          referrerPolicy="no-referrer"
-        />
+      <div className="relative aspect-[4/3] sm:aspect-square overflow-hidden bg-[#F3E7D0]/40">
+        <Link to={`/product/${product.id}`} className="block w-full h-full" tabIndex={-1} aria-hidden="true">
+          <img
+            src={product.image}
+            alt={product.name}
+            className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500 ease-out"
+            loading="lazy"
+            referrerPolicy="no-referrer"
+          />
+        </Link>
 
         {/* Badge */}
         {product.badge && (
@@ -81,11 +83,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, className = '
           </div>
 
           {/* Title */}
-          <h3
-            onClick={() => navigateToProduct(product.id)}
-            className="font-serif text-lg sm:text-xl font-bold text-[#483828] hover:text-[#87380F] transition-colors cursor-pointer leading-tight line-clamp-1"
-          >
-            {product.name}
+          <h3 className="font-serif text-lg sm:text-xl font-bold leading-tight line-clamp-1">
+            <Link
+              to={`/product/${product.id}`}
+              className="text-[#483828] hover:text-[#87380F] transition-colors"
+            >
+              {product.name}
+            </Link>
           </h3>
 
           {product.regionalName && (
