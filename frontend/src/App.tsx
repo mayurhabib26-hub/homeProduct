@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ShopProvider } from './context/ShopContext';
@@ -29,6 +29,17 @@ import { ContactPage } from './pages/ContactPage';
 import { CartPage } from './pages/CartPage';
 import { CheckoutPage } from './pages/CheckoutPage';
 import { OrderConfirmationPage, TrackOrderPage } from './pages/OrderConfirmationPage';
+
+/**
+ * Admin is lazy-loaded so none of it ships to customers. It is a large share
+ * of the code and none of the storefront audience. See docs/ADMIN.md §1.
+ */
+const AdminLayout = lazy(() => import('./pages/admin/AdminLayout').then((m) => ({ default: m.AdminLayout })));
+const AdminLoginPage = lazy(() => import('./pages/admin/AdminLoginPage').then((m) => ({ default: m.AdminLoginPage })));
+const AdminDashboardPage = lazy(() => import('./pages/admin/AdminDashboardPage').then((m) => ({ default: m.AdminDashboardPage })));
+const AdminOrdersPage = lazy(() => import('./pages/admin/AdminOrdersPage').then((m) => ({ default: m.AdminOrdersPage })));
+const AdminOrderDetailPage = lazy(() => import('./pages/admin/AdminOrdersPage').then((m) => ({ default: m.AdminOrderDetailPage })));
+const AdminInventoryPage = lazy(() => import('./pages/admin/AdminInventoryPage').then((m) => ({ default: m.AdminInventoryPage })));
 
 const AppContent: React.FC = () => {
   const location = useLocation();
@@ -95,13 +106,50 @@ const queryClient = new QueryClient({
   },
 });
 
+const AdminFallback = () => (
+  <div className="min-h-screen grid place-items-center text-sm text-[#483828]/60" role="status">
+    Loading…
+  </div>
+);
+
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <ShopProvider>
-          <AppContent />
-        </ShopProvider>
+        <Routes>
+          {/* Admin sits outside the storefront chrome: no navbar, footer or
+              bottom nav, and no ShopProvider — it is a different product. */}
+          <Route
+            path="/admin/login"
+            element={
+              <Suspense fallback={<AdminFallback />}>
+                <AdminLoginPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <Suspense fallback={<AdminFallback />}>
+                <AdminLayout />
+              </Suspense>
+            }
+          >
+            <Route index element={<Suspense fallback={<AdminFallback />}><AdminDashboardPage /></Suspense>} />
+            <Route path="orders" element={<Suspense fallback={<AdminFallback />}><AdminOrdersPage /></Suspense>} />
+            <Route path="orders/:orderNumber" element={<Suspense fallback={<AdminFallback />}><AdminOrderDetailPage /></Suspense>} />
+            <Route path="inventory" element={<Suspense fallback={<AdminFallback />}><AdminInventoryPage /></Suspense>} />
+          </Route>
+
+          <Route
+            path="*"
+            element={
+              <ShopProvider>
+                <AppContent />
+              </ShopProvider>
+            }
+          />
+        </Routes>
       </BrowserRouter>
     </QueryClientProvider>
   );

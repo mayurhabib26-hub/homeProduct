@@ -38,6 +38,7 @@ jobs:
           npm run test:pricing -w backend
           npm run test:payments -w backend
           npm run test:status -w backend
+          npm run test:auth -w backend
 
       # Guards the invariant that matters most. Against PGlite this proves the
       # arithmetic, not contention — see the header in concurrency.test.ts.

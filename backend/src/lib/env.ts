@@ -6,6 +6,7 @@
  */
 import 'dotenv/config';
 import { z } from 'zod';
+import { randomBytes } from 'node:crypto';
 
 const schema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
@@ -24,6 +25,13 @@ const schema = z.object({
   RAZORPAY_KEY_ID: z.string().optional(),
   RAZORPAY_KEY_SECRET: z.string().optional(),
   RAZORPAY_WEBHOOK_SECRET: z.string().optional(),
+
+  /**
+   * Admin session signing. Required in production — a default here would be
+   * a published secret, which is worse than no secret at all.
+   */
+  JWT_SECRET: z.string().min(32).optional(),
+  ADMIN_SESSION_HOURS: z.coerce.number().int().positive().default(8),
 });
 
 const parsed = schema.safeParse(process.env);
@@ -45,3 +53,15 @@ export const razorpayConfigured = Boolean(env.RAZORPAY_KEY_ID && env.RAZORPAY_KE
 if (isProduction && !razorpayConfigured) {
   console.warn('[env] Razorpay is not configured — the shop will accept COD orders only.');
 }
+
+if (isProduction && !env.JWT_SECRET) {
+  console.error('[env] JWT_SECRET is required in production. Refusing to start.');
+  process.exit(1);
+}
+
+/**
+ * Development falls back to a random per-boot secret, so sessions simply do
+ * not survive a restart. That is the right failure: a hardcoded development
+ * secret is one copy-paste away from production.
+ */
+export const jwtSecret = env.JWT_SECRET ?? randomBytes(48).toString('hex');

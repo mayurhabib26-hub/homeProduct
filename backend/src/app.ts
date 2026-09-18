@@ -1,10 +1,14 @@
 import express from 'express';
+import cookieParser from 'cookie-parser';
+import helmet from 'helmet';
 import { pinoHttp } from 'pino-http';
 import { logger } from './lib/logger.js';
 import { requestId } from './middleware/request-id.js';
 import { errorHandler, notFoundHandler } from './middleware/error-handler.js';
 import { catalogueRouter } from './routes/catalogue.js';
 import { ordersRouter } from './routes/orders.js';
+import { adminAuthRouter } from './routes/admin-auth.js';
+import { adminRouter } from './routes/admin.js';
 import { webhooksRouter } from './routes/webhooks.js';
 import { getDb } from './db/client.js';
 import { sql } from 'drizzle-orm';
@@ -13,6 +17,10 @@ export function createApp() {
   const app = express();
 
   app.disable('x-powered-by');
+  // CSP is set at the edge for the HTML; here helmet covers the API's own
+  // headers. See docs/SECURITY.md §3.10.
+  app.use(helmet({ contentSecurityPolicy: false }));
+  app.use(cookieParser());
   app.use(requestId);
     // genReqId reuses the id set by our own middleware so the HTTP log line
   // and every application log line for a request share one id.
@@ -46,6 +54,8 @@ export function createApp() {
 
   app.use('/api', catalogueRouter);
   app.use('/api', ordersRouter);
+  app.use('/api', adminAuthRouter);
+  app.use('/api', adminRouter);
 
   app.use(notFoundHandler);
   app.use(errorHandler);

@@ -273,3 +273,83 @@ export const webhookEvents = pgTable(
  * Human-readable order numbers come from order_number_seq, created in
  * migration 0001. Sequence, never randomness — see docs/COMPLIANCE.md §4.
  */
+
+/* ------------------------------------------------------------------ *
+ * Admin — Phase 3
+ * ------------------------------------------------------------------ */
+
+export const adminUsers = pgTable(
+  'admin_users',
+  {
+    id: bigint('id', { mode: 'number' }).primaryKey().generatedAlwaysAsIdentity(),
+    email: text('email').notNull(),
+    /** bcrypt, cost 12. Never anything reversible. */
+    passwordHash: text('password_hash').notNull(),
+    /**
+     * 'owner' can refund, reprice, manage coupons and export customer data.
+     * 'staff' cannot. Not distrust — limiting the blast radius of a
+     * compromised or mistaken account. See docs/ADMIN.md §3.
+     */
+    role: text('role').notNull().default('staff'),
+    totpSecret: text('totp_secret'),
+    active: boolean('active').notNull().default(true),
+    lastLoginAt: timestamp('last_login_at', { withTimezone: true }),
+    failedAttempts: integer('failed_attempts').notNull().default(0),
+    lockedUntil: timestamp('locked_until', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex('admin_users_email_idx').on(t.email)],
+);
+
+/**
+ * Refresh tokens are stored so a session can actually be revoked.
+ * A purely stateless design cannot log anyone out.
+ */
+export const adminSessions = pgTable(
+  'admin_sessions',
+  {
+    id: bigint('id', { mode: 'number' }).primaryKey().generatedAlwaysAsIdentity(),
+    adminUserId: bigint('admin_user_id', { mode: 'number' })
+      .notNull()
+      .references(() => adminUsers.id, { onDelete: 'cascade' }),
+    /** The token is hashed: a database dump must not hand over live sessions. */
+    tokenHash: text('token_hash').notNull(),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    revokedAt: timestamp('revoked_at', { withTimezone: true }),
+    ip: text('ip'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex('admin_sessions_token_idx').on(t.tokenHash),
+    index('admin_sessions_user_idx').on(t.adminUserId),
+  ],
+);
+
+/**
+ * Every admin mutation, with before and after.
+ *
+ * When a price is wrong or stock vanished, this is the only thing that
+ * answers "who changed what, and when". Cheap to write, impossible to
+ * reconstruct after the fact. See docs/DATABASE.md §2.
+ */
+export const auditLog = pgTable(
+  'audit_log',
+  {
+    id: bigint('id', { mode: 'number' }).primaryKey().generatedAlwaysAsIdentity(),
+    adminUserId: bigint('admin_user_id', { mode: 'number' }).references(() => adminUsers.id, {
+      onDelete: 'set null',
+    }),
+    adminEmail: text('admin_email'),
+    action: text('action').notNull(),
+    entityType: text('entity_type').notNull(),
+    entityId: text('entity_id'),
+    before: jsonb('before'),
+    after: jsonb('after'),
+    ip: text('ip'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    index('audit_log_entity_idx').on(t.entityType, t.entityId),
+    index('audit_log_created_idx').on(t.createdAt),
+  ],
+);

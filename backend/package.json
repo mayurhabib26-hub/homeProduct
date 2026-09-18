@@ -20,22 +20,31 @@
     "test:concurrency": "tsx src/services/concurrency.test.ts",
     "test:status": "tsx src/services/order-status.test.ts",
     "job:reconcile": "tsx src/jobs/reconcile-cli.ts",
-    "test:reconcile": "tsx src/jobs/reconcile.test.ts"
+    "test:reconcile": "tsx src/jobs/reconcile.test.ts",
+    "admin:create": "tsx src/db/create-admin.ts",
+    "test:auth": "tsx src/services/admin-auth.test.ts"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.5.8",
     "@sv/shared": "*",
+    "bcryptjs": "^3.0.3",
+    "cookie-parser": "^1.4.7",
     "dotenv": "^17.2.3",
     "drizzle-orm": "^0.45.2",
     "express": "^4.21.2",
     "express-rate-limit": "^8.7.0",
+    "helmet": "^8.3.0",
+    "jsonwebtoken": "^9.0.3",
     "pino": "^10.3.1",
     "pino-http": "^11.0.0",
     "postgres": "^3.4.9",
     "zod": "^4.6.5"
   },
   "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cookie-parser": "^1.4.10",
     "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^22.14.0",
     "drizzle-kit": "^0.31.10",
     "pino-pretty": "^13.1.3",
