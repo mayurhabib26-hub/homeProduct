@@ -4,12 +4,12 @@
 import 'dotenv/config';
 import { migrate as migratePg } from 'drizzle-orm/postgres-js/migrator';
 import { migrate as migratePglite } from 'drizzle-orm/pglite/migrator';
-import { getDb } from './client.ts';
+import { getDb } from './client.js';
 
 const db = getDb();
 const isPglite = !process.env.DATABASE_URL || process.env.DATABASE_URL.startsWith('pglite:');
-const run = isPglite ? (migratePglite as typeof migratePg) : migratePg;
+const run = isPglite ? (migratePglite as unknown as typeof migratePg) : migratePg;
 
-await run(db as never, { migrationsFolder: './drizzle' });
+await run(db, { migrationsFolder: './drizzle' });
 console.log(`migrations applied (${isPglite ? 'pglite' : 'postgres'})`);
 process.exit(0);

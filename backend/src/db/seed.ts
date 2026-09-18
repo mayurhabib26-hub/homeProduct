@@ -7,11 +7,11 @@
  */
 import 'dotenv/config';
 import { sql } from 'drizzle-orm';
-import { getDb } from './client.ts';
-import { products, variants, recipes, reviews } from './schema.ts';
-import { PRODUCTS } from './seed-data/products.ts';
-import { RECIPES } from './seed-data/recipes.ts';
-import { CLIENT_REVIEWS } from './seed-data/siteData.ts';
+import { getDb } from './client.js';
+import { products, variants, recipes, reviews } from './schema.js';
+import { PRODUCTS } from './seed-data/products.js';
+import { RECIPES } from './seed-data/recipes.js';
+import { CLIENT_REVIEWS } from './seed-data/siteData.js';
 
 /**
  * Opening stock per variant.
@@ -113,7 +113,7 @@ const counted = (await db.execute(sql`select
   (select count(*) from ${products})::int products,
   (select count(*) from ${variants})::int variants,
   (select count(*) from ${recipes})::int  recipes,
-  (select count(*) from ${reviews})::int  reviews`)) as unknown as { rows: unknown[] };
+  (select count(*) from ${reviews})::int  reviews`)) as unknown as Array<Record<string, number>>;
 
-console.log('seeded', counted.rows[0], `(${variantCount} variants inserted)`);
+console.log('seeded', counted[0] ?? counted, `(${variantCount} variants inserted)`);
 process.exit(0);

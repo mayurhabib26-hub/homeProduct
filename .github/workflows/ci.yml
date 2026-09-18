@@ -26,6 +26,13 @@ jobs:
       - name: Unit checks
         run: node --experimental-strip-types shared/src/money.test.ts
 
+      # PGlite needs no service container — it is Postgres in-process.
+      - name: Database migrate, seed and constraint checks
+        run: |
+          npm run db:migrate -w backend
+          npm run db:seed -w backend
+          npm run db:test -w backend
+
       - name: Build
         run: npm run build
 

@@ -1,7 +1,7 @@
 /** Ad-hoc seed verification. Run: npm run db:verify -w backend */
 import 'dotenv/config';
 import { sql } from 'drizzle-orm';
-import { getDb } from './client.ts';
+import { getDb } from './client.js';
 
 const db = getDb();
 const q = async (label: string, stmt: string) => {

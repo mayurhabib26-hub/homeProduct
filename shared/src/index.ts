@@ -4,5 +4,5 @@
 // no process.env. If it cannot be imported by both a browser bundle and a
 // Node process, it does not belong here. See docs/ARCHITECTURE.md §3.3.
 
-export * from './types';
-export * from './money';
+export * from './types.js';
+export * from './money.js';

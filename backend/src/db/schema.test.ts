@@ -6,7 +6,7 @@
  * database: npm run db:test -w backend
  */
 import { sql } from 'drizzle-orm';
-import { getDb } from './client.ts';
+import { getDb } from './client.js';
 const db = getDb();
 try {
   await db.execute(sql`update variants set stock_qty = -1 where id = 1`);

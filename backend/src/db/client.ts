@@ -15,11 +15,16 @@ import { drizzle as drizzlePg } from 'drizzle-orm/postgres-js';
 import { drizzle as drizzlePglite } from 'drizzle-orm/pglite';
 import { PGlite } from '@electric-sql/pglite';
 import postgres from 'postgres';
-import * as schema from './schema.ts';
+import * as schema from './schema.js';
 
-export type Database =
-  | ReturnType<typeof drizzlePg<typeof schema>>
-  | ReturnType<typeof drizzlePglite<typeof schema>>;
+/**
+ * One concrete type rather than a union of both drivers.
+ *
+ * A union collapses the overloads on .execute() and friends, so every call
+ * site would need a cast. The two drivers are API-compatible across
+ * everything this codebase uses, so the cast happens once, here.
+ */
+export type Database = ReturnType<typeof drizzlePg<typeof schema>>;
 
 let db: Database | null = null;
 
@@ -36,7 +41,7 @@ export function getDb(): Database {
     db = drizzlePg(sql, { schema });
   } else {
     const dir = url?.replace('pglite:', '') || './.pglite';
-    db = drizzlePglite(new PGlite(dir), { schema });
+    db = drizzlePglite(new PGlite(dir), { schema }) as unknown as Database;
   }
 
   return db;
