@@ -61,21 +61,24 @@ This project follows the global frontend standards. Specifically:
 - Navigation uses `<Link>`, not a `<button>` with an onClick — crawlers,
   middle-click, and screen readers all depend on a real `<a href>`
 
-## Known issues in the current code
+## Status
 
-Being fixed in Phase 0 ([docs/MIGRATION.md](./docs/MIGRATION.md)):
+Phases 0-2 are largely done. The catalogue comes from Postgres, orders are
+priced and taken server-side, and COD works end to end. Every known issue
+from the original storefront is closed.
 
-- `navigateToProduct` sets `'product-detail'` but `App.tsx` matches
-  `'product'` — the product detail page is unreachable and falls through to
-  the homepage
-- `ShopContext` seeds a fake cart item and two fake wishlist entries
-- The cart serialises whole product objects into `localStorage`, so prices go
-  stale permanently
-- Coupon codes are hardcoded in the frontend bundle
-- `CheckoutPage` fakes an order with `Math.random()` — no payment, nothing
-  persisted
-- Every product image exists twice (`public/images/` and `src/assets/images/`)
-- `@google/genai` is a dependency with zero imports
+**Two things gate release, and neither is code:**
+
+1. **No live Razorpay call has ever run.** Signature verification is fully
+   tested, but order creation against their API needs keys, which needs KYC.
+2. **The concurrency test has never run against a real Postgres.** PGlite is
+   single-connection, so it proves the arithmetic and not contention. The
+   commands are in the header of `backend/src/services/concurrency.test.ts`.
+   A pass on PGlite is not a pass.
+
+Local development uses PGlite when `DATABASE_URL` is unset — real Postgres
+compiled to WASM, but **single-process**: stop the API before `db:migrate` or
+`db:seed`, or the seed writes somewhere the server cannot see.
 
 ## Before you change auth code
 

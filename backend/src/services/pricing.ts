@@ -14,6 +14,16 @@ export const SHIPPING_FEE_PAISE = rupees(60);
 /** Charged on COD to nudge prepaid; RTO costs ~9 points of margin. */
 export const COD_HANDLING_PAISE = rupees(30);
 
+/**
+ * Above this, prepaid only.
+ *
+ * COD return-to-origin runs 15-30%, and each RTO costs two-way shipping on a
+ * sale that never happened. The bigger the basket, the worse that is. OTP
+ * verification is the stronger filter but needs a message provider — see
+ * docs/AUTH.md §8. This cap works today.
+ */
+export const COD_MAX_ORDER_PAISE = rupees(2000);
+
 export interface PricedLine {
   variantId: number;
   productId: number;

@@ -10,9 +10,14 @@ import { and, eq, inArray, sql } from 'drizzle-orm';
 import { getDb } from '../db/client.js';
 import { orders, orderItems, variants, products, coupons } from '../db/schema.js';
 import { decrementStock, restoreStock, type StockLine } from './stock.js';
-import { computeTotals, formatOrderNumber, type CouponRule, type PricedLine } from './pricing.js';
+import {
+  computeTotals, formatOrderNumber, COD_MAX_ORDER_PAISE,
+  type CouponRule, type PricedLine,
+} from './pricing.js';
 import { ApiError, notFound } from '../lib/errors.js';
 import { logger } from '../lib/logger.js';
+import { createRazorpayOrder } from '../lib/razorpay.js';
+import { razorpayConfigured } from '../lib/env.js';
 
 export interface OrderRequestLine {
   productSlug: string;
@@ -148,6 +153,14 @@ export async function createOrder(input: CreateOrderInput) {
   const coupon = await resolveCoupon(input.couponCode);
   const totals = computeTotals(lines, coupon, input.paymentMethod);
 
+  if (input.paymentMethod === 'cod' && totals.totalPaise > COD_MAX_ORDER_PAISE) {
+    throw new ApiError(
+      422,
+      'COD_LIMIT_EXCEEDED',
+      `Cash on Delivery is available up to ₹${COD_MAX_ORDER_PAISE / 100}. Please choose an online payment method for this order.`,
+    );
+  }
+
   const stockLines: StockLine[] = lines.map((l) => ({ variantId: l.variantId, quantity: l.quantity }));
 
   const created = await db.transaction(async (tx) => {
@@ -218,6 +231,22 @@ export async function createOrder(input: CreateOrderInput) {
     { orderNumber: created.orderNumber, method: created.paymentMethod, totalPaise: created.totalPaise },
     'order created',
   );
+
+  // Online payment needs a Razorpay order to hand the checkout widget. This
+  // happens after the local transaction commits: a provider timeout must not
+  // roll back an order we have already taken stock for — the stale-order
+  // sweep releases it instead.
+  if (created.paymentMethod !== 'cod' && razorpayConfigured) {
+    try {
+      const rp = await createRazorpayOrder(created.totalPaise, created.orderNumber);
+      await db.update(orders).set({ razorpayOrderId: rp.id }).where(eq(orders.id, created.id));
+      return { ...summarise(created), razorpayOrderId: rp.id };
+    } catch (err) {
+      logger.error({ err, orderNumber: created.orderNumber }, 'could not create razorpay order');
+      await failOrder(created.orderNumber, 'razorpay order creation failed');
+      throw err;
+    }
+  }
 
   return summarise(created);
 }

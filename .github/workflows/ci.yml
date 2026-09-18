@@ -33,10 +33,11 @@ jobs:
           npm run db:seed -w backend
           npm run db:test -w backend
 
-      - name: Pricing and signature verification
+      - name: Pricing, signatures and state machine
         run: |
           npm run test:pricing -w backend
           npm run test:payments -w backend
+          npm run test:status -w backend
 
       # Guards the invariant that matters most. Against PGlite this proves the
       # arithmetic, not contention — see the header in concurrency.test.ts.
@@ -44,6 +45,7 @@ jobs:
         run: |
           npm run test:stock -w backend
           npm run test:concurrency -w backend
+          npm run test:reconcile -w backend
 
       - name: Build
         run: npm run build

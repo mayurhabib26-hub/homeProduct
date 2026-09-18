@@ -8,8 +8,11 @@ import { asyncRoute } from '../middleware/error-handler.js';
 import { badRequest } from '../lib/errors.js';
 import { env } from '../lib/env.js';
 import * as catalogue from '../services/catalogue.js';
+import { catalogueLimiter } from '../middleware/rate-limit.js';
 
 export const catalogueRouter = Router();
+
+catalogueRouter.use(catalogueLimiter);
 
 /**
  * Browsing tolerates staleness — the CDN already serves this with

@@ -4,6 +4,9 @@ import { asyncRoute } from '../middleware/error-handler.js';
 import { badRequest, ApiError } from '../lib/errors.js';
 import { env, razorpayConfigured } from '../lib/env.js';
 import * as ordersService from '../services/orders.js';
+import {
+  orderLimiter, paymentLimiter, couponLimiter, trackingLimiter,
+} from '../middleware/rate-limit.js';
 import { settlePayment, verifyCheckoutSignature } from '../services/payments.js';
 
 export const ordersRouter = Router();
@@ -46,6 +49,7 @@ const createBody = z
 
 ordersRouter.post(
   '/orders',
+  orderLimiter,
   asyncRoute(async (req, res) => {
     const key = req.header('Idempotency-Key');
     if (!key || key.length < 8 || key.length > 200) {
@@ -73,7 +77,12 @@ ordersRouter.post(
         payment:
           order.paymentMethod === 'cod'
             ? null
-            : { provider: 'razorpay', keyId: env.RAZORPAY_KEY_ID, amountPaise: order.totalPaise },
+            : {
+                provider: 'razorpay',
+                keyId: env.RAZORPAY_KEY_ID,
+                razorpayOrderId: (order as { razorpayOrderId?: string }).razorpayOrderId,
+                amountPaise: order.totalPaise,
+              },
       },
     });
   }),
@@ -97,6 +106,7 @@ const couponBody = z
 
 ordersRouter.post(
   '/coupons/validate',
+  couponLimiter,
   asyncRoute(async (req, res) => {
     const parsed = couponBody.safeParse(req.body);
     if (!parsed.success) throw badRequest('Invalid coupon request.');
@@ -118,6 +128,7 @@ const verifyBody = z
 
 ordersRouter.post(
   '/payments/verify',
+  paymentLimiter,
   asyncRoute(async (req, res) => {
     const parsed = verifyBody.safeParse(req.body);
     if (!parsed.success) throw badRequest('Invalid payment confirmation.');
@@ -145,6 +156,7 @@ const trackQuery = z.object({ phone }).strict();
 
 ordersRouter.get(
   '/orders/:orderNumber',
+  trackingLimiter,
   asyncRoute(async (req, res) => {
     const parsed = trackQuery.safeParse(req.query);
     // The order number alone is not an authenticator — without this the
