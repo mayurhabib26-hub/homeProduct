@@ -9,7 +9,7 @@ import { asyncRoute } from '../middleware/error-handler.js';
 import { requireAdmin, requireRole } from '../middleware/admin-auth.js';
 import { badRequest, notFound } from '../lib/errors.js';
 import { getDb } from '../db/client.js';
-import { orders, orderItems, products, variants, coupons, reviews, auditLog } from '../db/schema.js';
+import { orders, orderItems, products, variants, coupons, reviews, auditLog, jobs } from '../db/schema.js';
 import { transitionOrder, allowedFrom, type OrderStatus } from '../services/order-status.js';
 import { refundOrder } from '../services/refunds.js';
 import { record } from '../services/admin-auth.js';
@@ -37,7 +37,9 @@ adminRouter.get(
         (select count(*)::int from variants where stock_qty <= 5 and active) as low_stock,
         (select count(*)::int from orders
            where payment_status = 'failed' and created_at >= ${since(1)}) as failed_payments,
-        (select count(*)::int from reviews where approved = false) as pending_reviews
+        (select count(*)::int from reviews where approved = false) as pending_reviews,
+        (select count(*)::int from jobs where status = 'pending') as jobs_pending,
+        (select count(*)::int from jobs where status = 'failed') as jobs_failed
     `)) as unknown as { rows?: Record<string, number>[] } | Record<string, number>[];
 
     const stats = (Array.isArray(rows) ? rows : (rows.rows ?? []))[0] ?? {};
@@ -49,8 +51,16 @@ adminRouter.get(
       .where(and(eq(orders.status, 'confirmed'), sql`${orders.createdAt} < now() - interval '48 hours'`))
       .limit(20);
 
+    // A job that exhausted its retries means a customer never got their
+    // confirmation. It belongs on the dashboard, not only in a log.
+    const failedJobs = await db
+      .select({ queue: jobs.queue, payload: jobs.payload, lastError: jobs.lastError })
+      .from(jobs)
+      .where(eq(jobs.status, 'failed'))
+      .limit(20);
+
     res.setHeader('Cache-Control', 'no-store');
-    res.json({ data: { ...stats, stuckOrders: stuck } });
+    res.json({ data: { ...stats, stuckOrders: stuck, failedJobs } });
   }),
 );
 

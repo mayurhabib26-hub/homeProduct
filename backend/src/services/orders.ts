@@ -17,6 +17,7 @@ import {
 import { ApiError, notFound } from '../lib/errors.js';
 import { logger } from '../lib/logger.js';
 import { createRazorpayOrder } from '../lib/razorpay.js';
+import { enqueue } from '../lib/queue.js';
 import { razorpayConfigured } from '../lib/env.js';
 
 export interface OrderRequestLine {
@@ -231,6 +232,15 @@ export async function createOrder(input: CreateOrderInput) {
     { orderNumber: created.orderNumber, method: created.paymentMethod, totalPaise: created.totalPaise },
     'order created',
   );
+
+  // Enqueued AFTER the transaction commits, never inside it: a rolled-back
+  // order must not have sent a confirmation. Deduped so a retry cannot
+  // double-send. See docs/ARCHITECTURE.md §4.2.
+  if (created.status === 'confirmed') {
+    await enqueue('notifications',
+      { type: 'order.confirmation', orderNumber: created.orderNumber },
+      { dedupeKey: `confirmation:${created.orderNumber}` });
+  }
 
   // Online payment needs a Razorpay order to hand the checkout widget. This
   // happens after the local transaction commits: a provider timeout must not

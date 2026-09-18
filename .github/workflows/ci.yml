@@ -48,6 +48,11 @@ jobs:
           npm run test:concurrency -w backend
           npm run test:reconcile -w backend
 
+      - name: Queue and fulfilment
+        run: |
+          npm run test:queue -w backend
+          npm run test:fulfilment -w backend
+
       - name: Build
         run: npm run build
 

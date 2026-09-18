@@ -55,6 +55,28 @@ export const AdminDashboardPage: React.FC = () => {
         <Tile label="Failed payments, 24h" value={String(s.failed_payments)} tone={s.failed_payments > 0 ? 'warn' : 'normal'} />
       </div>
 
+      {s.jobs_failed > 0 && (
+        <section className="bg-white border border-[#87380F]/30 rounded-lg">
+          <h2 className="px-4 py-3 border-b border-[#87380F]/20 text-sm font-semibold text-[#87380F]">
+            {s.jobs_failed} background {s.jobs_failed === 1 ? 'job' : 'jobs'} gave up
+          </h2>
+          <p className="px-4 pt-3 text-xs text-[#483828]/70">
+            These customers did not get their message. Fix the cause, then re-queue.
+          </p>
+          <ul className="divide-y divide-[#EBD9BC] mt-2">
+            {s.failedJobs.map((j, i) => (
+              <li key={i} className="px-4 py-2.5 text-xs">
+                <span className="font-semibold">{String(j.payload.type ?? j.queue)}</span>
+                {j.payload.orderNumber ? (
+                  <span className="font-mono text-[#87380F]"> {String(j.payload.orderNumber)}</span>
+                ) : null}
+                {j.lastError && <span className="block text-[#483828]/60 mt-0.5">{j.lastError}</span>}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       <section className="bg-white border border-[#EBD9BC] rounded-lg">
         <h2 className="px-4 py-3 border-b border-[#EBD9BC] text-sm font-semibold">
           Paid but unshipped for over 48 hours

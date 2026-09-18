@@ -353,3 +353,45 @@ export const auditLog = pgTable(
     index('audit_log_created_idx').on(t.createdAt),
   ],
 );
+
+/* ------------------------------------------------------------------ *
+ * Jobs — Phase 4
+ * ------------------------------------------------------------------ */
+
+/**
+ * A durable job queue in Postgres.
+ *
+ * Deliberately not Redis + BullMQ yet. At this order volume a job table with
+ * FOR UPDATE SKIP LOCKED gives the same guarantees — at-least-once delivery,
+ * retries with backoff, visibility into failures — without a second piece of
+ * infrastructure to run, monitor and pay for.
+ *
+ * Switch to BullMQ when Redis is already in the stack for catalogue caching
+ * and distributed rate limits (Stage 2), or when queue throughput genuinely
+ * needs it. The interface in lib/queue.ts is the seam. See docs/SCALING.md.
+ */
+export const jobs = pgTable(
+  'jobs',
+  {
+    id: bigint('id', { mode: 'number' }).primaryKey().generatedAlwaysAsIdentity(),
+    queue: text('queue').notNull(),
+    payload: jsonb('payload').notNull(),
+    status: text('status').notNull().default('pending'),
+    attempts: integer('attempts').notNull().default(0),
+    maxAttempts: integer('max_attempts').notNull().default(5),
+    /** When this job becomes eligible to run. Backoff moves it forward. */
+    runAfter: timestamp('run_after', { withTimezone: true }).notNull().defaultNow(),
+    lastError: text('last_error'),
+    /**
+     * Set by the producer for jobs that must not be enqueued twice —
+     * "confirmation for order X". UNIQUE, so a retry cannot double-send.
+     */
+    dedupeKey: text('dedupe_key'),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    completedAt: timestamp('completed_at', { withTimezone: true }),
+  },
+  (t) => [
+    index('jobs_claim_idx').on(t.status, t.runAfter),
+    uniqueIndex('jobs_dedupe_idx').on(t.dedupeKey),
+  ],
+);

@@ -8,6 +8,7 @@ import { asyncRoute } from '../middleware/error-handler.js';
 import { badRequest } from '../lib/errors.js';
 import { env } from '../lib/env.js';
 import * as catalogue from '../services/catalogue.js';
+import { checkServiceability } from '../lib/shiprocket.js';
 import { catalogueLimiter } from '../middleware/rate-limit.js';
 
 export const catalogueRouter = Router();
@@ -88,5 +89,22 @@ catalogueRouter.post(
     // Never cached: this endpoint exists precisely to refresh stale prices.
     res.setHeader('Cache-Control', 'no-store');
     res.json({ data: await catalogue.hydrateCart(parsed.data.items) });
+  }),
+);
+
+const pincodeParam = z.string().regex(/^\d{6}$/, 'Enter a 6-digit pincode');
+
+catalogueRouter.get(
+  '/shipping/serviceability/:pincode',
+  asyncRoute(async (req, res) => {
+    const parsed = pincodeParam.safeParse(req.params.pincode);
+    if (!parsed.success) throw badRequest('Enter a 6-digit pincode.');
+
+    const cod = req.query.cod === '1';
+    const result = await checkServiceability(parsed.data, 0.5, cod);
+
+    // Short cache: serviceability changes rarely, but not never.
+    res.setHeader('Cache-Control', 'public, s-maxage=3600');
+    res.json({ data: result });
   }),
 );

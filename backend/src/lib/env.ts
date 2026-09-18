@@ -39,6 +39,21 @@ const schema = z.object({
   R2_SECRET_ACCESS_KEY: z.string().optional(),
   R2_BUCKET: z.string().optional(),
   R2_PUBLIC_URL: z.string().url().optional(),
+
+  /** WhatsApp Cloud API, direct. Unset logs instead of sending. */
+  WHATSAPP_TOKEN: z.string().optional(),
+  WHATSAPP_PHONE_ID: z.string().optional(),
+
+  SMTP_URL: z.string().optional(),
+  EMAIL_FROM: z.string().optional(),
+
+  /** Shiprocket. Unset means shipments are recorded but not booked. */
+  SHIPROCKET_EMAIL: z.string().optional(),
+  SHIPROCKET_PASSWORD: z.string().optional(),
+  PICKUP_PINCODE: z.string().regex(/^\d{6}$/).default('560004'),
+
+  /** How many jobs a worker takes at once. */
+  WORKER_CONCURRENCY: z.coerce.number().int().positive().max(20).default(3),
 });
 
 const parsed = schema.safeParse(process.env);

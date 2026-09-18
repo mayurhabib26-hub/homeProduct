@@ -13,6 +13,7 @@ import { adminProductsRouter } from './routes/admin-products.js';
 import { webhooksRouter } from './routes/webhooks.js';
 import { getDb } from './db/client.js';
 import { sql } from 'drizzle-orm';
+import { queueDepth } from './lib/queue.js';
 
 export function createApp() {
   const app = express();
@@ -47,7 +48,8 @@ export function createApp() {
   app.get('/api/health/ready', async (_req, res) => {
     try {
       await getDb().execute(sql`select 1`);
-      res.json({ status: 'ready', database: 'ok' });
+      const queues = await queueDepth();
+      res.json({ status: 'ready', database: 'ok', queues });
     } catch {
       res.status(503).json({ status: 'not-ready', database: 'unreachable' });
     }

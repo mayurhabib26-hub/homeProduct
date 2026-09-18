@@ -13,6 +13,7 @@ import { orders, orderItems } from '../db/schema.js';
 import { restoreStock } from './stock.js';
 import { ApiError, notFound } from '../lib/errors.js';
 import { logger } from '../lib/logger.js';
+import { enqueue } from '../lib/queue.js';
 
 export type OrderStatus =
   | 'pending' | 'confirmed' | 'packed' | 'shipped'
@@ -105,6 +106,20 @@ export async function transitionOrder(
       })
       .where(eq(orders.id, order.id));
   });
+
+  if (to === 'packed') {
+    await enqueue('fulfilment',
+      { type: 'shipment.book', orderNumber },
+      { dedupeKey: `book:${orderNumber}` });
+  }
+
+  // Only when an AWB actually exists — a "dispatched" message with no
+  // tracking number is worse than no message.
+  if (to === 'shipped' && options.trackingNumber) {
+    await enqueue('notifications',
+      { type: 'order.shipped', orderNumber },
+      { dedupeKey: `shipped:${orderNumber}` });
+  }
 
   logger.info({ orderNumber, from, to, restocked: shouldRestock }, 'order status changed');
   return { orderNumber, status: to, restocked: shouldRestock, unchanged: false };

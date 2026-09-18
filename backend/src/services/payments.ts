@@ -13,6 +13,7 @@ import { orders, orderItems, webhookEvents } from '../db/schema.js';
 import { decrementStock } from './stock.js';
 import { ApiError } from '../lib/errors.js';
 import { logger } from '../lib/logger.js';
+import { enqueue } from '../lib/queue.js';
 
 /**
  * Constant-time comparison.
@@ -122,6 +123,10 @@ export async function settlePayment(input: SettleInput) {
       ?? (updated as { count?: number }).count ?? 0;
     if (affected !== 1) throw new ApiError(409, 'ALREADY_SETTLED', 'This payment was already recorded.');
   });
+
+  await enqueue('notifications',
+    { type: 'order.confirmation', orderNumber: order.orderNumber },
+    { dedupeKey: `confirmation:${order.orderNumber}` });
 
   logger.info({ orderNumber: order.orderNumber, source: input.source }, 'payment settled');
   return { orderNumber: order.orderNumber, alreadySettled: false };

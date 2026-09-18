@@ -50,7 +50,10 @@ export interface DashboardStats {
   orders_today: number; revenue_today: number; revenue_week: number;
   awaiting_packing: number; low_stock: number; failed_payments: number;
   pending_reviews: number;
+  jobs_pending: number;
+  jobs_failed: number;
   stuckOrders: { orderNumber: string; createdAt: string }[];
+  failedJobs: { queue: string; payload: Record<string, unknown>; lastError: string | null }[];
 }
 
 export interface AdminProduct {

@@ -154,11 +154,26 @@ a browser bundle and a Node process, it does not belong here.
 
 ### 3.4 Worker pool
 
-Same codebase as the backend, different entrypoint. Consumes BullMQ queues:
+Same codebase as the backend, different entrypoint.
+
+**The queue is a Postgres table, not Redis + BullMQ.** At this order volume a
+job table with `FOR UPDATE SKIP LOCKED` gives the same guarantees —
+at-least-once delivery, retries with exponential backoff, dedupe keys,
+visibility into failures — without a second piece of infrastructure to run,
+monitor and pay for. Adding Redis to send a few hundred messages a month is
+the wrong trade.
+
+**Switch to BullMQ when Redis is already in the stack** for catalogue caching
+and distributed rate limiting (Stage 2), or when queue throughput genuinely
+demands it. `backend/src/lib/queue.ts` is the seam: producers call
+`enqueue()`, the worker calls `claimJob()`, and nothing else knows what backs
+them.
+
+Queues consumed:
 
 | Queue | Jobs | Retry policy |
 |---|---|---|
-| `notifications` | order confirmation, shipment update, OTP | 5 attempts, exponential |
+| `notifications` | order confirmation, shipment update, OTP | 5 attempts, 1m→1h backoff |
 | `fulfilment` | create Shiprocket order, fetch AWB, poll tracking | 10 attempts, exponential to 1h |
 | `documents` | GST invoice PDF generation, upload to R2 | 3 attempts |
 | `maintenance` | cache warm, abandoned-cart sweep, stale-payment reconcile | cron, no retry |
