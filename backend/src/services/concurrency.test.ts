@@ -29,12 +29,13 @@
 import assert from 'node:assert/strict';
 import { sql } from 'drizzle-orm';
 import { getDb } from '../db/client.js';
+import { testVariantId } from '../db/test-helpers.js';
 import { decrementStock, InsufficientStockError } from './stock.js';
 
 const db = getDb();
+const VARIANT = await testVariantId();
 const STOCK = 50;
 const ATTEMPTS = 200;
-const VARIANT = 1;
 
 const stockOf = async (): Promise<number> => {
   const r = (await db.execute(sql`select stock_qty from variants where id = ${VARIANT}`)) as unknown as

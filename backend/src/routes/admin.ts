@@ -13,6 +13,7 @@ import { orders, orderItems, products, variants, coupons, reviews, auditLog, job
 import { transitionOrder, allowedFrom, type OrderStatus } from '../services/order-status.js';
 import { refundOrder } from '../services/refunds.js';
 import { record } from '../services/admin-auth.js';
+import { erasePersonalData, exportPersonalData } from '../services/consent.js';
 
 export const adminRouter = Router();
 
@@ -375,6 +376,42 @@ adminRouter.patch(
 
     await record(req.admin!, 'review.moderate', 'review', String(id), null, after, req.ip);
     res.json({ data: after });
+  }),
+);
+
+/* --- DPDP: subject access and erasure ----------------------------------- */
+
+const phoneParam = z.object({ phone: z.string().regex(/^[6-9]\d{9}$/) }).strict();
+
+adminRouter.get(
+  '/admin/customers/:phone/data',
+  requireRole('owner'),
+  asyncRoute(async (req, res) => {
+    const parsed = phoneParam.safeParse({ phone: req.params.phone });
+    if (!parsed.success) throw badRequest('Enter a 10-digit mobile number.');
+
+    // Exporting customer data is itself sensitive, so it is audited.
+    await record(req.admin!, 'customer.export', 'customer', parsed.data.phone, null, null, req.ip);
+    res.setHeader('Cache-Control', 'no-store');
+    res.json({ data: await exportPersonalData(parsed.data.phone) });
+  }),
+);
+
+adminRouter.post(
+  '/admin/customers/:phone/erase',
+  requireRole('owner'),
+  asyncRoute(async (req, res) => {
+    const parsed = phoneParam.safeParse({ phone: req.params.phone });
+    if (!parsed.success) throw badRequest('Enter a 10-digit mobile number.');
+
+    const body = z.object({ reason: z.string().min(3).max(300) }).strict().safeParse(req.body);
+    if (!body.success) throw badRequest('A reason is required for an erasure request.');
+
+    const result = await erasePersonalData(parsed.data.phone, body.data.reason);
+
+    // The audit entry records that an erasure happened, never what was erased.
+    await record(req.admin!, 'customer.erase', 'customer', 'redacted', null, result, req.ip);
+    res.json({ data: result });
   }),
 );
 

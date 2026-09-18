@@ -4,6 +4,7 @@ import { asyncRoute } from '../middleware/error-handler.js';
 import { badRequest, ApiError } from '../lib/errors.js';
 import { env, razorpayConfigured } from '../lib/env.js';
 import * as ordersService from '../services/orders.js';
+import { recordMarketingConsent } from '../services/consent.js';
 import {
   orderLimiter, paymentLimiter, couponLimiter, trackingLimiter,
 } from '../middleware/rate-limit.js';
@@ -41,6 +42,11 @@ const createBody = z
     couponCode: z.string().max(40).optional(),
     paymentMethod: z.enum(['upi', 'card', 'netbanking', 'cod']),
     notes: z.string().max(500).optional(),
+    /**
+     * Separate from the transaction and defaulted false. Consent bundled
+     * with placing an order is not consent. See docs/COMPLIANCE.md §6.
+     */
+    marketingConsent: z.boolean().default(false),
   })
   // .strict() so a client sending prices is rejected, not silently ignored.
   // An unexpected field is a signal, and silently dropping it hides an attack
@@ -69,7 +75,12 @@ ordersRouter.post(
       );
     }
 
-    const order = await ordersService.createOrder({ ...parsed.data, idempotencyKey: key });
+    const { marketingConsent: consent, ...orderInput } = parsed.data;
+    const order = await ordersService.createOrder({ ...orderInput, idempotencyKey: key });
+
+    // Recorded either way, with a timestamp: consent must be demonstrable,
+    // and so must its absence.
+    await recordMarketingConsent(parsed.data.customer.phone, parsed.data.customer.email, consent, 'checkout', req.ip);
 
     res.status(201).json({
       data: {

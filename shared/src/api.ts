@@ -14,6 +14,9 @@ export interface ApiVariant {
   weight: string;
   pricePaise: number;
   mrpPaise?: number;
+  /** Legal Metrology net quantity: 100 + 'g'. */
+  netQuantityValue?: string;
+  netQuantityUnit?: string;
   inStock: boolean;
   /** Derived server-side from a threshold — exact counts are never exposed. */
   lowStock: boolean;
@@ -61,6 +64,16 @@ export interface ProductDetail extends ProductSummary {
   gallery: string[];
   reviews: ApiReview[];
   related: ProductSummary[];
+  /** Legal Metrology declarations. See docs/COMPLIANCE.md §3. */
+  declarations: {
+    manufacturerName?: string;
+    manufacturerAddress?: string;
+    countryOfOrigin: string;
+    consumerCarePhone?: string;
+    consumerCareEmail?: string;
+    shelfLifeMonths?: number;
+    hsnCode?: string;
+  };
 }
 
 export interface ApiRecipe {
@@ -116,6 +129,8 @@ export interface CreateOrderRequest {
   couponCode?: string;
   paymentMethod: 'upi' | 'card' | 'netbanking' | 'cod';
   notes?: string;
+  /** Separate from the transaction, never pre-ticked. */
+  marketingConsent?: boolean;
 }
 
 export interface OrderTotals {

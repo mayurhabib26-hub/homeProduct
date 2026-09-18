@@ -53,6 +53,12 @@ jobs:
           npm run test:queue -w backend
           npm run test:fulfilment -w backend
 
+      - name: Compliance — GST, invoices, consent, seed safety
+        run: |
+          npm run test:gst -w backend
+          npm run test:consent -w backend
+          npm run test:seed-safety -w backend
+
       - name: Build
         run: npm run build
 

@@ -3,7 +3,7 @@ import { BrandLogo } from './BrandLogo';
 import { useShop } from '../context/ShopContext';
 import { Phone, Mail, MapPin, Instagram, Facebook, ShieldCheck, Truck, RefreshCw } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { telHref, formatPhoneForDisplay } from '../lib/contact';
+import { telHref, formatPhoneForDisplay, FSSAI_LICENCE, SELLER_LEGAL_NAME } from '../lib/contact';
 
 export const Footer: React.FC = () => {
   const { generateWhatsAppOrderUrl } = useShop();
@@ -248,6 +248,23 @@ export const Footer: React.FC = () => {
           </span>
         </div>
       </div>
-    </footer>
+          {/* FSSAI licence must appear on every page, not buried in an About
+          section. Legal declaration, not decoration. docs/COMPLIANCE.md §2 */}
+      <div className="border-t border-[#FAF6F0]/15 mt-8 pt-6 pb-8 px-4">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 text-[11px] text-[#EBD9BC]/70">
+          <p>
+            {SELLER_LEGAL_NAME} &middot; FSSAI Licence No.{' '}
+            <span className="font-mono">{FSSAI_LICENCE}</span>
+          </p>
+          <nav className="flex flex-wrap gap-x-4 gap-y-1" aria-label="Policies">
+            <Link to="/policies/shipping" className="hover:text-[#FAF6F0] transition-colors">Shipping</Link>
+            <Link to="/policies/refunds" className="hover:text-[#FAF6F0] transition-colors">Refunds &amp; Cancellation</Link>
+            <Link to="/policies/privacy" className="hover:text-[#FAF6F0] transition-colors">Privacy</Link>
+            <Link to="/policies/terms" className="hover:text-[#FAF6F0] transition-colors">Terms</Link>
+            <Link to="/policies/grievance" className="hover:text-[#FAF6F0] transition-colors">Grievances</Link>
+          </nav>
+        </div>
+      </div>
+</footer>
   );
 };

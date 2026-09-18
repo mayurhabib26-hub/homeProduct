@@ -63,11 +63,12 @@ This project follows the global frontend standards. Specifically:
 
 ## Status
 
-Phases 0-2 are largely done. The catalogue comes from Postgres, orders are
-priced and taken server-side, and COD works end to end. Every known issue
-from the original storefront is closed.
+Phases 0-5 are done. The catalogue comes from Postgres, orders are priced
+and taken server-side, COD works end to end, the admin panel runs the
+business, fulfilment is queued, and GST invoices are issued with gap-free
+sequential numbering.
 
-**Two things gate release, and neither is code:**
+**Three things gate release, and none of them is code:**
 
 1. **No live Razorpay call has ever run.** Signature verification is fully
    tested, but order creation against their API needs keys, which needs KYC.
@@ -75,6 +76,13 @@ from the original storefront is closed.
    single-connection, so it proves the arithmetic and not contention. The
    commands are in the header of `backend/src/services/concurrency.test.ts`.
    A pass on PGlite is not a pass.
+
+3. **Compliance values are not set, and invoicing refuses to run without
+   them.** SELLER_ADDRESS, SELLER_GSTIN, FSSAI_LICENCE, GRIEVANCE_OFFICER and
+   GRIEVANCE_EMAIL come from real registrations. The policy pages in
+   `frontend/src/content/policies.ts` are drafts and need a lawyer's review.
+   HSN codes and GST rates need confirming per product with a CA — every
+   product is currently seeded at 0910 / 5%, which is a guess.
 
 Local development uses PGlite when `DATABASE_URL` is unset — real Postgres
 compiled to WASM, but **single-process**: stop the API before `db:migrate` or
@@ -96,6 +104,18 @@ are easy to get wrong:
 [PWA.md §2](./docs/PWA.md) lists which routes may be cached. Order, payment,
 coupon-validation and cart-hydration routes are **network-only** — caching any
 of them silently undoes hard rule 1. There is no offline checkout, by design.
+
+## Before you change the seed
+
+`db:seed` refuses to run when orders exist (override with `FORCE_SEED=1`) and
+uses DELETE rather than TRUNCATE CASCADE. That is not stylistic: TRUNCATE
+CASCADE ignores `ON DELETE SET NULL` and wipes `order_items`, the snapshots
+that exist so an invoice survives a product being discontinued. It silently
+destroyed order history once already.
+
+Tests resolve variant ids through `db/test-helpers.ts` rather than assuming
+id 1 — identity no longer restarts, because restarting it required the
+TRUNCATE that caused the problem above.
 
 ## Before you change payment or stock code
 

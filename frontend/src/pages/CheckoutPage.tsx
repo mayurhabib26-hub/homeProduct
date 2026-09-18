@@ -35,6 +35,8 @@ export const CheckoutPage: React.FC = () => {
   const [upiOption, setUpiOption] = useState<'gpay' | 'phonepe' | 'qr'>('gpay');
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  // Never pre-ticked: consent bundled with a purchase is not consent.
+  const [marketingConsent, setMarketingConsent] = useState(false);
   const navigate = useNavigate();
 
   /**
@@ -96,6 +98,7 @@ export const CheckoutPage: React.FC = () => {
           },
           couponCode: couponCode || undefined,
           paymentMethod,
+          marketingConsent,
         },
         idempotencyKey.current,
       );
@@ -505,6 +508,20 @@ export const CheckoutPage: React.FC = () => {
                     </>
                   )}
                 </button>
+
+                <label className="flex items-start gap-2.5 mt-4 mb-1 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={marketingConsent}
+                    onChange={(e) => setMarketingConsent(e.target.checked)}
+                    className="mt-0.5 shrink-0"
+                  />
+                  <span className="text-[11px] text-[#483828]/75 leading-relaxed">
+                    Send me occasional offers and new product news on WhatsApp.
+                    Order updates are sent either way — this is only for
+                    promotions, and you can stop them any time.
+                  </span>
+                </label>
 
                 {submitError && (
                   <div

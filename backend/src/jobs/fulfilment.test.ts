@@ -9,6 +9,7 @@
 import assert from 'node:assert/strict';
 import { sql } from 'drizzle-orm';
 import { getDb } from '../db/client.js';
+import { testVariantId } from '../db/test-helpers.js';
 import { jobs } from '../db/schema.js';
 import { createOrder } from '../services/orders.js';
 import { transitionOrder } from '../services/order-status.js';
@@ -16,8 +17,9 @@ import { claimJob, completeJob, queueDepth } from '../lib/queue.js';
 import { runJob } from './handlers.js';
 
 const db = getDb();
+const VARIANT = await testVariantId();
 await db.execute(sql`delete from ${jobs}`);
-await db.execute(sql`update variants set stock_qty = 50 where id = 1`);
+await db.execute(sql`update variants set stock_qty = 50 where id = ${VARIANT}`);
 
 const drain = async () => {
   const done: string[] = [];
@@ -42,10 +44,15 @@ const order = await createOrder({
 
 assert.equal(order.status, 'confirmed');
 let depth = await queueDepth();
-assert.equal(depth.pending, 1, 'exactly one confirmation job queued');
+// A confirmed order queues both a confirmation and its tax invoice.
+assert.equal(depth.pending, 2, 'confirmation and invoice queued');
 
-const afterConfirm = await drain();
-assert.deepEqual(afterConfirm, ['order.confirmation'], 'the confirmation handler ran');
+const afterConfirm = (await drain()).sort();
+assert.deepEqual(
+  afterConfirm,
+  ['invoice.issue', 'order.confirmation'],
+  'both handlers ran',
+);
 
 /* --- packing books a shipment ------------------------------------------ */
 await transitionOrder(order.orderNumber, 'packed');
@@ -63,29 +70,30 @@ assert.ok(
   'no dispatch message without an AWB — "dispatched" with no tracking is worse than silence',
 );
 
-/* --- the same lifecycle point twice does not double-send --------------- */
+/* --- a repeated idempotency key queues nothing extra -------------------- */
 await db.execute(sql`delete from ${jobs}`);
-const repeat = await createOrder({
-  items: [{ productSlug: 'rasam-powder', weight: '100g', quantity: 1 }],
-  customer: { name: 'Dedupe Test', phone: '9876543210' },
-  shipping: { address: '9 Kitchen Lane', city: 'Bengaluru', state: 'Karnataka', pincode: '560004' },
-  paymentMethod: 'cod',
-  idempotencyKey: `dedupe-test-${Date.now()}`,
-});
-// Same idempotency key returns the same order; the confirmation must not be
-// queued a second time.
-await createOrder({
-  items: [{ productSlug: 'rasam-powder', weight: '100g', quantity: 1 }],
-  customer: { name: 'Dedupe Test', phone: '9876543210' },
-  shipping: { address: '9 Kitchen Lane', city: 'Bengaluru', state: 'Karnataka', pincode: '560004' },
-  paymentMethod: 'cod',
-  idempotencyKey: `dedupe-test-${Date.now()}`,
-}).catch(() => {});
 
+// The SAME key both times — that is the whole point. Generating a fresh one
+// per call creates two orders and tests nothing.
+const sharedKey = `dedupe-test-${Date.now()}`;
+const line = {
+  items: [{ productSlug: 'rasam-powder', weight: '100g', quantity: 1 }],
+  customer: { name: 'Dedupe Test', phone: '9876543210' },
+  shipping: { address: '9 Kitchen Lane', city: 'Bengaluru', state: 'Karnataka', pincode: '560004' },
+  paymentMethod: 'cod' as const,
+  idempotencyKey: sharedKey,
+};
+
+const repeat = await createOrder(line);
+const again = await createOrder(line);
+assert.equal(again.orderNumber, repeat.orderNumber, 'the same key returns the same order');
+
+// One confirmed order queues exactly two jobs: its confirmation and its
+// invoice. The repeat must add nothing.
 const finalDepth = await queueDepth();
-assert.ok((finalDepth.pending ?? 0) <= 2, 'no runaway duplicate confirmations');
+assert.equal(finalDepth.pending ?? 0, 2, 'a repeated order queues nothing extra');
 
 await db.execute(sql`delete from ${jobs}`);
-await db.execute(sql`update variants set stock_qty = 25 where id = 1`);
+await db.execute(sql`update variants set stock_qty = 25 where id = ${VARIANT}`);
 console.log(`fulfilment: order ${repeat.orderNumber} — wiring verified end to end`);
 process.exit(0);

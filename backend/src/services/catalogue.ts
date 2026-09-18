@@ -21,6 +21,8 @@ const toVariant = (v: typeof variants.$inferSelect) => ({
   weight: v.weight,
   pricePaise: v.pricePaise,
   mrpPaise: v.mrpPaise ?? undefined,
+  netQuantityValue: v.netQuantityValue ?? undefined,
+  netQuantityUnit: v.netQuantityUnit ?? undefined,
   inStock: v.stockQty > 0,
   lowStock: v.stockQty > 0 && v.stockQty <= LOW_STOCK_THRESHOLD,
 });
@@ -141,6 +143,21 @@ export async function getProduct(slug: string) {
     nutrition: product.nutrition,
     spiceLevel: product.spiceLevel,
     gallery: product.gallery,
+
+    /**
+     * Legal Metrology declarations, required on the listing page legibly and
+     * before purchase — not behind a tab that needs a click.
+     * See docs/COMPLIANCE.md §3.
+     */
+    declarations: {
+      manufacturerName: product.manufacturerName ?? undefined,
+      manufacturerAddress: product.manufacturerAddress ?? undefined,
+      countryOfOrigin: product.countryOfOrigin,
+      consumerCarePhone: product.consumerCarePhone ?? undefined,
+      consumerCareEmail: product.consumerCareEmail ?? undefined,
+      shelfLifeMonths: product.shelfLifeMonths ?? undefined,
+      hsnCode: product.hsnCode ?? undefined,
+    },
     reviews: approved.map((r) => ({
       id: r.id,
       name: r.name,

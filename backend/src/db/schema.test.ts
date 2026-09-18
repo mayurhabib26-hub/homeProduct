@@ -7,16 +7,18 @@
  */
 import { sql } from 'drizzle-orm';
 import { getDb } from './client.js';
+import { testVariantId } from './test-helpers.js';
 const db = getDb();
+const VARIANT = await testVariantId();
 try {
-  await db.execute(sql`update variants set stock_qty = -1 where id = 1`);
+  await db.execute(sql`update variants set stock_qty = -1 where id = ${VARIANT}`);
   console.log('FAIL — database accepted negative stock');
   process.exit(1);
 } catch (e) {
   console.log('OK   — database rejected negative stock:', (e as Error).message.split('\n')[0]);
 }
 try {
-  await db.execute(sql`update variants set price_paise = 0 where id = 1`);
+  await db.execute(sql`update variants set price_paise = 0 where id = ${VARIANT}`);
   console.log('FAIL — database accepted a zero price');
   process.exit(1);
 } catch (e) {

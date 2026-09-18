@@ -29,6 +29,7 @@ import { ContactPage } from './pages/ContactPage';
 import { CartPage } from './pages/CartPage';
 import { CheckoutPage } from './pages/CheckoutPage';
 import { OrderConfirmationPage, TrackOrderPage } from './pages/OrderConfirmationPage';
+import { PolicyPage } from './pages/PolicyPage';
 
 /**
  * Admin is lazy-loaded so none of it ships to customers. It is a large share
@@ -79,6 +80,7 @@ const AppContent: React.FC = () => {
             <Route path="/checkout" element={<CheckoutPage />} />
             <Route path="/order/:orderNumber" element={<OrderConfirmationPage />} />
             <Route path="/track" element={<TrackOrderPage />} />
+            <Route path="/policies/:slug" element={<PolicyPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </motion.main>

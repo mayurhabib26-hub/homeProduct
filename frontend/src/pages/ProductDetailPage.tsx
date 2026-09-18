@@ -6,6 +6,7 @@ import { formatPaise, type ProductDetail as ProductDetailData } from '@sv/shared
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useProduct } from '../api/queries';
 import { ErrorState } from '../components/QueryStates';
+import { ProductDeclarations } from '../components/ProductDeclarations';
 import {
   Star,
   ShoppingBag,
@@ -367,6 +368,14 @@ const ProductDetail: React.FC<{ product: ProductDetailData }> = ({ product }) =>
             </div>
           </div>
         </div>
+
+        {/* Legal Metrology declarations — inline and before the tabs, because
+            they must be readable before purchase rather than behind a click. */}
+        <ScrollReveal animation="fade-up">
+          <div className="mb-10">
+            <ProductDeclarations product={product} variant={currentVariant} />
+          </div>
+        </ScrollReveal>
 
         {/* Tabbed In-Depth Information Section */}
         <ScrollReveal animation="fade-up">

@@ -34,3 +34,27 @@ export const telHref = (): string => `tel:+${WHATSAPP_NUMBER}`;
 export function whatsappUrl(message: string): string {
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
 }
+
+/* --- Compliance values, rendered on the storefront ---------------------- */
+
+/**
+ * These are legal declarations. An unset value renders as a visible gap
+ * rather than an empty string, so a missing FSSAI number on a live site is
+ * obvious rather than invisible. See docs/COMPLIANCE.md §2.
+ */
+const declared = (v: string | undefined, label: string) => v?.trim() || `[${label} not set]`;
+
+export const SELLER_LEGAL_NAME = declared(import.meta.env.VITE_SELLER_LEGAL_NAME, 'business name');
+export const SELLER_ADDRESS = declared(import.meta.env.VITE_SELLER_ADDRESS, 'address');
+export const FSSAI_LICENCE = declared(import.meta.env.VITE_FSSAI_LICENCE, 'FSSAI licence');
+export const GRIEVANCE_OFFICER = declared(import.meta.env.VITE_GRIEVANCE_OFFICER, 'grievance officer');
+export const GRIEVANCE_EMAIL = declared(import.meta.env.VITE_GRIEVANCE_EMAIL, 'grievance email');
+
+/** Substitutes {{TOKENS}} in policy drafts with configured values. */
+export function fillPolicyText(text: string): string {
+  return text
+    .replace(/\{\{SELLER_LEGAL_NAME\}\}/g, SELLER_LEGAL_NAME)
+    .replace(/\{\{SELLER_ADDRESS\}\}/g, SELLER_ADDRESS)
+    .replace(/\{\{GRIEVANCE_OFFICER\}\}/g, GRIEVANCE_OFFICER)
+    .replace(/\{\{GRIEVANCE_EMAIL\}\}/g, GRIEVANCE_EMAIL);
+}

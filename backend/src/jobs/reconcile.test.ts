@@ -7,10 +7,12 @@
 import assert from 'node:assert/strict';
 import { sql } from 'drizzle-orm';
 import { getDb } from '../db/client.js';
+import { testVariantId } from '../db/test-helpers.js';
 import { createOrder } from '../services/orders.js';
 import { sweepStaleOrders, type ReconciliationReport } from './reconcile.js';
 
 const db = getDb();
+const VARIANT = await testVariantId();
 const stockOf = async (id: number) => {
   const r = (await db.execute(sql`select stock_qty from variants where id = ${id}`)) as unknown as
     | { rows?: Array<{ stock_qty: number }> } | Array<{ stock_qty: number }>;
@@ -18,8 +20,8 @@ const stockOf = async (id: number) => {
   return Number(rows[0]!.stock_qty);
 };
 
-await db.execute(sql`update variants set stock_qty = 20 where id = 1`);
-const before = await stockOf(1);
+await db.execute(sql`update variants set stock_qty = 20 where id = ${VARIANT}`);
+const before = await stockOf(VARIANT);
 
 const order = await createOrder({
   items: [{ productSlug: 'rasam-powder', weight: '100g', quantity: 3 }],
@@ -29,7 +31,7 @@ const order = await createOrder({
   idempotencyKey: `stale-test-${Date.now()}`,
 });
 
-assert.equal(await stockOf(1), before - 3, 'a pending order holds its stock');
+assert.equal(await stockOf(VARIANT), before - 3, 'a pending order holds its stock');
 
 // A fresh pending order must NOT be swept — the customer may still be paying.
 const fresh: ReconciliationReport = {
@@ -37,7 +39,7 @@ const fresh: ReconciliationReport = {
 };
 await sweepStaleOrders(fresh);
 assert.equal(fresh.staleReleased.length, 0, 'a recent pending order is left alone');
-assert.equal(await stockOf(1), before - 3, 'stock still held');
+assert.equal(await stockOf(VARIANT), before - 3, 'stock still held');
 
 // Backdate it past the threshold.
 await db.execute(sql`
@@ -50,7 +52,7 @@ const report: ReconciliationReport = {
 await sweepStaleOrders(report);
 
 assert.ok(report.staleReleased.includes(order.orderNumber), 'the stale order was released');
-assert.equal(await stockOf(1), before, 'its stock came back');
+assert.equal(await stockOf(VARIANT), before, 'its stock came back');
 
 const statusResult = await db.execute(sql`
   select status from orders where order_number = ${order.orderNumber}`);
@@ -64,8 +66,8 @@ const again: ReconciliationReport = {
   staleReleased: [], staleRecovered: [], paymentsWithoutOrder: [], amountMismatches: [], checkedPayments: 0,
 };
 await sweepStaleOrders(again);
-assert.equal(await stockOf(1), before, 'a second sweep does not restock twice');
+assert.equal(await stockOf(VARIANT), before, 'a second sweep does not restock twice');
 
-await db.execute(sql`update variants set stock_qty = 25 where id = 1`);
+await db.execute(sql`update variants set stock_qty = 25 where id = ${VARIANT}`);
 console.log('reconcile.ts: stale sweep releases stock exactly once');
 process.exit(0);

@@ -7,6 +7,12 @@ interface ImportMetaEnv {
   readonly VITE_API_URL?: string;
   readonly VITE_RAZORPAY_KEY_ID?: string;
   readonly VITE_SENTRY_DSN?: string;
+  /** Legal declarations. Public by design — they must be displayed. */
+  readonly VITE_SELLER_LEGAL_NAME?: string;
+  readonly VITE_SELLER_ADDRESS?: string;
+  readonly VITE_FSSAI_LICENCE?: string;
+  readonly VITE_GRIEVANCE_OFFICER?: string;
+  readonly VITE_GRIEVANCE_EMAIL?: string;
 }
 
 interface ImportMeta {

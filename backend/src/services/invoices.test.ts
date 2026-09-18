@@ -8,6 +8,7 @@
 import assert from 'node:assert/strict';
 import { sql } from 'drizzle-orm';
 import { getDb } from '../db/client.js';
+import { testVariantId } from '../db/test-helpers.js';
 import { invoices, jobs } from '../db/schema.js';
 import { createOrder } from '../services/orders.js';
 import { issueInvoice } from './invoices.js';
@@ -17,9 +18,10 @@ import { orders } from '../db/schema.js';
 import { eq } from 'drizzle-orm';
 
 const db = getDb();
+const VARIANT = await testVariantId();
 await db.execute(sql`delete from ${invoices}`);
 await db.execute(sql`delete from ${jobs}`);
-await db.execute(sql`update variants set stock_qty = 100 where id = 1`);
+await db.execute(sql`update variants set stock_qty = 100 where id = ${VARIANT}`);
 
 const place = (state: string, n: number) =>
   createOrder({
@@ -82,6 +84,6 @@ assert.ok(pdf.length > 800, 'the PDF has content');
 assert.equal(pdf.subarray(0, 4).toString(), '%PDF', 'it is a PDF');
 
 await db.execute(sql`delete from ${invoices}`);
-await db.execute(sql`update variants set stock_qty = 25 where id = 1`);
+await db.execute(sql`update variants set stock_qty = 25 where id = ${VARIANT}`);
 console.log(`invoices.ts: ${numbers.length + 5} invoices, gap-free, all reconciled, PDF ${pdf.length} bytes`);
 process.exit(0);

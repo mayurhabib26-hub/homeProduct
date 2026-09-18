@@ -11,9 +11,11 @@
 import assert from 'node:assert/strict';
 import { sql } from 'drizzle-orm';
 import { getDb } from '../db/client.js';
+import { testVariantId } from '../db/test-helpers.js';
 import { decrementStock, restoreStock, InsufficientStockError } from './stock.js';
 
 const db = getDb();
+const VARIANT = await testVariantId();
 const stockOf = async (id: number): Promise<number> => {
   const r = (await db.execute(sql`select stock_qty from variants where id = ${id}`)) as unknown as
     | { rows?: Array<{ stock_qty: number }> }
@@ -22,43 +24,43 @@ const stockOf = async (id: number): Promise<number> => {
   return Number(rows[0]!.stock_qty);
 };
 
-await db.execute(sql`update variants set stock_qty = 10 where id = 1`);
+await db.execute(sql`update variants set stock_qty = 10 where id = ${VARIANT}`);
 
 // happy path
-await decrementStock(db, [{ variantId: 1, quantity: 3 }]);
-assert.equal(await stockOf(1), 7, 'decrement applied');
+await decrementStock(db, [{ variantId: VARIANT, quantity: 3 }]);
+assert.equal(await stockOf(VARIANT), 7, 'decrement applied');
 
 // exactly the remaining stock is allowed
-await decrementStock(db, [{ variantId: 1, quantity: 7 }]);
-assert.equal(await stockOf(1), 0, 'selling the last unit is allowed');
+await decrementStock(db, [{ variantId: VARIANT, quantity: 7 }]);
+assert.equal(await stockOf(VARIANT), 0, 'selling the last unit is allowed');
 
 // one more is refused, and refused by rowCount, not by an exception from the
 // CHECK constraint — the guard must reject cleanly
 await assert.rejects(
-  () => decrementStock(db, [{ variantId: 1, quantity: 1 }]),
+  () => decrementStock(db, [{ variantId: VARIANT, quantity: 1 }]),
   (e: unknown) => e instanceof InsufficientStockError,
   'selling past zero is refused',
 );
-assert.equal(await stockOf(1), 0, 'a refused decrement changes nothing');
+assert.equal(await stockOf(VARIANT), 0, 'a refused decrement changes nothing');
 
 // asking for more than exists in one go
-await db.execute(sql`update variants set stock_qty = 5 where id = 1`);
+await db.execute(sql`update variants set stock_qty = 5 where id = ${VARIANT}`);
 await assert.rejects(
-  () => decrementStock(db, [{ variantId: 1, quantity: 6 }]),
+  () => decrementStock(db, [{ variantId: VARIANT, quantity: 6 }]),
   (e: unknown) => e instanceof InsufficientStockError,
 );
-assert.equal(await stockOf(1), 5, 'over-request leaves stock untouched');
+assert.equal(await stockOf(VARIANT), 5, 'over-request leaves stock untouched');
 
 // restore
-await restoreStock(db, [{ variantId: 1, quantity: 4 }]);
-assert.equal(await stockOf(1), 9, 'restore adds back');
+await restoreStock(db, [{ variantId: VARIANT, quantity: 4 }]);
+assert.equal(await stockOf(VARIANT), 9, 'restore adds back');
 
 // the database itself still refuses to go negative, whatever the code does
 await assert.rejects(
-  () => db.execute(sql`update variants set stock_qty = -1 where id = 1`),
+  () => db.execute(sql`update variants set stock_qty = -1 where id = ${VARIANT}`),
   'CHECK constraint holds independently of application logic',
 );
 
-await db.execute(sql`update variants set stock_qty = 25 where id = 1`);
+await db.execute(sql`update variants set stock_qty = 25 where id = ${VARIANT}`);
 console.log('stock.ts: all assertions passed (logic only — see note on concurrency)');
 process.exit(0);
