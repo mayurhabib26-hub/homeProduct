@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Product, CartItem, rupees, percentOf, formatPaise } from '@sv/shared';
-import { PRODUCTS } from '../data/products';
 
 interface ShopContextType {
   cart: CartItem[];
@@ -47,17 +46,10 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [cart, setCart] = useState<CartItem[]>(() => {
     try {
       const saved = localStorage.getItem('sv_cart');
-      return saved ? JSON.parse(saved) : [
-        // Seed with a default favorite for immediate interactive preview
-        {
-          id: 'rasam-powder-100g',
-          productId: 'rasam-powder',
-          product: PRODUCTS[0],
-          selectedWeight: '100g',
-          price: 110,
-          quantity: 1,
-        }
-      ];
+      // Annotated, not inferred: JSON.parse returns any, which would let a
+      // stale or malformed stored cart through the type system untouched.
+      const parsed: CartItem[] | null = saved ? JSON.parse(saved) : null;
+      return parsed ?? [];
     } catch {
       return [];
     }
@@ -66,7 +58,8 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [wishlist, setWishlist] = useState<string[]>(() => {
     try {
       const saved = localStorage.getItem('sv_wishlist');
-      return saved ? JSON.parse(saved) : ['rasam-powder', 'puliyogare-powder'];
+      const parsed: string[] | null = saved ? JSON.parse(saved) : null;
+      return parsed ?? [];
     } catch {
       return [];
     }
