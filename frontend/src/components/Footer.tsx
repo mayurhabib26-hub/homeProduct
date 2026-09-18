@@ -3,6 +3,7 @@ import { BrandLogo } from './BrandLogo';
 import { useShop } from '../context/ShopContext';
 import { Phone, Mail, MapPin, Instagram, Facebook, ShieldCheck, Truck, RefreshCw } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { telHref, formatPhoneForDisplay } from '../lib/contact';
 
 export const Footer: React.FC = () => {
   const { generateWhatsAppOrderUrl } = useShop();
@@ -200,8 +201,8 @@ export const Footer: React.FC = () => {
               </li>
               <li className="flex items-center gap-2.5">
                 <Phone size={16} className="text-[#B69A55] shrink-0" />
-                <a href="tel:+919876543210" className="hover:text-[#FAF6F0] transition-colors">
-                  +91 98765 43210
+                <a href={telHref()} className="hover:text-[#FAF6F0] transition-colors">
+                  {formatPhoneForDisplay()}
                 </a>
               </li>
               <li className="flex items-center gap-2.5">

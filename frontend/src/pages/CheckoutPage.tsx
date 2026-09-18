@@ -3,6 +3,7 @@ import { useShop } from '../context/ShopContext';
 import { CheckCircle2, ShieldCheck, ArrowRight, Phone, Truck, CreditCard, QrCode, Banknote } from 'lucide-react';
 import { formatPaise } from '@sv/shared';
 import { Link } from 'react-router-dom';
+import { whatsappUrl } from '../lib/contact';
 
 export const CheckoutPage: React.FC = () => {
   const {
@@ -101,7 +102,7 @@ export const CheckoutPage: React.FC = () => {
 
             <div className="space-y-3 pt-2">
               <a
-                href={`https://wa.me/919876543210?text=Namaste%20S%20V%20Home%20Products!%20I%20just%20placed%20order%20${orderNumber}.%20Please%20confirm%20dispatch.`}
+                href={whatsappUrl(`Namaste S V Home Products! I just placed order ${orderNumber}. Please confirm dispatch.`)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="w-full py-3.5 bg-[#647044] hover:bg-[#4d5733] text-white rounded-md text-xs font-bold tracking-widest uppercase transition-colors flex items-center justify-center gap-2"

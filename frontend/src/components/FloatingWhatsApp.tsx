@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useShop } from '../context/ShopContext';
 import { Phone, X, MessageSquare, Send } from 'lucide-react';
+import { whatsappUrl } from '../lib/contact';
 
 export const FloatingWhatsApp: React.FC = () => {
   const { generateWhatsAppOrderUrl } = useShop();
@@ -9,11 +10,10 @@ export const FloatingWhatsApp: React.FC = () => {
 
   const handleSendCustomMessage = (e: React.FormEvent) => {
     e.preventDefault();
-    const phoneNumber = '919876543210';
     const text = customQuery.trim()
       ? `Namaste S V Home Products!\n${customQuery}`
       : 'Namaste S V Home Products! I would like to place an order for traditional homemade spice powders.';
-    window.open(`https://wa.me/${phoneNumber}?text=${encodeURIComponent(text)}`, '_blank');
+    window.open(whatsappUrl(text), '_blank');
     setIsOpen(false);
     setCustomQuery('');
   };

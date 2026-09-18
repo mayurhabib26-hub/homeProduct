@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { Product, CartItem, StoredCartItem, rupees, percentOf, formatPaise } from '@sv/shared';
 import { PRODUCTS } from '../data/products';
+import { whatsappUrl } from '../lib/contact';
 
 interface ShopContextType {
   cart: CartItem[];
@@ -233,7 +234,6 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const generateWhatsAppOrderUrl = (product?: Product, weight?: string, qty = 1) => {
-    const phoneNumber = '919876543210'; // Client's WhatsApp support number placeholder
     let messageText = '';
 
     if (product) {
@@ -248,7 +248,7 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
       messageText = 'Namaste S V Home Products! I would like to enquire about your authentic homemade spice powders and traditional South Indian food products.';
     }
 
-    return `https://wa.me/${phoneNumber}?text=${encodeURIComponent(messageText)}`;
+    return whatsappUrl(messageText);
   };
 
   return (

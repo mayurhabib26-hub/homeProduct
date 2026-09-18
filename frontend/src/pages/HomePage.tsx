@@ -19,6 +19,7 @@ import { RECIPES } from '../data/recipes';
 import { INGREDIENTS_STORY, CLIENT_REVIEWS } from '../data/siteData';
 import { ProductCard } from '../components/ProductCard';
 import { Link } from 'react-router-dom';
+import { whatsappUrl } from '../lib/contact';
 import {
   ArrowRight,
   Sparkles,
@@ -973,7 +974,7 @@ export const HomePage: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-3">
                   <a
-                    href="https://wa.me/919876543210?text=Namaste%20S%20V%20Home%20Products!%20I%20would%20like%20to%20know%20more%20about%20your%20fresh%20spice%20batches."
+                    href={whatsappUrl("Namaste S V Home Products! I would like to know more about your fresh spice batches.")}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="px-4 py-2 bg-[#FAF6F0] hover:bg-[#EBD9BC] border border-[#EBD9BC] text-[#483828] text-xs font-semibold rounded flex items-center gap-1.5 transition-colors"

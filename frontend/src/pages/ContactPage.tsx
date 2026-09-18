@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useShop } from '../context/ShopContext';
 import { Phone, Mail, MapPin, Clock, Send, ChevronDown, CheckCircle2, MessageSquare } from 'lucide-react';
 import { ScrollReveal } from '../components/ScrollReveal';
+import { telHref, formatPhoneForDisplay, whatsappUrl } from '../lib/contact';
 
 export const ContactPage: React.FC = () => {
   const { showToast } = useShop();
@@ -89,8 +90,8 @@ export const ContactPage: React.FC = () => {
                     <Phone size={18} className="text-[#87380F] shrink-0 mt-0.5" />
                     <div>
                       <strong className="block text-[#483828] font-semibold">Phone / WhatsApp</strong>
-                      <a href="tel:+919876543210" className="hover:text-[#87380F] transition-colors">
-                        +91 98765 43210
+                      <a href={telHref()} className="hover:text-[#87380F] transition-colors">
+                        {formatPhoneForDisplay()}
                       </a>
                     </div>
                   </div>
@@ -124,7 +125,7 @@ export const ContactPage: React.FC = () => {
                       Prefer speaking to us directly? We assist orders and recipe advice on WhatsApp.
                     </p>
                     <a
-                      href="https://wa.me/919876543210?text=Namaste%20S%20V%20Home%20Products!%20I%20have%20an%20inquiry."
+                      href={whatsappUrl("Namaste S V Home Products! I have an inquiry.")}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-2 px-4 py-2 bg-[#647044] hover:bg-[#4d5733] text-white text-xs font-semibold rounded transition-colors mt-1"
