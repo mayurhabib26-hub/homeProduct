@@ -136,6 +136,15 @@ stop you walking into:
   guarantee we do not have. Verify the shared token in constant time, treat the
   payload as a hint about a parcel we already booked, and never move money on
   one — COD remittance is imported from a statement by an admin.
+- **Three COD facts, three fields.** Whether the customer owes
+  (`orders.paymentStatus`), whether the rider took the cash
+  (`shipments.codCollectionStatus`) and whether the courier paid it over
+  (`shipments.codRemittanceStatus`) are different events. Collapse them and the
+  admin shows "Paid" while the courier still holds the money.
+- **An AWB is not a dispatch.** `orders.status` becomes `shipped` on the first
+  pickup scan, never at booking — the parcel is still on the packing table when
+  the AWB is created, and saying otherwise is a dispatch claim you cannot
+  support.
 - **Parcel dimensions are hardcoded** in `lib/shiprocket.ts`. Couriers bill on
   volumetric weight and reweigh at the hub; a guessed 500 g comes back as a
   discrepancy charge weeks later. Variants need a real packed weight.

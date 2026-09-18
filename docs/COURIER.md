@@ -95,6 +95,25 @@ export const shipments = pgTable('shipments', {
   /** Amount the rider must collect. 0 for prepaid. Never a float. */
   codAmountPaise: bigint('cod_amount_paise', { mode: 'number' }).notNull().default(0),
 
+  /**
+   * Keep customer payment, courier cash collection and courier remittance as
+   * separate concepts. For prepaid parcels these stay 'not_applicable'.
+   */
+  codCollectionStatus: text('cod_collection_status')
+    .notNull().default('not_applicable'), // not_applicable | pending | collected | failed
+  codCollectedAt: timestamp('cod_collected_at', { withTimezone: true }),
+  codRemittanceStatus: text('cod_remittance_status')
+    .notNull().default('not_applicable'), // not_applicable | pending | partially_remitted | remitted | disputed
+  codRemittedAt: timestamp('cod_remitted_at', { withTimezone: true }),
+
+  /**
+   * Non-delivery report. The courier failed an attempt and is asking what to
+   * do. Answering within hours is what keeps this from becoming an RTO.
+   */
+  ndrReason: text('ndr_reason'),
+  ndrAttempts: integer('ndr_attempts').notNull().default(0),
+  ndrLastAt: timestamp('ndr_last_at', { withTimezone: true }),
+
   labelUrl: text('label_url'),
   manifestUrl: text('manifest_url'),
 
@@ -119,6 +138,21 @@ export const shipments = pgTable('shipments', {
 
 `onDelete: 'restrict'` for the same reason `invoices` uses it: a shipment is a
 record of a physical event and must survive anything happening to the order.
+
+The COD fields deliberately separate three different facts:
+
+- `orders.paymentStatus` — whether the customer has satisfied the order's
+  payment obligation.
+- `shipments.codCollectionStatus` — whether the courier actually collected
+  cash for this parcel.
+- `shipments.codRemittanceStatus` — whether that collected cash has reached
+  S V Home Products' bank account and reconciled against a courier statement.
+
+Those are related, but they are not the same event. Keeping them separate
+prevents the admin from showing "Paid" when the courier still owes the money.
+The `cod_remittance_items` table remains the financial source of truth; the
+shipment-level remittance fields are an operational summary for filtering and
+UI.
 
 ### 3.2 `shipment_events`
 
@@ -242,6 +276,9 @@ export interface CourierProvider {
   cancel(awb: string): Promise<void>;
   schedulePickup(awbs: string[], date: Date): Promise<PickupResult>;
 
+  /** Answer a non-delivery report: reattempt, or reattempt to a new address. */
+  respondToNdr(awb: string, action: NdrAction): Promise<void>;
+
   /** Provider status string -> our normalised status. Unknown returns null. */
   mapStatus(providerStatus: string): ShipmentStatus | null;
 
@@ -317,8 +354,20 @@ worker claims shipment.book
   ├─ UPDATE shipments SET awb, courier, status 'awb_assigned'
   ├─ UPDATE orders SET tracking_number, courier         (denormalised copy)
   ├─ enqueue documents: label.fetch
-  └─ enqueue notifications: order.shipped   (only when an AWB exists)
+  └─ enqueue notifications: shipment.booked   (tracking is available; order is still packed)
 ```
+
+`shipment.booked` is a **new** notification handler — `handlers.ts` currently
+has `order.confirmation` and `order.shipped` only, and it needs its own
+template. The existing `order.shipped` enqueue at `handlers.ts:121` must be
+**deleted** in the same change: left in place it fires the moment an AWB
+exists, and this section changes nothing.
+
+An AWB is **not** proof that the courier has the parcel. `orders.status` stays
+`packed` through `awb_assigned` and `pickup_scheduled`; it moves to `shipped`
+only on the first real pickup scan (`picked_up`). The customer may receive the
+tracking link as soon as an AWB exists, but the wording must say "shipment
+booked" or "tracking created", not "shipped".
 
 **The `shipments` row is written before the provider call, not after.** If the
 API call times out after the carrier created the shipment, a retry that
@@ -417,7 +466,9 @@ Our normalised `ShipmentStatus`:
 ```
 created → awb_assigned → pickup_scheduled → picked_up → in_transit
         → out_for_delivery → delivered
-                           ↘ rto_initiated → rto_in_transit → rto_delivered
+              ↑            ↘ ndr ──(answered, reattempt)──┘
+              └──────────────┘   ↘ (unanswered, or attempts exhausted)
+                                   rto_initiated → rto_in_transit → rto_delivered
         → cancelled | lost | damaged
 ```
 
@@ -433,8 +484,9 @@ touching stock-restoration logic to add a status that never moves stock.
 | `PICKED_UP` | `In Transit` (first scan) | `picked_up` | → `shipped` |
 | `IN_TRANSIT` | `In Transit` | `in_transit` | — |
 | `OUT_FOR_DELIVERY` | `Dispatched` | `out_for_delivery` | — |
+| `UNDELIVERED` | `Undelivered` / `Pending` | `ndr` | — (see §9.0) |
 | `DELIVERED` | `Delivered` | `delivered` | → `delivered` |
-| `RTO_INITIATED` | `RTO` / `Undelivered` | `rto_initiated` | — (see §9) |
+| `RTO_INITIATED` | `RTO` | `rto_initiated` | — (see §9) |
 | `RTO_IN_TRANSIT` | `RTO In Transit` | `rto_in_transit` | — |
 | `RTO_DELIVERED` | `RTO Delivered` | `rto_delivered` | → `rto` |
 | `CANCELLED` | `Cancelled` | `cancelled` | — |
@@ -443,6 +495,10 @@ touching stock-restoration logic to add a status that never moves stock.
 Anything not in the table maps to `null`: the event is stored, the timeline
 shows it, nothing transitions. **Silence beats a guess** — a mis-mapped status
 that restocks is worse than a status we did not understand.
+
+`ndr` is not terminal and does not move the order: the parcel is still out
+with the courier and a reattempt is normal. It is the one status with a clock
+on it — see §9.0.
 
 `lost` and `damaged` deliberately do not auto-transition. They mean a claim
 has to be filed and someone decides whether to reship or refund. The admin
@@ -461,24 +517,54 @@ shows them as a red banner on the order.
   means a cancelled order after packing.
 - `COD_MAX_ORDER_PAISE` already caps order value (`orders.ts:157`). Keep it.
 
-### 8.2 The cash
+### 8.2 The cash — collection is not remittance
 
 `shipments.cod_amount_paise` is the order total in paise, converted to rupees
 **only in the adapter's request body**, next to the existing `selling_price`
 conversion. It is the single number the rider collects; a mismatch between it
 and the invoice is a dispute you will lose.
 
-Fixes §2.2 — on `delivered` for a COD order, in one transaction:
+Three states must not be conflated. They are **three independent lifecycles**,
+not three columns of one table — nothing lines up row-wise, and a matrix here
+would invite a mapping that does not exist:
+
+- `orders.paymentStatus` — has the customer satisfied the order?
+  `pending → paid → refunded`
+- `shipments.codCollectionStatus` — did the rider actually take the cash?
+  `not_applicable | pending → collected | failed`
+- `shipments.codRemittanceStatus` — has that cash reached our bank and
+  reconciled? `not_applicable | pending → partially_remitted | remitted | disputed`
+
+For prepaid orders, the two COD shipment fields are `not_applicable`. For COD,
+booking sets both operational fields to `pending`.
+
+On a provider `delivered` event for a COD parcel, in one transaction:
 
 ```ts
-// The only place a COD order becomes paid.
-await tx.update(orders)
-  .set({ paymentStatus: 'paid', paidAt: occurredAt })
-  .where(and(eq(orders.id, order.id), eq(orders.paymentMethod, 'cod')));
+await tx.update(shipments)
+  .set({
+    codCollectionStatus: 'collected',
+    codCollectedAt: occurredAt,
+    codRemittanceStatus: 'pending',
+  })
+  .where(eq(shipments.id, shipment.id));
+
+// The order becomes paid only when the COD amount due across its parcels has
+// been collected. In v1 there is normally one parcel, but this remains correct
+// if the data model later uses more than one.
+const collectedPaise = await collectedCodForOrder(tx, order.id);
+if (collectedPaise >= order.totalPaise) {
+  await tx.update(orders)
+    .set({ paymentStatus: 'paid', paidAt: occurredAt })
+    .where(and(eq(orders.id, order.id), eq(orders.paymentMethod, 'cod')));
+}
 ```
 
-Delivered is when the cash changed hands. `paidAt` is the courier's scan time,
-not ours, because that is the date that has to reconcile with their statement.
+`paidAt` is the courier's collection scan time, not the time the money reached
+our bank. Bank settlement is represented separately by
+`codRemittanceStatus` and the remittance tables in §8.3. This keeps revenue /
+GST logic based on the customer's payment while still making "courier owes us
+₹X" visible and reconcilable.
 
 ### 8.3 Remittance and reconciliation
 
@@ -506,6 +592,18 @@ The report is the point. Four findings, and each one is money:
 `shipment_id` uses `onDelete: 'restrict'`: a financial record may not be
 orphaned by a cleanup.
 
+After import, recompute the operational summary on each matched shipment:
+
+- exact expected amount matched → `codRemittanceStatus = 'remitted'` and set
+  `codRemittedAt`;
+- some money matched but less than expected → `partially_remitted`;
+- a short-pay or other unresolved mismatch → `disputed`;
+- delivered COD with no matching statement item after the grace period stays
+  `pending` and appears in **Delivered, never remitted**.
+
+Do not use a courier webhook to set any remittance status. The remittance CSV
+and its bank UTR are the financial evidence.
+
 ### 8.4 COD and GST
 
 Nothing changes. The invoice is issued at dispatch on the accrual basis, not
@@ -517,6 +615,42 @@ when the cash arrives. Remittance reconciles the *bank*, not the tax position.
 
 Return To Origin — refused at the door, address wrong, three failed attempts.
 For COD it is the single biggest loss: no revenue, freight paid both ways.
+
+### 9.0 NDR — the stage before RTO, and the only one you can still win
+
+A non-delivery report is the courier saying *"we tried, it failed, what now?"*
+Nobody home, phone unreachable, address incomplete, customer asked for a later
+date. It is **not** an RTO yet. Both providers give you a window — typically
+24 to 48 hours, and usually two or three attempts — to answer with a reattempt
+or a corrected address. Answer inside the window and most NDRs deliver.
+Ignore it and it becomes the RTO in §9.1, which costs two-way freight and, for
+COD, the entire sale.
+
+This is the highest-leverage clock in the whole integration, and it is the
+reason §9.4's RTO rate is a lagging indicator: by the time RTO rate moves, the
+NDRs that caused it went unanswered days earlier.
+
+```
+provider UNDELIVERED event
+  ├─ shipments.status = 'ndr'
+  ├─ ndr_reason, ndr_last_at, ndr_attempts += 1
+  ├─ orders.status unchanged — the parcel is still out
+  └─ notify the operator immediately; this is not a daily-digest event
+
+operator answers (or the customer does, via a call)
+  └─ provider.respondToNdr(awb, { action: 'reattempt' | 'reattempt_new_address', ... })
+       └─ next scan returns the shipment to out_for_delivery
+```
+
+An NDR older than `NDR_RESPONSE_HOURS` with no response is **escalated, not
+auto-answered**. A blind auto-reattempt to an address that was wrong the first
+time just buys a second failed attempt and burns one of the three.
+
+Reattempting to a new address is a customer-contact job, not an API call in
+isolation: the phone call happens first, the address correction is recorded
+against the order, and only then is the provider told. The admin records who
+made the call, because "we tried to reach you" is the thing a customer will
+dispute.
 
 ### 9.1 Two stages, and why the split is the whole design
 
@@ -550,7 +684,7 @@ where a packet that spent two weeks in a van goes back into stock unopened.
 | Payment | On `rto_delivered` |
 |---|---|
 | Prepaid | Refund is **owed**. Raise the task; `refundOrder()` handles it, owner-only, with the existing typed confirmation. Do not auto-refund — freight may be deductible per your own published policy. |
-| COD | **No refund. No money was ever taken.** Terminal at `rto`. The loss is two-way freight, recorded against the shipment. |
+| COD | **No refund. No money was ever taken.** Terminal at `rto`. The loss is two-way freight, recorded against the shipment. Set `codCollectionStatus = 'failed'` — this is the only thing that sets it, and without it a never-collected parcel sits in "delivered, never remitted" forever, chasing a courier for money they correctly never owed. |
 
 The existing machine allows `rto → refunded`, which stays correct for prepaid
 and simply is not exercised for COD.
@@ -618,8 +752,23 @@ direction; this is work inside an established system.
 
 ### 11.1 Nav
 
-One new item: **Shipments**, between Orders and Inventory. It has a backend,
-which is the bar set when Customers, Reports and Settings were left out.
+One new item: **Shipments**, directly after Orders, because it is the next
+step in the daily loop.
+
+```
+Dashboard  Orders  Shipments  Products  Inventory  Reviews  Coupons
+```
+
+That is the existing `NAV` in `Shell.tsx` with one entry inserted. It has a
+backend, which is the bar set when Customers, Reports and Settings were left
+out of `14b5a51` — a nav item that leads nowhere teaches the operator to
+distrust the nav.
+
+**COD reconciliation** and **courier routing** are owner-only routes reached
+from the Shipments screen, not new top-level groups. Two parent groups holding
+one child each is scaffolding for a hierarchy that does not exist yet; when
+there is a third finance screen, `Finance` earns its group and these move under
+it.
 
 ### 11.2 Orders list
 
@@ -638,18 +787,36 @@ Replaces the current tracking-number line with a **shipment card**:
 - Vertical timeline from `shipment_events` — status, location, time, newest
   first. Same visual language as the existing audit-trail timeline.
 - **Print label** (single), **Track** (deep link), **Cancel shipment**
-- COD orders show **"₹X to collect"** or **"₹X collected · UTR ..."** once
-  reconciled
+- COD orders show the two operational money states separately:
+  **"₹X to collect" → "₹X collected by courier · remittance pending" →
+  "₹X remitted · UTR ..."**. Never collapse collection and remittance into a
+  single `Paid` badge.
+- An open NDR shows a banner above everything else: reason, attempts used,
+  hours left, **Call customer** (`tel:`) and **Answer NDR**. It outranks the
+  timeline, because it is the only thing on the screen with a deadline.
 - RTO shows a warning band with the two stages, and the **Inspect and
   restock** action when the parcel is back
 
 ### 11.4 Shipments screen
 
-Filter tabs: **Booking failed · To pick up · In transit · Out for delivery ·
-RTO · Delivered**. Defaults to **Booking failed**, for the same reason Orders
-defaults to `confirmed` — open the screen on the work that needs a person.
+Filter tabs, ordered by how fast they go cold: **NDR · Booking failed · Ready
+to ship · To pick up · In transit · Out for delivery · RTO · Delivered**.
 
-Bulk select → print labels, schedule pickup, retry booking.
+Opens on the first tab with a non-zero count, so the screen lands on the work
+that needs a person rather than on historical delivery totals. **NDR leads**
+because it is the only tab with a deadline measured in hours (§9.0); a booking
+failure waits patiently, an unanswered NDR becomes an RTO.
+
+An NDR row shows the reason, attempts used, hours left in the window, and the
+customer's phone as a `tel:` link — the answer to most NDRs is a phone call,
+and on a mobile that call should be one tap from the row.
+
+Bulk select → **Book shipments**, **Print labels**, **Schedule pickup**,
+**Retry booking**. The normal day is a batch: pack several orders, book them,
+print their labels in one run, then hand over one manifest.
+
+On mobile, keep the same sequence but collapse each shipment to a tappable row
+showing order, courier/AWB, current status and the single legal next action.
 
 ### 11.5 COD reconciliation
 
@@ -657,9 +824,13 @@ Owner-only. Upload the statement, then the four findings from §8.3 as counted
 tabs, **Delivered, never remitted** first and in `--color-danger` — the tab
 order encodes which one costs money.
 
-Per row: order number, AWB, expected, remitted, difference, delivery date. CSV
-export, because chasing a courier happens over email with a spreadsheet
-attached.
+Summary tiles show **COD collected**, **remittance pending**, **remitted this
+cycle**, and **disputed**. These are deliberately separate from
+`orders.paymentStatus`.
+
+Per row: order number, AWB, expected, remitted, difference, collection date,
+delivery date, remittance status. CSV export, because chasing a courier
+happens over email with a spreadsheet attached.
 
 ### 11.6 Inventory
 
@@ -703,9 +874,10 @@ disclosure are the two that will fail an audit if written carelessly.
 | `GET` | `/api/admin/shipments/:awb/label` | staff | 302 to stored PDF |
 | `POST` | `/api/admin/shipments/labels` | staff | `{ awbs }` → merged PDF |
 | `POST` | `/api/admin/pickups` | staff | `{ awbs, date }` → manifest |
+| `POST` | `/api/admin/shipments/:awb/ndr` | staff | Answer an NDR: reattempt, or reattempt to a corrected address |
 | `POST` | `/api/admin/shipments/:awb/restock` | owner | Post-RTO inspection decision, per line |
 | `POST` | `/api/admin/cod-remittances/import` | owner | multipart CSV |
-| `GET` | `/api/admin/cod-remittances/reconcile` | owner | The four findings |
+| `GET` | `/api/admin/cod-remittances/reconcile` | owner | The four findings + collection/remittance summary |
 | `GET` | `/api/admin/reports/rto` | owner | RTO rate by pincode |
 | `GET`/`POST` | `/api/admin/courier-rules` | owner | Routing rules |
 
@@ -731,6 +903,7 @@ DELHIVERY_WEBHOOK_TOKEN=
 PICKUP_PINCODE=560004        # existing
 PICKUP_LOCATION_NAME=Primary
 COD_REMITTANCE_GRACE_DAYS=10
+NDR_RESPONSE_HOURS=24
 ```
 
 None of these is `VITE_`-prefixed. The storefront learns serviceability from
@@ -750,7 +923,10 @@ is a token published to the internet.
 | Out-of-order scans | Older-than-current events ignored; `ILLEGAL_TRANSITION` caught and logged at info. |
 | Booking succeeds, our write fails | Shipment row exists in `created` from before the call; the retry reconciles by AWB instead of rebooking. |
 | Weight under-declared | Discrepancy webhook writes `charged_weight_grams`; admin reports the gap by SKU, which is the signal to fix §3.5. |
+| Delivery attempt fails | Shipment goes to `ndr`, operator notified immediately, NDR tab leads the Shipments screen. Not auto-answered. |
+| NDR window expires unanswered | Escalated to the owner. The parcel will RTO; §9.4's pincode report is where the pattern shows up. |
 | COD collected, never remitted | The reconciliation report's first tab. |
+| COD parcel RTO'd | `codCollectionStatus = 'failed'`, so it never enters the remittance chase. |
 | Provider label URL expired | Never used — labels are fetched and stored at assignment. |
 | Both providers unconfigured | Orders are still taken. Serviceability answers optimistically with `assumed: true`. Dispatch is manual. |
 
@@ -770,10 +946,13 @@ Each step ships and is useful alone.
 5. **Webhooks + status mapping + the poller** — the timeline starts working.
 6. **COD delivered → paid** — fixes §2.2, three lines and a test.
 7. **RTO two-stage** — fixes §2.3.
-8. **Labels** — fetch, store, bulk merge. The biggest daily time saving.
-9. **Admin UI** — shipments screen, order detail card, bulk actions.
-10. **COD reconciliation** — import and the four findings.
-11. **Delhivery adapter** — when the contract exists.
+8. **NDR** — status, notification, the answer endpoint. Ships with or right
+   after the webhooks, because it is the step that prevents the RTOs step 7
+   handles.
+9. **Labels** — fetch, store, bulk merge. The biggest daily time saving.
+10. **Admin UI** — shipments screen, order detail card, bulk actions.
+11. **COD reconciliation** — import and the four findings.
+12. **Delhivery adapter** — when the contract exists.
 
 Steps 3, 6 and 7 are bug fixes wearing a feature's clothes. They are worth
 doing even if the rest is deferred.
@@ -790,8 +969,19 @@ Follows [TESTING.md](./TESTING.md). The ones that matter:
   `delivered`.
 - **RTO does not restock early** — `rto_initiated` moves no stock;
   `rto_delivered` with `restock: true` moves it exactly once.
-- **COD delivered marks paid** — and a prepaid delivery does not touch
-  `paymentStatus`.
+- **COD delivered records collection before payment** — the shipment becomes
+  `codCollectionStatus = 'collected'`; the order becomes `paymentStatus =
+  'paid'` only when the COD amount due across its parcels is collected. A
+  prepaid delivery touches neither COD field.
+- **COD collection is not remittance** — a delivered COD parcel stays
+  `codRemittanceStatus = 'pending'` until a statement item with a valid UTR is
+  imported; short payment becomes `partially_remitted` or `disputed`, never
+  silently `remitted`.
+- **NDR does not become RTO by itself** — an `ndr` event leaves the order
+  `shipped` and moves no stock; an expired window escalates rather than
+  auto-answering; a reattempt returns the shipment to `out_for_delivery`.
+- **COD RTO marks collection failed** — and the parcel never appears in
+  "delivered, never remitted".
 - **Parcel sizing** — known basket → known box and chargeable weight;
   volumetric beats dead weight for a light bulky order.
 - **Reconciliation** — a statement with one short-paid, one unknown AWB and
