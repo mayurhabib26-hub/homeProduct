@@ -8,6 +8,7 @@ interface ShopContextType {
   activePage: string;
   selectedProductId: string | null;
   selectedRecipeId: string | null;
+  setSelectedRecipeId: (recipeId: string | null) => void;
   isCartDrawerOpen: boolean;
   isSearchOpen: boolean;
   searchQuery: string;
@@ -236,6 +237,7 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
         activePage,
         selectedProductId,
         selectedRecipeId,
+        setSelectedRecipeId,
         isCartDrawerOpen,
         isSearchOpen,
         searchQuery,
