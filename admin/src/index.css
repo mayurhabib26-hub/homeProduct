@@ -1,18 +1,82 @@
 @import "tailwindcss";
 
 /*
- * The admin is the tool half of the product: system sans rather than the
- * storefront's display serif, dense layout, no decorative motion. It borrows
- * the brand palette so it does not feel like a different company.
- * See docs/ADMIN.md §2.
+ * Design tokens for the S V Home Products admin.
+ *
+ * The storefront is warm and slow — serif display type, scroll reveals,
+ * generous whitespace. The admin inverts every one of those while staying
+ * recognisably the same brand: system sans, dense tables, motion only as
+ * state feedback. See docs/ADMIN.md §2.
  */
+@theme {
+  --color-bg: #FAF6F0;
+  --color-text: #483828;
+  --color-brand: #87380F;
+  --color-brand-hover: #6D2D0C;
+  --color-border: #EBD9BC;
+  --color-surface-alt: #F3E7D0;
+  --color-success: #647044;
+  --color-gold: #B69A55;
+  /* Muted, so it reads as serious rather than alarming against cream. */
+  --color-danger: #A33A28;
+  --color-danger-soft: #FBEDEA;
+}
+
+:root {
+  --bg: #FAF6F0;
+  --text: #483828;
+  --brand: #87380F;
+  --brand-hover: #6D2D0C;
+  --border: #EBD9BC;
+  --surface: #FFFFFF;
+  --surface-alt: #F3E7D0;
+  --success: #647044;
+  --gold: #B69A55;
+  --danger: #A33A28;
+  --danger-soft: #FBEDEA;
+}
+
 body {
   margin: 0;
-  background: #FAF6F0;
-  color: #483828;
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
-/* Money and quantities line up in columns. */
-.tabular-nums { font-variant-numeric: tabular-nums; }
+/* Money and quantities must align in columns; misread digits cost money. */
+.tabular { font-variant-numeric: tabular-nums; }
+
+/* One focus treatment everywhere, so it is never accidentally omitted. */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 2px solid var(--brand);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/*
+ * An admin is a tool. Motion is state feedback only — and none of it for
+ * anyone who has asked for less.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+@keyframes shimmer {
+  0% { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+.skeleton {
+  background: linear-gradient(90deg, #EFE7DA 25%, #F7F1E8 50%, #EFE7DA 75%);
+  background-size: 800px 100%;
+  animation: shimmer 1.4s infinite linear;
+  border-radius: 4px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .skeleton { animation: none; background: #EFE7DA; }
+}
