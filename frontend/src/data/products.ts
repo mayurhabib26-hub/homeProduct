@@ -1,4 +1,4 @@
-import { Product } from '../types';
+import { Product, rupees } from '@sv/shared';
 
 // Product photography and pouch mockups.
 // Plain URLs served from public/images/, not bundle imports — the admin panel
@@ -56,9 +56,9 @@ export const PRODUCTS: Product[] = [
     isSignature: true,
     featured: true,
     variants: [
-      { weight: '100g', price: 110, originalPrice: 130, inStock: true },
-      { weight: '250g', price: 250, originalPrice: 290, inStock: true },
-      { weight: '500g', price: 470, originalPrice: 550, inStock: true },
+      { weight: '100g', pricePaise: rupees(110), mrpPaise: rupees(130), inStock: true },
+      { weight: '250g', pricePaise: rupees(250), mrpPaise: rupees(290), inStock: true },
+      { weight: '500g', pricePaise: rupees(470), mrpPaise: rupees(550), inStock: true },
     ],
     rating: 4.9,
     reviewsCount: 148,
@@ -107,9 +107,9 @@ export const PRODUCTS: Product[] = [
     badge: 'Traditional Favorite',
     featured: true,
     variants: [
-      { weight: '100g', price: 125, originalPrice: 145, inStock: true },
-      { weight: '250g', price: 280, originalPrice: 320, inStock: true },
-      { weight: '500g', price: 520, originalPrice: 600, inStock: true },
+      { weight: '100g', pricePaise: rupees(125), mrpPaise: rupees(145), inStock: true },
+      { weight: '250g', pricePaise: rupees(280), mrpPaise: rupees(320), inStock: true },
+      { weight: '500g', pricePaise: rupees(520), mrpPaise: rupees(600), inStock: true },
     ],
     rating: 4.9,
     reviewsCount: 112,
@@ -158,9 +158,9 @@ export const PRODUCTS: Product[] = [
     badge: 'Bestseller',
     featured: true,
     variants: [
-      { weight: '100g', price: 115, originalPrice: 135, inStock: true },
-      { weight: '250g', price: 260, originalPrice: 300, inStock: true },
-      { weight: '500g', price: 490, originalPrice: 570, inStock: true },
+      { weight: '100g', pricePaise: rupees(115), mrpPaise: rupees(135), inStock: true },
+      { weight: '250g', pricePaise: rupees(260), mrpPaise: rupees(300), inStock: true },
+      { weight: '500g', pricePaise: rupees(490), mrpPaise: rupees(570), inStock: true },
     ],
     rating: 4.8,
     reviewsCount: 96,
@@ -209,9 +209,9 @@ export const PRODUCTS: Product[] = [
     badge: 'Traditional Favorite',
     featured: true,
     variants: [
-      { weight: '100g', price: 120, originalPrice: 140, inStock: true },
-      { weight: '200g', price: 230, originalPrice: 270, inStock: true },
-      { weight: '500g', price: 480, originalPrice: 560, inStock: true },
+      { weight: '100g', pricePaise: rupees(120), mrpPaise: rupees(140), inStock: true },
+      { weight: '200g', pricePaise: rupees(230), mrpPaise: rupees(270), inStock: true },
+      { weight: '500g', pricePaise: rupees(480), mrpPaise: rupees(560), inStock: true },
     ],
     rating: 4.9,
     reviewsCount: 84,
@@ -256,8 +256,8 @@ export const PRODUCTS: Product[] = [
     categoryLabel: 'Chutney & Podi',
     badge: 'Handcrafted',
     variants: [
-      { weight: '100g', price: 130, originalPrice: 150, inStock: true },
-      { weight: '250g', price: 290, originalPrice: 340, inStock: true },
+      { weight: '100g', pricePaise: rupees(130), mrpPaise: rupees(150), inStock: true },
+      { weight: '250g', pricePaise: rupees(290), mrpPaise: rupees(340), inStock: true },
     ],
     rating: 4.8,
     reviewsCount: 62,
@@ -301,9 +301,9 @@ export const PRODUCTS: Product[] = [
     categoryLabel: 'Spice Powders',
     badge: 'Handcrafted',
     variants: [
-      { weight: '100g', price: 95, originalPrice: 110, inStock: true },
-      { weight: '250g', price: 210, originalPrice: 240, inStock: true },
-      { weight: '500g', price: 395, originalPrice: 450, inStock: true },
+      { weight: '100g', pricePaise: rupees(95), mrpPaise: rupees(110), inStock: true },
+      { weight: '250g', pricePaise: rupees(210), mrpPaise: rupees(240), inStock: true },
+      { weight: '500g', pricePaise: rupees(395), mrpPaise: rupees(450), inStock: true },
     ],
     rating: 4.9,
     reviewsCount: 77,
@@ -336,9 +336,9 @@ export const PRODUCTS: Product[] = [
     category: 'spices',
     categoryLabel: 'Spice Powders',
     variants: [
-      { weight: '100g', price: 85, originalPrice: 100, inStock: true },
-      { weight: '250g', price: 190, originalPrice: 220, inStock: true },
-      { weight: '500g', price: 350, originalPrice: 400, inStock: true },
+      { weight: '100g', pricePaise: rupees(85), mrpPaise: rupees(100), inStock: true },
+      { weight: '250g', pricePaise: rupees(190), mrpPaise: rupees(220), inStock: true },
+      { weight: '500g', pricePaise: rupees(350), mrpPaise: rupees(400), inStock: true },
     ],
     rating: 4.8,
     reviewsCount: 53,
@@ -373,9 +373,9 @@ export const PRODUCTS: Product[] = [
     badge: 'Heritage Recipe',
     featured: true,
     variants: [
-      { weight: '100g', price: 135, originalPrice: 155, inStock: true },
-      { weight: '250g', price: 310, originalPrice: 360, inStock: true },
-      { weight: '500g', price: 580, originalPrice: 660, inStock: true },
+      { weight: '100g', pricePaise: rupees(135), mrpPaise: rupees(155), inStock: true },
+      { weight: '250g', pricePaise: rupees(310), mrpPaise: rupees(360), inStock: true },
+      { weight: '500g', pricePaise: rupees(580), mrpPaise: rupees(660), inStock: true },
     ],
     rating: 4.9,
     reviewsCount: 89,
@@ -421,8 +421,8 @@ export const PRODUCTS: Product[] = [
     category: 'spices',
     categoryLabel: 'Spice Powders',
     variants: [
-      { weight: '100g', price: 110, originalPrice: 130, inStock: true },
-      { weight: '250g', price: 240, originalPrice: 280, inStock: true },
+      { weight: '100g', pricePaise: rupees(110), mrpPaise: rupees(130), inStock: true },
+      { weight: '250g', pricePaise: rupees(240), mrpPaise: rupees(280), inStock: true },
     ],
     rating: 4.9,
     reviewsCount: 48,
@@ -458,8 +458,8 @@ export const PRODUCTS: Product[] = [
     badge: 'Festival Special',
     featured: true,
     variants: [
-      { weight: '3 x 250g Pack', price: 740, originalPrice: 860, inStock: true },
-      { weight: '3 x 500g Pack', price: 1380, originalPrice: 1620, inStock: true },
+      { weight: '3 x 250g Pack', pricePaise: rupees(740), mrpPaise: rupees(860), inStock: true },
+      { weight: '3 x 500g Pack', pricePaise: rupees(1380), mrpPaise: rupees(1620), inStock: true },
     ],
     rating: 5.0,
     reviewsCount: 65,
@@ -498,7 +498,7 @@ export const PRODUCTS: Product[] = [
     categoryLabel: 'Combo Collections',
     badge: 'Bestseller',
     variants: [
-      { weight: '5 x 200g Gift Box', price: 999, originalPrice: 1190, inStock: true },
+      { weight: '5 x 200g Gift Box', pricePaise: rupees(999), mrpPaise: rupees(1190), inStock: true },
     ],
     rating: 4.9,
     reviewsCount: 42,

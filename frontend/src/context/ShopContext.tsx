@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Product, CartItem } from '../types';
+import { Product, CartItem, rupees, percentOf, formatPaise } from '@sv/shared';
 import { PRODUCTS } from '../data/products';
 
 interface ShopContextType {
@@ -36,6 +36,10 @@ interface ShopContextType {
   cartItemCount: number;
   generateWhatsAppOrderUrl: (product?: Product, weight?: string, qty?: number) => string;
 }
+
+// Shipping rules. Server-side once orders move to the API — see docs/API.md.
+const FREE_SHIPPING_THRESHOLD_PAISE = rupees(499);
+const SHIPPING_FEE_PAISE = rupees(60);
 
 const ShopContext = createContext<ShopContextType | undefined>(undefined);
 
@@ -138,7 +142,7 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
           productId: product.id,
           product,
           selectedWeight,
-          price: variant.price,
+          pricePaise: variant.pricePaise,
           quantity,
         },
       ];
@@ -180,26 +184,27 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const isWishlisted = (productId: string) => wishlist.includes(productId);
 
-  const cartSubtotal = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
-  const shippingFee = cartSubtotal >= 499 || cartSubtotal === 0 ? 0 : 60;
+  const cartSubtotal = cart.reduce((acc, item) => acc + item.pricePaise * item.quantity, 0);
+  const shippingFee =
+    cartSubtotal >= FREE_SHIPPING_THRESHOLD_PAISE || cartSubtotal === 0 ? 0 : SHIPPING_FEE_PAISE;
   const cartTotal = Math.max(0, cartSubtotal - appliedDiscount + shippingFee);
   const cartItemCount = cart.reduce((acc, item) => acc + item.quantity, 0);
 
   const applyCoupon = (code: string) => {
     const clean = code.trim().toUpperCase();
     if (clean === 'SVTRADITION' || clean === 'WELCOME10') {
-      const discount = Math.round(cartSubtotal * 0.1);
+      const discount = percentOf(cartSubtotal, 10);
       setAppliedDiscount(discount);
       setCouponCode(clean);
       showToast('Coupon applied! 10% discount added.');
       return { success: true, message: '10% discount applied successfully!' };
     }
     if (clean === 'TASTEOFHOME') {
-      const discount = 50;
+      const discount = rupees(50);
       setAppliedDiscount(discount);
       setCouponCode(clean);
-      showToast('Coupon applied! ₹50 flat discount.');
-      return { success: true, message: '₹50 flat discount applied!' };
+      showToast(`Coupon applied! ${formatPaise(discount)} flat discount.`);
+      return { success: true, message: `${formatPaise(discount)} flat discount applied!` };
     }
     return { success: false, message: 'Invalid coupon code. Try SVTRADITION for 10% off.' };
   };
@@ -216,12 +221,12 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     if (product) {
       const variant = product.variants.find((v) => v.weight === weight) || product.variants[0];
-      messageText = `Namaste S V Home Products!\nI would like to order:\n- Product: ${product.name}\n- Weight: ${weight || variant.weight}\n- Quantity: ${qty}\n- Price: ₹${variant.price * qty}\n\nPlease confirm availability and delivery details.`;
+      messageText = `Namaste S V Home Products!\nI would like to order:\n- Product: ${product.name}\n- Weight: ${weight || variant.weight}\n- Quantity: ${qty}\n- Price: ${formatPaise(variant.pricePaise * qty)}\n\nPlease confirm availability and delivery details.`;
     } else if (cart.length > 0) {
       const itemsList = cart
-        .map((item) => `• ${item.product.name} (${item.selectedWeight}) x ${item.quantity} = ₹${item.price * item.quantity}`)
+        .map((item) => `• ${item.product.name} (${item.selectedWeight}) x ${item.quantity} = ${formatPaise(item.pricePaise * item.quantity)}`)
         .join('\n');
-      messageText = `Namaste S V Home Products!\nI would like to place an order for my cart items:\n\n${itemsList}\n\nSubtotal: ₹${cartSubtotal}\nShipping: ${shippingFee === 0 ? 'FREE' : `₹${shippingFee}`}\nTotal: ₹${cartTotal}\n\nPlease share payment details and dispatch timeline.`;
+      messageText = `Namaste S V Home Products!\nI would like to place an order for my cart items:\n\n${itemsList}\n\nSubtotal: ${formatPaise(cartSubtotal)}\nShipping: ${shippingFee === 0 ? 'FREE' : formatPaise(shippingFee)}\nTotal: ${formatPaise(cartTotal)}\n\nPlease share payment details and dispatch timeline.`;
     } else {
       messageText = 'Namaste S V Home Products! I would like to enquire about your authentic homemade spice powders and traditional South Indian food products.';
     }

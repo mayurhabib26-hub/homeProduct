@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useShop } from '../context/ShopContext';
 import { X, Trash2, Plus, Minus, ShoppingBag, ArrowRight, ShieldCheck, Tag, Phone } from 'lucide-react';
+import { formatPaise } from '@sv/shared';
 
 export const CartDrawer: React.FC = () => {
   const {
@@ -80,7 +81,7 @@ export const CartDrawer: React.FC = () => {
           <div className="bg-[#EBD9BC]/40 px-5 py-3 border-b border-[#EBD9BC]">
             {remainingForFreeShipping > 0 ? (
               <p className="text-xs text-[#483828] font-medium">
-                Add <span className="font-bold text-[#87380F]">₹{remainingForFreeShipping}</span> more
+                Add <span className="font-bold text-[#87380F]">{formatPaise(remainingForFreeShipping)}</span> more
                 for <span className="text-[#647044] font-semibold">FREE Pan-India Delivery!</span>
               </p>
             ) : (
@@ -177,7 +178,7 @@ export const CartDrawer: React.FC = () => {
                       {/* Price */}
                       <div className="text-right">
                         <span className="font-serif text-base font-bold text-[#87380F]">
-                          ₹{item.price * item.quantity}
+                          {formatPaise(item.pricePaise * item.quantity)}
                         </span>
                       </div>
                     </div>
@@ -195,7 +196,7 @@ export const CartDrawer: React.FC = () => {
                 {couponCode ? (
                   <div className="flex items-center justify-between bg-[#647044]/15 border border-[#647044]/30 rounded-md px-3 py-2 text-xs">
                     <span className="text-[#647044] font-semibold flex items-center gap-1.5">
-                      <Tag size={13} /> {couponCode} Applied (-₹{appliedDiscount})
+                      <Tag size={13} /> {couponCode} Applied (-{formatPaise(appliedDiscount)})
                     </span>
                     <button
                       type="button"
@@ -229,12 +230,12 @@ export const CartDrawer: React.FC = () => {
               <div className="space-y-1.5 text-xs text-[#483828]">
                 <div className="flex justify-between">
                   <span>Subtotal</span>
-                  <span className="font-medium">₹{cartSubtotal}</span>
+                  <span className="font-medium">{formatPaise(cartSubtotal)}</span>
                 </div>
                 {appliedDiscount > 0 && (
                   <div className="flex justify-between text-[#647044] font-medium">
                     <span>Discount</span>
-                    <span>-₹{appliedDiscount}</span>
+                    <span>-{formatPaise(appliedDiscount)}</span>
                   </div>
                 )}
                 <div className="flex justify-between">
@@ -243,7 +244,7 @@ export const CartDrawer: React.FC = () => {
                 </div>
                 <div className="flex justify-between text-base font-serif font-bold text-[#87380F] pt-2 border-t border-[#EBD9BC]">
                   <span>Total Amount</span>
-                  <span>₹{cartTotal}</span>
+                  <span>{formatPaise(cartTotal)}</span>
                 </div>
               </div>
 

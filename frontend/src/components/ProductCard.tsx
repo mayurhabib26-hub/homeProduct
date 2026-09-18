@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
-import { Product } from '../types';
+import {Product, formatPaise } from '@sv/shared';
 import { useShop } from '../context/ShopContext';
 import { Star, Heart, ShoppingBag, ArrowRight } from 'lucide-react';
 
@@ -127,11 +127,11 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, className = '
             <div>
               <div className="flex items-baseline gap-1.5">
                 <span className="font-serif text-xl sm:text-2xl font-bold text-[#87380F]">
-                  ₹{currentVariant.price}
+                  {formatPaise(currentVariant.pricePaise)}
                 </span>
-                {currentVariant.originalPrice && (
+                {currentVariant.mrpPaise && (
                   <span className="text-xs line-through text-[#483828]/50">
-                    ₹{currentVariant.originalPrice}
+                    {formatPaise(currentVariant.mrpPaise)}
                   </span>
                 )}
               </div>

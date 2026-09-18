@@ -34,7 +34,7 @@ export const ShopPage: React.FC = () => {
         return false;
       }
       // Price filter (based on lowest variant price)
-      const lowestPrice = product.variants[0]?.price || 0;
+      const lowestPrice = product.variants[0]?.pricePaise || 0;
       if (priceFilter === 'under-150' && lowestPrice >= 150) return false;
       if (priceFilter === '150-300' && (lowestPrice < 150 || lowestPrice > 300)) return false;
       if (priceFilter === 'above-300' && lowestPrice <= 300) return false;
@@ -42,10 +42,10 @@ export const ShopPage: React.FC = () => {
       return true;
     }).sort((a, b) => {
       if (sortBy === 'price-asc') {
-        return a.variants[0].price - b.variants[0].price;
+        return a.variants[0].pricePaise - b.variants[0].pricePaise;
       }
       if (sortBy === 'price-desc') {
-        return b.variants[0].price - a.variants[0].price;
+        return b.variants[0].pricePaise - a.variants[0].pricePaise;
       }
       if (sortBy === 'rating') {
         return b.rating - a.rating;

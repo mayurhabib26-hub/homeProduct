@@ -3,6 +3,7 @@ import { useShop } from '../context/ShopContext';
 import { PRODUCTS } from '../data/products';
 import { RECIPES } from '../data/recipes';
 import { Search, X, ArrowRight, Sparkles } from 'lucide-react';
+import { formatPaise } from '@sv/shared';
 
 export const SearchModal: React.FC = () => {
   const {
@@ -145,7 +146,7 @@ export const SearchModal: React.FC = () => {
                         {p.shortDescription}
                       </p>
                       <span className="text-xs font-bold text-[#87380F] font-serif">
-                        From ₹{p.variants[0].price}
+                        From {formatPaise(p.variants[0].pricePaise)}
                       </span>
                     </div>
                   </div>

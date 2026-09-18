@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useShop } from '../context/ShopContext';
 import { CheckCircle2, ShieldCheck, ArrowRight, Phone, Truck, CreditCard, QrCode, Banknote } from 'lucide-react';
+import { formatPaise } from '@sv/shared';
 
 export const CheckoutPage: React.FC = () => {
   const {
@@ -94,7 +95,7 @@ export const CheckoutPage: React.FC = () => {
               </p>
               <div className="pt-2 border-t border-[#EBD9BC] flex justify-between font-bold text-sm text-[#87380F]">
                 <span>Total Amount Paid/Due:</span>
-                <span>₹{cartTotal}</span>
+                <span>{formatPaise(cartTotal)}</span>
               </div>
             </div>
 
@@ -421,7 +422,7 @@ export const CheckoutPage: React.FC = () => {
                         </div>
                       </div>
                       <span className="font-serif font-bold text-[#87380F]">
-                        ₹{item.price * item.quantity}
+                        {formatPaise(item.pricePaise * item.quantity)}
                       </span>
                     </div>
                   ))}
@@ -431,12 +432,12 @@ export const CheckoutPage: React.FC = () => {
                 <div className="pt-3 border-t border-[#EBD9BC] space-y-2 text-xs text-[#483828]">
                   <div className="flex justify-between">
                     <span>Subtotal</span>
-                    <span>₹{cartSubtotal}</span>
+                    <span>{formatPaise(cartSubtotal)}</span>
                   </div>
                   {appliedDiscount > 0 && (
                     <div className="flex justify-between text-[#647044] font-medium">
                       <span>Coupon ({couponCode})</span>
-                      <span>-₹{appliedDiscount}</span>
+                      <span>-{formatPaise(appliedDiscount)}</span>
                     </div>
                   )}
                   <div className="flex justify-between">
@@ -445,7 +446,7 @@ export const CheckoutPage: React.FC = () => {
                   </div>
                   <div className="flex justify-between text-lg font-serif font-bold text-[#87380F] pt-2 border-t border-[#EBD9BC]">
                     <span>Total Amount Payable</span>
-                    <span>₹{cartTotal}</span>
+                    <span>{formatPaise(cartTotal)}</span>
                   </div>
                 </div>
 

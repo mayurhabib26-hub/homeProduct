@@ -1,4 +1,4 @@
-import { CustomerReview } from '../types';
+import { CustomerReview } from '@sv/shared';
 
 export interface IngredientStory {
   id: string;

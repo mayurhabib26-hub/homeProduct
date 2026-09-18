@@ -3,6 +3,7 @@ import { useShop } from '../context/ShopContext';
 import { PRODUCTS } from '../data/products';
 import { ProductCard } from '../components/ProductCard';
 import { ScrollReveal } from '../components/ScrollReveal';
+import { formatPaise } from '@sv/shared';
 import {
   Star,
   ShoppingBag,
@@ -181,16 +182,16 @@ export const ProductDetailPage: React.FC = () => {
             <div className="p-4 bg-[#F7EFE1] rounded-xl border border-[#EBD9BC]">
               <div className="flex items-baseline gap-3">
                 <span className="font-serif text-3xl sm:text-4xl font-bold text-[#87380F]">
-                  ₹{currentVariant.price * quantity}
+                  {formatPaise(currentVariant.pricePaise * quantity)}
                 </span>
-                {currentVariant.originalPrice && (
+                {currentVariant.mrpPaise && (
                   <span className="text-base line-through text-[#483828]/50">
-                    ₹{currentVariant.originalPrice * quantity}
+                    {formatPaise(currentVariant.mrpPaise * quantity)}
                   </span>
                 )}
-                {currentVariant.originalPrice && (
+                {currentVariant.mrpPaise && (
                   <span className="text-xs font-semibold text-[#647044] bg-[#647044]/10 px-2 py-0.5 rounded">
-                    Save ₹{(currentVariant.originalPrice - currentVariant.price) * quantity}
+                    Save {formatPaise((currentVariant.mrpPaise - currentVariant.pricePaise) * quantity)}
                   </span>
                 )}
               </div>
@@ -221,7 +222,7 @@ export const ProductDetailPage: React.FC = () => {
                         : 'border-[#EBD9BC] bg-white text-[#483828] hover:border-[#B69A55]'
                     }`}
                   >
-                    {v.weight} — ₹{v.price}
+                    {v.weight} — {formatPaise(v.pricePaise)}
                   </button>
                 ))}
               </div>
@@ -541,7 +542,7 @@ export const ProductDetailPage: React.FC = () => {
         <div>
           <span className="text-[11px] text-[#483828]/70 block">{selectedWeight}</span>
           <span className="font-serif text-lg font-bold text-[#87380F]">
-            ₹{currentVariant.price * quantity}
+            {formatPaise(currentVariant.pricePaise * quantity)}
           </span>
         </div>
         <button

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useShop } from '../context/ShopContext';
 import { RECIPES } from '../data/recipes';
-import { Recipe } from '../types';
+import {Recipe, formatPaise } from '@sv/shared';
 import { PRODUCTS } from '../data/products';
 import { Clock, ChefHat, Users, ArrowRight, ShoppingBag, Check, X, Sparkles } from 'lucide-react';
 import { ScrollReveal } from '../components/ScrollReveal';
@@ -208,7 +208,7 @@ export const RecipesPage: React.FC = () => {
                           {getProductForRecipe(selectedRecipe)!.name}
                         </h4>
                         <span className="text-xs font-serif text-[#87380F] font-bold">
-                          ₹{getProductForRecipe(selectedRecipe)!.variants[0].price}
+                          {formatPaise(getProductForRecipe(selectedRecipe)!.variants[0].pricePaise)}
                         </span>
                       </div>
                     </div>

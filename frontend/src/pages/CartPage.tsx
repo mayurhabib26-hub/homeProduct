@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useShop } from '../context/ShopContext';
 import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, ShieldCheck, Tag, Phone } from 'lucide-react';
+import { formatPaise } from '@sv/shared';
 
 export const CartPage: React.FC = () => {
   const {
@@ -77,7 +78,7 @@ export const CartPage: React.FC = () => {
         <div className="bg-[#F7EFE1] p-4 rounded-xl border border-[#EBD9BC] mb-8">
           {remainingForFreeShipping > 0 ? (
             <p className="text-xs sm:text-sm text-[#483828] font-medium">
-              Add <strong className="text-[#87380F]">₹{remainingForFreeShipping}</strong> more to your cart to get <strong className="text-[#647044]">FREE Pan-India Delivery!</strong>
+              Add <strong className="text-[#87380F]">{formatPaise(remainingForFreeShipping)}</strong> more to your cart to get <strong className="text-[#647044]">FREE Pan-India Delivery!</strong>
             </p>
           ) : (
             <p className="text-xs sm:text-sm text-[#647044] font-bold">
@@ -112,7 +113,7 @@ export const CartPage: React.FC = () => {
                         Pack: {item.selectedWeight}
                       </span>
                       <span className="text-xs text-[#483828]/60 block font-serif">
-                        ₹{item.price} each
+                        {formatPaise(item.pricePaise)} each
                       </span>
                     </div>
                   </div>
@@ -142,7 +143,7 @@ export const CartPage: React.FC = () => {
                     {/* Price */}
                     <div className="text-right min-w-[70px]">
                       <span className="font-serif text-lg font-bold text-[#87380F]">
-                        ₹{item.price * item.quantity}
+                        {formatPaise(item.pricePaise * item.quantity)}
                       </span>
                     </div>
 
@@ -181,7 +182,7 @@ export const CartPage: React.FC = () => {
                 {couponCode ? (
                   <div className="flex items-center justify-between bg-[#647044]/15 border border-[#647044]/30 rounded-lg px-3 py-2.5 text-xs">
                     <span className="text-[#647044] font-semibold flex items-center gap-1.5">
-                      <Tag size={14} /> Coupon {couponCode} (-₹{appliedDiscount})
+                      <Tag size={14} /> Coupon {couponCode} (-{formatPaise(appliedDiscount)})
                     </span>
                     <button
                       type="button"
@@ -218,12 +219,12 @@ export const CartPage: React.FC = () => {
               <div className="space-y-2.5 text-xs text-[#483828] pt-2 border-t border-[#EBD9BC]/70">
                 <div className="flex justify-between">
                   <span>Cart Subtotal</span>
-                  <span className="font-semibold">₹{cartSubtotal}</span>
+                  <span className="font-semibold">{formatPaise(cartSubtotal)}</span>
                 </div>
                 {appliedDiscount > 0 && (
                   <div className="flex justify-between text-[#647044] font-medium">
                     <span>Special Discount</span>
-                    <span>-₹{appliedDiscount}</span>
+                    <span>-{formatPaise(appliedDiscount)}</span>
                   </div>
                 )}
                 <div className="flex justify-between">
@@ -232,7 +233,7 @@ export const CartPage: React.FC = () => {
                 </div>
                 <div className="flex justify-between text-lg font-serif font-bold text-[#87380F] pt-3 border-t border-[#EBD9BC]">
                   <span>Total Amount</span>
-                  <span>₹{cartTotal}</span>
+                  <span>{formatPaise(cartTotal)}</span>
                 </div>
               </div>
 

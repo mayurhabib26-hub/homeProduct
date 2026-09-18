@@ -1,7 +1,12 @@
+// Types shared by frontend and backend.
+//
+// All money is integer paise. Never a float, never a decimal string.
+// Format for display with formatPaise() from ./money — never by hand.
+
 export interface ProductVariant {
   weight: string;
-  price: number;
-  originalPrice?: number;
+  pricePaise: number;
+  mrpPaise?: number;
   inStock: boolean;
 }
 
@@ -39,7 +44,7 @@ export interface CartItem {
   productId: string;
   product: Product;
   selectedWeight: string;
-  price: number;
+  pricePaise: number;
   quantity: number;
 }
 
