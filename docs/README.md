@@ -60,16 +60,17 @@ Start here if you are new:
 | 3 | [DATABASE.md](./DATABASE.md) | Schema, indexes, money, migrations |
 | 4 | [API.md](./API.md) | Every endpoint contract |
 | 5 | [PAYMENTS.md](./PAYMENTS.md) | Razorpay flow, webhooks, reconciliation |
-| 6 | [ADMIN.md](./ADMIN.md) | Admin panel specification |
-| 7 | [AUTH.md](./AUTH.md) | Admin login, customer OTP, delivery providers |
-| 8 | [SECURITY.md](./SECURITY.md) | Threat model and controls |
-| 9 | [OBSERVABILITY.md](./OBSERVABILITY.md) | Logs, metrics, alerts, SLOs |
-| 10 | [DEPLOYMENT.md](./DEPLOYMENT.md) | Environments, CI/CD, runbooks |
-| 11 | [TESTING.md](./TESTING.md) | Test strategy and coverage gates |
-| 12 | [COMPLIANCE.md](./COMPLIANCE.md) | FSSAI, GST, Legal Metrology, consumer law |
-| 13 | [PWA.md](./PWA.md) | Installability, caching rules, offline boundaries |
-| 14 | [MIGRATION.md](./MIGRATION.md) | What changes in the existing codebase |
-| 15 | [ROADMAP.md](./ROADMAP.md) | Phased delivery plan |
+| 6 | [COURIER.md](./COURIER.md) | Shipping, tracking webhooks, labels, COD, RTO |
+| 7 | [ADMIN.md](./ADMIN.md) | Admin panel specification |
+| 8 | [AUTH.md](./AUTH.md) | Admin login, customer OTP, delivery providers |
+| 9 | [SECURITY.md](./SECURITY.md) | Threat model and controls |
+| 10 | [OBSERVABILITY.md](./OBSERVABILITY.md) | Logs, metrics, alerts, SLOs |
+| 11 | [DEPLOYMENT.md](./DEPLOYMENT.md) | Environments, CI/CD, runbooks |
+| 12 | [TESTING.md](./TESTING.md) | Test strategy and coverage gates |
+| 13 | [COMPLIANCE.md](./COMPLIANCE.md) | FSSAI, GST, Legal Metrology, consumer law |
+| 14 | [PWA.md](./PWA.md) | Installability, caching rules, offline boundaries |
+| 15 | [MIGRATION.md](./MIGRATION.md) | What changes in the existing codebase |
+| 16 | [ROADMAP.md](./ROADMAP.md) | Phased delivery plan |
 
 ## Design principles
 

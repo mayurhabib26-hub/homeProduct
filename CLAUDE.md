@@ -122,6 +122,24 @@ Tests resolve variant ids through `db/test-helpers.ts` rather than assuming
 id 1 — identity no longer restarts, because restarting it required the
 TRUNCATE that caused the problem above.
 
+## Before you change courier or shipping code
+
+[docs/COURIER.md](./docs/COURIER.md) is the design. Three traps it exists to
+stop you walking into:
+
+- **`rto` restocks.** `RESTOCKING` in `order-status.ts` includes it, so
+  transitioning to `rto` hands stock back. Wire that to RTO_INITIATED and the
+  shop resells a jar that is still in a truck. Only RTO_DELIVERED may
+  transition, and restock is a human decision after inspection.
+- **Courier webhooks are not payment webhooks.** Neither provider signs the
+  body, so hard rule 4 does not apply and `express.raw()` here would imply a
+  guarantee we do not have. Verify the shared token in constant time, treat the
+  payload as a hint about a parcel we already booked, and never move money on
+  one — COD remittance is imported from a statement by an admin.
+- **Parcel dimensions are hardcoded** in `lib/shiprocket.ts`. Couriers bill on
+  volumetric weight and reweigh at the hub; a guessed 500 g comes back as a
+  discrepancy charge weeks later. Variants need a real packed weight.
+
 ## Before you change payment or stock code
 
 Read [docs/PAYMENTS.md](./docs/PAYMENTS.md) fully, and make sure the
