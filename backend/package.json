@@ -29,7 +29,8 @@
     "test:gst": "tsx src/services/gst.test.ts",
     "test:invoices": "SELLER_ADDRESS='1 Test Street, Bengaluru 560004' SELLER_GSTIN=29AAAAA0000A1Z5 FSSAI_LICENCE=00000000000000 GRIEVANCE_OFFICER='Test Officer' GRIEVANCE_EMAIL=test@example.invalid tsx src/services/invoices.test.ts",
     "test:consent": "tsx src/services/consent.test.ts",
-    "test:seed-safety": "tsx src/db/seed-safety.test.ts"
+    "test:seed-safety": "tsx src/db/seed-safety.test.ts",
+    "admin:remove": "tsx src/db/remove-admin.ts"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.5.8",

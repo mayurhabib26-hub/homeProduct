@@ -43,4 +43,14 @@ if (existing) {
   console.log(`created ${normalised} (${role})`);
 }
 
+/**
+ * PGlite holds its data directory in a single process, so a running API has a
+ * stale view until it restarts. Postgres proper has no such constraint — this
+ * only applies to local development.
+ */
+const usingPglite = !process.env.DATABASE_URL || process.env.DATABASE_URL.startsWith('pglite:');
+if (usingPglite) {
+  console.log('\nRestart the API before signing in — it will not see this account until you do.');
+}
+
 process.exit(0);

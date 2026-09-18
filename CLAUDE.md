@@ -88,8 +88,10 @@ sequential numbering.
    product is currently seeded at 0910 / 5%, which is a guess.
 
 Local development uses PGlite when `DATABASE_URL` is unset — real Postgres
-compiled to WASM, but **single-process**: stop the API before `db:migrate` or
-`db:seed`, or the seed writes somewhere the server cannot see.
+compiled to WASM, but **single-process**: stop the API before `db:migrate`,
+`db:seed` or `admin:create`, or the write lands somewhere the running server
+cannot see. The failure is silent — the command reports success and the API
+keeps serving stale data.
 
 ## Before you change auth code
 
