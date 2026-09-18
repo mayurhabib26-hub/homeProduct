@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useShop } from '../context/ShopContext';
 import { X, Trash2, Plus, Minus, ShoppingBag, ArrowRight, ShieldCheck, Tag, Phone } from 'lucide-react';
 import { formatPaise } from '@sv/shared';
+import { useNavigate } from 'react-router-dom';
 
 export const CartDrawer: React.FC = () => {
   const {
@@ -17,9 +18,9 @@ export const CartDrawer: React.FC = () => {
     couponCode,
     applyCoupon,
     removeCoupon,
-    setActivePage,
     generateWhatsAppOrderUrl,
   } = useShop();
+  const navigate = useNavigate();
 
   const [inputCoupon, setInputCoupon] = useState('');
   const [couponError, setCouponError] = useState<string | null>(null);
@@ -44,7 +45,7 @@ export const CartDrawer: React.FC = () => {
 
   const handleProceedToCheckout = () => {
     setIsCartDrawerOpen(false);
-    setActivePage('checkout');
+    navigate('/checkout');
   };
 
   return (
@@ -113,7 +114,7 @@ export const CartDrawer: React.FC = () => {
                   id="empty-cart-shop-now"
                   onClick={() => {
                     setIsCartDrawerOpen(false);
-                    setActivePage('shop');
+                    navigate('/shop');
                   }}
                   className="mt-4 px-6 py-2.5 bg-[#87380F] hover:bg-[#483828] text-white rounded-md text-sm font-semibold tracking-wider uppercase transition-colors inline-block"
                 >

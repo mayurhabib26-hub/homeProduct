@@ -4,6 +4,7 @@ import { PRODUCTS } from '../data/products';
 import { RECIPES } from '../data/recipes';
 import { Search, X, ArrowRight, Sparkles } from 'lucide-react';
 import { formatPaise } from '@sv/shared';
+import { useNavigate } from 'react-router-dom';
 
 export const SearchModal: React.FC = () => {
   const {
@@ -13,8 +14,8 @@ export const SearchModal: React.FC = () => {
     setSearchQuery,
     navigateToProduct,
     navigateToRecipe,
-    setActivePage,
   } = useShop();
+  const navigate = useNavigate();
 
   if (!isSearchOpen) return null;
 
@@ -110,7 +111,7 @@ export const SearchModal: React.FC = () => {
                   type="button"
                   onClick={() => {
                     setIsSearchOpen(false);
-                    setActivePage('shop');
+                    navigate('/shop');
                   }}
                   className="text-xs text-[#87380F] font-semibold hover:underline flex items-center gap-1"
                 >

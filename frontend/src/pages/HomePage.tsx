@@ -18,6 +18,7 @@ import {
 import { RECIPES } from '../data/recipes';
 import { INGREDIENTS_STORY, CLIENT_REVIEWS } from '../data/siteData';
 import { ProductCard } from '../components/ProductCard';
+import { Link } from 'react-router-dom';
 import {
   ArrowRight,
   Sparkles,
@@ -42,7 +43,6 @@ import {
 
 export const HomePage: React.FC = () => {
   const {
-    setActivePage,
     navigateToProduct,
     navigateToRecipe,
     addToCart,
@@ -108,25 +108,19 @@ export const HomePage: React.FC = () => {
 
               {/* CTAs */}
               <div className="pt-2 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
-                <button
-                  type="button"
-                  id="hero-shop-cta"
-                  onClick={() => setActivePage('shop')}
-                  className="w-full sm:w-auto px-8 py-3.5 bg-[#87380F] hover:bg-[#662707] text-[#FAF6F0] rounded-md font-sans text-sm font-semibold tracking-widest uppercase transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer"
-                >
+                <Link to="/shop"
+                id="hero-shop-cta"
+                className="w-full sm:w-auto px-8 py-3.5 bg-[#87380F] hover:bg-[#662707] text-[#FAF6F0] rounded-md font-sans text-sm font-semibold tracking-widest uppercase transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2 cursor-pointer">
                   <ShoppingBag size={16} />
                   <span>SHOP OUR PRODUCTS</span>
-                </button>
+                </Link>
 
-                <button
-                  type="button"
-                  id="hero-story-cta"
-                  onClick={() => setActivePage('about')}
-                  className="w-full sm:w-auto px-8 py-3.5 bg-transparent border border-[#87380F] text-[#87380F] hover:bg-[#EBD9BC]/50 rounded-md font-sans text-sm font-semibold tracking-widest uppercase transition-colors flex items-center justify-center gap-2 cursor-pointer"
-                >
+                <Link to="/about"
+                id="hero-story-cta"
+                className="w-full sm:w-auto px-8 py-3.5 bg-transparent border border-[#87380F] text-[#87380F] hover:bg-[#EBD9BC]/50 rounded-md font-sans text-sm font-semibold tracking-widest uppercase transition-colors flex items-center justify-center gap-2 cursor-pointer">
                   <span>EXPLORE OUR STORY</span>
                   <ArrowRight size={16} />
-                </button>
+                </Link>
               </div>
 
               {/* Trust Line */}
@@ -258,15 +252,12 @@ export const HomePage: React.FC = () => {
                   </div>
 
                   <div className="pt-2">
-                    <button
-                      type="button"
-                      id="brand-intro-story-cta"
-                      onClick={() => setActivePage('about')}
-                      className="inline-flex items-center gap-2 text-sm font-semibold tracking-wider uppercase text-[#87380F] hover:text-[#662707] transition-colors group cursor-pointer"
-                    >
+                    <Link to="/about"
+                id="brand-intro-story-cta"
+                className="inline-flex items-center gap-2 text-sm font-semibold tracking-wider uppercase text-[#87380F] hover:text-[#662707] transition-colors group cursor-pointer">
                       <span>Read our full family story</span>
                       <ArrowRight size={16} className="transform group-hover:translate-x-1 transition-transform" />
-                    </button>
+                    </Link>
                   </div>
                 </div>
               </ScrollReveal>
@@ -303,15 +294,12 @@ export const HomePage: React.FC = () => {
 
           <ScrollReveal animation="fade-up" delay={0.1}>
             <div className="mt-12 text-center">
-              <button
-                type="button"
+              <Link to="/shop"
                 id="view-all-spices-btn"
-                onClick={() => setActivePage('shop')}
-                className="px-8 py-3.5 bg-[#87380F] hover:bg-[#662707] text-white rounded-md font-sans text-xs font-semibold tracking-widest uppercase transition-colors shadow-sm inline-flex items-center gap-2 cursor-pointer"
-              >
+                className="px-8 py-3.5 bg-[#87380F] hover:bg-[#662707] text-white rounded-md font-sans text-xs font-semibold tracking-widest uppercase transition-colors shadow-sm inline-flex items-center gap-2 cursor-pointer">
                 <span>EXPLORE ALL SPICE BLENDS</span>
                 <ArrowRight size={16} />
-              </button>
+              </Link>
             </div>
           </ScrollReveal>
         </div>
@@ -339,10 +327,8 @@ export const HomePage: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Category 1: Classics */}
             <ScrollReveal animation="fade-up" delay={0.05}>
-              <div
-                onClick={() => setActivePage('shop')}
-                className="group relative rounded-xl overflow-hidden shadow-sm border border-[#EBD9BC] bg-white cursor-pointer hover:shadow-md transition-all duration-300 flex flex-col h-full"
-              >
+              <Link to="/shop"
+                className="group relative rounded-xl overflow-hidden shadow-sm border border-[#EBD9BC] bg-white cursor-pointer hover:shadow-md transition-all duration-300 flex flex-col h-full">
                 <div className="aspect-[4/3] overflow-hidden bg-[#F3E7D0]">
                   <img
                     src={sambarPackImg}
@@ -368,15 +354,13 @@ export const HomePage: React.FC = () => {
                     <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
                   </div>
                 </div>
-              </div>
+              </Link>
             </ScrollReveal>
 
             {/* Category 2: Pure Spice Powders */}
             <ScrollReveal animation="fade-up" delay={0.1}>
-              <div
-                onClick={() => setActivePage('shop')}
-                className="group relative rounded-xl overflow-hidden shadow-sm border border-[#EBD9BC] bg-white cursor-pointer hover:shadow-md transition-all duration-300 flex flex-col h-full"
-              >
+              <Link to="/shop"
+                className="group relative rounded-xl overflow-hidden shadow-sm border border-[#EBD9BC] bg-white cursor-pointer hover:shadow-md transition-all duration-300 flex flex-col h-full">
                 <div className="aspect-[4/3] overflow-hidden bg-[#F3E7D0]">
                   <img
                     src={byadagiChilliPackImg}
@@ -403,15 +387,13 @@ export const HomePage: React.FC = () => {
                     <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
                   </div>
                 </div>
-              </div>
+              </Link>
             </ScrollReveal>
 
             {/* Category 3: Chutney & Podi */}
             <ScrollReveal animation="fade-up" delay={0.15}>
-              <div
-                onClick={() => setActivePage('shop')}
-                className="group relative rounded-xl overflow-hidden shadow-sm border border-[#EBD9BC] bg-white cursor-pointer hover:shadow-md transition-all duration-300 flex flex-col h-full"
-              >
+              <Link to="/shop"
+                className="group relative rounded-xl overflow-hidden shadow-sm border border-[#EBD9BC] bg-white cursor-pointer hover:shadow-md transition-all duration-300 flex flex-col h-full">
                 <div className="aspect-[4/3] overflow-hidden bg-[#F3E7D0]">
                   <img
                     src={chutneyPudiPackImg}
@@ -437,15 +419,13 @@ export const HomePage: React.FC = () => {
                     <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
                   </div>
                 </div>
-              </div>
+              </Link>
             </ScrollReveal>
 
             {/* Category 4: Combo Collections */}
             <ScrollReveal animation="fade-up" delay={0.2}>
-              <div
-                onClick={() => setActivePage('shop')}
-                className="group relative rounded-xl overflow-hidden shadow-sm border border-[#EBD9BC] bg-white cursor-pointer hover:shadow-md transition-all duration-300 flex flex-col h-full"
-              >
+              <Link to="/shop"
+                className="group relative rounded-xl overflow-hidden shadow-sm border border-[#EBD9BC] bg-white cursor-pointer hover:shadow-md transition-all duration-300 flex flex-col h-full">
                 <div className="aspect-[4/3] overflow-hidden bg-[#F3E7D0]">
                   <img
                     src={comboTrioPackImg}
@@ -471,7 +451,7 @@ export const HomePage: React.FC = () => {
                     <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
                   </div>
                 </div>
-              </div>
+              </Link>
             </ScrollReveal>
           </div>
         </div>
@@ -779,15 +759,12 @@ export const HomePage: React.FC = () => {
 
           <ScrollReveal animation="fade-up" delay={0.1}>
             <div className="mt-12 text-center">
-              <button
-                type="button"
+              <Link to="/recipes"
                 id="how-to-use-recipes-cta"
-                onClick={() => setActivePage('recipes')}
-                className="px-8 py-3.5 bg-[#483828] hover:bg-[#87380F] text-white rounded-md font-sans text-xs font-semibold tracking-widest uppercase transition-colors inline-flex items-center gap-2 cursor-pointer shadow-sm"
-              >
+                className="px-8 py-3.5 bg-[#483828] hover:bg-[#87380F] text-white rounded-md font-sans text-xs font-semibold tracking-widest uppercase transition-colors inline-flex items-center gap-2 cursor-pointer shadow-sm">
                 <span>EXPLORE ALL RECIPES</span>
                 <ArrowRight size={16} />
-              </button>
+              </Link>
             </div>
           </ScrollReveal>
         </div>
@@ -813,15 +790,12 @@ export const HomePage: React.FC = () => {
                 </p>
               </div>
 
-              <button
-                type="button"
+              <Link to="/shop"
                 id="heritage-craft-shop-cta"
-                onClick={() => setActivePage('shop')}
-                className="px-6 py-3 bg-[#87380F] hover:bg-[#662707] text-white text-xs font-semibold tracking-widest uppercase rounded shadow-sm flex items-center gap-2 self-start md:self-auto cursor-pointer transition-colors"
-              >
+                className="px-6 py-3 bg-[#87380F] hover:bg-[#662707] text-white text-xs font-semibold tracking-widest uppercase rounded shadow-sm flex items-center gap-2 self-start md:self-auto cursor-pointer transition-colors">
                 <span>EXPLORE ALL BLENDS</span>
                 <ArrowRight size={14} />
-              </button>
+              </Link>
             </div>
           </ScrollReveal>
 
@@ -1011,13 +985,10 @@ export const HomePage: React.FC = () => {
                     <Phone size={13} className="text-[#647044]" />
                     <span>WhatsApp Inquiry</span>
                   </a>
-                  <button
-                    type="button"
-                    onClick={() => setActivePage('shop')}
-                    className="px-5 py-2 bg-[#87380F] hover:bg-[#662707] text-white text-xs font-bold uppercase tracking-wider rounded transition-colors cursor-pointer"
-                  >
+                  <Link to="/shop"
+                className="px-5 py-2 bg-[#87380F] hover:bg-[#662707] text-white text-xs font-bold uppercase tracking-wider rounded transition-colors cursor-pointer">
                     Shop Now
-                  </button>
+                  </Link>
                 </div>
               </div>
             </div>

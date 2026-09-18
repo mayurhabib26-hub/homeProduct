@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrandLogo } from './BrandLogo';
 import { useShop } from '../context/ShopContext';
-import { useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import {
   Search,
   ShoppingBag,
@@ -12,9 +12,11 @@ import {
   ArrowRight,
 } from 'lucide-react';
 
+/** 'home' is the only nav id whose path is not just /<id>. */
+const linkPath = (id: string) => (id === 'home' ? '/' : `/${id}`);
+
 export const Navbar: React.FC = () => {
   const {
-    setActivePage,
     cartItemCount,
     setIsCartDrawerOpen,
     setIsSearchOpen,
@@ -95,30 +97,27 @@ export const Navbar: React.FC = () => {
                 <Menu size={24} />
               </button>
 
-              <button
-                type="button"
+              <Link to="/"
                 id="brand-logo-btn"
-                onClick={() => setActivePage('home')}
-                className="text-left focus:outline-none group cursor-pointer"
-              >
+                className="text-left focus:outline-none group cursor-pointer">
                 <BrandLogo
                   size={isScrolled ? 'sm' : 'md'}
                   showText={true}
                   textColor="text-[#483828] group-hover:text-[#87380F] transition-colors"
                   subtextColor="text-[#87380F]"
                 />
-              </button>
+              </Link>
             </div>
 
             {/* Center: Desktop Navigation Links */}
             <nav className="hidden lg:flex items-center gap-8 xl:gap-10">
               {navLinks.map((link) => {
-                const isActive = pathname === (link.id === 'home' ? '/' : `/${link.id}`);
+                const isActive = pathname === linkPath(link.id);
                 return (
-                  <button
+                  <Link
                     key={link.id}
                     id={`nav-${link.id}`}
-                    onClick={() => setActivePage(link.id)}
+                    to={linkPath(link.id)}
                     className={`relative text-sm font-sans font-medium tracking-wider uppercase transition-colors py-1 cursor-pointer ${
                       isActive
                         ? 'text-[#87380F] font-semibold'
@@ -129,7 +128,7 @@ export const Navbar: React.FC = () => {
                     {isActive && (
                       <span className="absolute bottom-0 left-0 w-full h-[2px] bg-[#87380F] rounded-full transition-all duration-300" />
                     )}
-                  </button>
+                  </Link>
                 );
               })}
             </nav>
@@ -147,21 +146,18 @@ export const Navbar: React.FC = () => {
                 <Search size={20} />
               </button>
 
-              <button
-                type="button"
+              <Link to="/shop"
                 id="navbar-wishlist-btn"
-                onClick={() => setActivePage('shop')}
                 className="relative hidden sm:flex p-2.5 text-[#483828] hover:text-[#87380F] hover:bg-[#F3E7D0]/40 rounded-full transition-colors cursor-pointer"
                 title="Favorites"
-                aria-label="Favorites"
-              >
+                aria-label="Favorites">
                 <Heart size={20} className={wishlist.length > 0 ? 'fill-[#87380F] text-[#87380F]' : ''} />
                 {wishlist.length > 0 && (
                   <span className="absolute top-1 right-1 w-4 h-4 bg-[#87380F] text-white text-[10px] font-bold rounded-full flex items-center justify-center">
                     {wishlist.length}
                   </span>
                 )}
-              </button>
+              </Link>
 
               <button
                 type="button"
@@ -207,21 +203,19 @@ export const Navbar: React.FC = () => {
 
               <div className="py-6 space-y-3 font-sans">
                 {navLinks.map((link) => (
-                  <button
+                  <Link
                     key={link.id}
-                    onClick={() => {
-                      setActivePage(link.id);
-                      setMobileMenuOpen(false);
-                    }}
+                    to={linkPath(link.id)}
+                    onClick={() => setMobileMenuOpen(false)}
                     className={`w-full text-left py-2.5 px-3 rounded-lg text-base font-medium flex items-center justify-between transition-colors ${
-                      pathname === (link.id === 'home' ? '/' : `/${link.id}`)
+                      pathname === linkPath(link.id)
                         ? 'bg-[#EBD9BC]/60 text-[#87380F] font-semibold'
                         : 'text-[#483828] hover:bg-[#F3E7D0]/40'
                     }`}
                   >
                     <span>{link.label}</span>
                     <ArrowRight size={16} className="text-[#87380F]/60" />
-                  </button>
+                  </Link>
                 ))}
               </div>
             </div>

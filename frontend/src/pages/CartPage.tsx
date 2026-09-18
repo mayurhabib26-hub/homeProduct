@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useShop } from '../context/ShopContext';
 import { Trash2, Plus, Minus, ShoppingBag, ArrowRight, ShieldCheck, Tag, Phone } from 'lucide-react';
 import { formatPaise } from '@sv/shared';
+import { Link } from 'react-router-dom';
 
 export const CartPage: React.FC = () => {
   const {
@@ -15,7 +16,6 @@ export const CartPage: React.FC = () => {
     couponCode,
     applyCoupon,
     removeCoupon,
-    setActivePage,
     generateWhatsAppOrderUrl,
   } = useShop();
 
@@ -49,14 +49,11 @@ export const CartPage: React.FC = () => {
           <p className="text-xs sm:text-sm text-[#483828]/75 leading-relaxed">
             Your spice pantry is waiting. Explore our authentic homemade Rasam, Puliyogare, and Sambar powders to begin.
           </p>
-          <button
-            type="button"
-            id="empty-cart-explore-btn"
-            onClick={() => setActivePage('shop')}
-            className="mt-4 px-8 py-3 bg-[#87380F] hover:bg-[#662707] text-white rounded-md text-xs font-bold tracking-widest uppercase transition-colors inline-block cursor-pointer"
-          >
+          <Link to="/shop"
+                id="empty-cart-explore-btn"
+                className="mt-4 px-8 py-3 bg-[#87380F] hover:bg-[#662707] text-white rounded-md text-xs font-bold tracking-widest uppercase transition-colors inline-block cursor-pointer">
             START SHOPPING
-          </button>
+          </Link>
         </div>
       </div>
     );
@@ -161,13 +158,10 @@ export const CartPage: React.FC = () => {
               ))}
             </div>
 
-            <button
-              type="button"
-              onClick={() => setActivePage('shop')}
-              className="text-xs font-semibold uppercase tracking-wider text-[#87380F] hover:underline flex items-center gap-1.5 pt-2"
-            >
+            <Link to="/shop"
+                className="text-xs font-semibold uppercase tracking-wider text-[#87380F] hover:underline flex items-center gap-1.5 pt-2">
               <span>← Continue Shopping for Spices</span>
-            </button>
+            </Link>
           </div>
 
           {/* Right Summary Card */}
@@ -239,15 +233,12 @@ export const CartPage: React.FC = () => {
 
               {/* Actions */}
               <div className="space-y-3 pt-2">
-                <button
-                  type="button"
-                  id="cart-proceed-checkout"
-                  onClick={() => setActivePage('checkout')}
-                  className="w-full py-3.5 bg-[#87380F] hover:bg-[#662707] text-white rounded-md font-sans text-xs font-bold tracking-widest uppercase transition-colors flex items-center justify-center gap-2 shadow-sm cursor-pointer"
-                >
+                <Link to="/checkout"
+                id="cart-proceed-checkout"
+                className="w-full py-3.5 bg-[#87380F] hover:bg-[#662707] text-white rounded-md font-sans text-xs font-bold tracking-widest uppercase transition-colors flex items-center justify-center gap-2 shadow-sm cursor-pointer">
                   <span>PROCEED TO CHECKOUT</span>
                   <ArrowRight size={16} />
-                </button>
+                </Link>
 
                 <a
                   href={generateWhatsAppOrderUrl()}

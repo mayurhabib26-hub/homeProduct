@@ -4,7 +4,7 @@ import { PRODUCTS } from '../data/products';
 import { ProductCard } from '../components/ProductCard';
 import { ScrollReveal } from '../components/ScrollReveal';
 import { formatPaise, type Product } from '@sv/shared';
-import { useParams, Link } from 'react-router-dom';
+import {useParams, Link, useNavigate } from 'react-router-dom';
 import {
   Star,
   ShoppingBag,
@@ -61,10 +61,10 @@ const ProductDetail: React.FC<{ product: Product }> = ({ product }) => {
     addToCart,
     toggleWishlist,
     isWishlisted,
-    setActivePage,
     generateWhatsAppOrderUrl,
     showToast,
   } = useShop();
+  const navigate = useNavigate();
 
   const [selectedImage, setSelectedImage] = useState(product.image);
   const [selectedWeight, setSelectedWeight] = useState(product.variants[0]?.weight || '100g');
@@ -88,7 +88,7 @@ const ProductDetail: React.FC<{ product: Product }> = ({ product }) => {
 
   const handleBuyNow = () => {
     addToCart(product, selectedWeight, quantity);
-    setActivePage('checkout');
+    navigate('/checkout');
   };
 
   const handleShare = () => {
@@ -108,13 +108,13 @@ const ProductDetail: React.FC<{ product: Product }> = ({ product }) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Breadcrumb Navigation */}
         <nav className="flex items-center gap-2 text-xs text-[#483828]/70 mb-6 sm:mb-8 font-sans">
-          <button onClick={() => setActivePage('home')} className="hover:text-[#87380F]">
+          <Link to="/" className="hover:text-[#87380F]">
             Home
-          </button>
+          </Link>
           <span>/</span>
-          <button onClick={() => setActivePage('shop')} className="hover:text-[#87380F]">
+          <Link to="/shop" className="hover:text-[#87380F]">
             Shop All
-          </button>
+          </Link>
           <span>/</span>
           <span className="text-[#87380F] font-semibold truncate max-w-xs">{product.name}</span>
         </nav>

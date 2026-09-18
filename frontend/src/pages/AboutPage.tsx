@@ -3,9 +3,9 @@ import { useShop } from '../context/ShopContext';
 import { comboTrioImg } from '../data/products';
 import { ArrowRight, Sparkles, Heart, Shield, Flame, Wheat, Leaf } from 'lucide-react';
 import { ScrollReveal } from '../components/ScrollReveal';
+import { Link } from 'react-router-dom';
 
 export const AboutPage: React.FC = () => {
-  const { setActivePage } = useShop();
 
   return (
     <div className="bg-[#FAF6F0] min-h-screen py-10 md:py-16 font-sans">
@@ -183,14 +183,11 @@ export const AboutPage: React.FC = () => {
             <p className="text-sm sm:text-base text-[#EBD9BC] max-w-xl mx-auto mb-6">
               Taste the craftsmanship in every meal. Delivered freshly to your doorstep across India.
             </p>
-            <button
-              type="button"
-              onClick={() => setActivePage('shop')}
-              className="px-8 py-3.5 bg-[#FAF6F0] hover:bg-[#EBD9BC] text-[#87380F] font-sans text-xs font-bold tracking-widest uppercase rounded-md transition-colors inline-flex items-center gap-2 cursor-pointer"
-            >
+            <Link to="/shop"
+                className="px-8 py-3.5 bg-[#FAF6F0] hover:bg-[#EBD9BC] text-[#87380F] font-sans text-xs font-bold tracking-widest uppercase rounded-md transition-colors inline-flex items-center gap-2 cursor-pointer">
               <span>EXPLORE OUR PRODUCTS</span>
               <ArrowRight size={16} />
-            </button>
+            </Link>
           </div>
         </ScrollReveal>
       </div>

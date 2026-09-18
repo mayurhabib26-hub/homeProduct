@@ -1,11 +1,10 @@
 import React from 'react';
 import { useShop } from '../context/ShopContext';
-import { useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Home, ShoppingBag, Search, Compass, BookOpen } from 'lucide-react';
 
 export const MobileBottomNav: React.FC = () => {
   const {
-    setActivePage,
     cartItemCount,
     setIsCartDrawerOpen,
     setIsSearchOpen,
@@ -14,27 +13,21 @@ export const MobileBottomNav: React.FC = () => {
 
   return (
     <div className="lg:hidden fixed bottom-0 left-0 right-0 z-30 bg-[#FAF6F0]/95 backdrop-blur-md border-t border-[#EBD9BC] px-3 py-2 flex items-center justify-around shadow-md font-sans">
-      <button
-        type="button"
-        onClick={() => setActivePage('home')}
-        className={`flex flex-col items-center gap-1 p-1 transition-colors ${
-          pathname === '/' ? 'text-[#87380F] font-semibold' : 'text-[#483828]/70 hover:text-[#87380F]'
-        }`}
-      >
+      <Link to="/"
+                className={`flex flex-col items-center gap-1 p-1 transition-colors ${
+                pathname === '/' ? 'text-[#87380F] font-semibold' : 'text-[#483828]/70 hover:text-[#87380F]'
+                }`}>
         <Home size={19} />
         <span className="text-[10px] tracking-wider uppercase">Home</span>
-      </button>
+      </Link>
 
-      <button
-        type="button"
-        onClick={() => setActivePage('shop')}
-        className={`flex flex-col items-center gap-1 p-1 transition-colors ${
-          pathname === '/shop' ? 'text-[#87380F] font-semibold' : 'text-[#483828]/70 hover:text-[#87380F]'
-        }`}
-      >
+      <Link to="/shop"
+                className={`flex flex-col items-center gap-1 p-1 transition-colors ${
+                pathname === '/shop' ? 'text-[#87380F] font-semibold' : 'text-[#483828]/70 hover:text-[#87380F]'
+                }`}>
         <Compass size={19} />
         <span className="text-[10px] tracking-wider uppercase">Shop</span>
-      </button>
+      </Link>
 
       <button
         type="button"
@@ -45,16 +38,13 @@ export const MobileBottomNav: React.FC = () => {
         <span className="text-[10px] tracking-wider uppercase">Search</span>
       </button>
 
-      <button
-        type="button"
-        onClick={() => setActivePage('recipes')}
-        className={`flex flex-col items-center gap-1 p-1 transition-colors ${
-          pathname === '/recipes' ? 'text-[#87380F] font-semibold' : 'text-[#483828]/70 hover:text-[#87380F]'
-        }`}
-      >
+      <Link to="/recipes"
+                className={`flex flex-col items-center gap-1 p-1 transition-colors ${
+                pathname === '/recipes' ? 'text-[#87380F] font-semibold' : 'text-[#483828]/70 hover:text-[#87380F]'
+                }`}>
         <BookOpen size={19} />
         <span className="text-[10px] tracking-wider uppercase">Recipes</span>
-      </button>
+      </Link>
 
       <button
         type="button"

@@ -2,9 +2,10 @@ import React from 'react';
 import { BrandLogo } from './BrandLogo';
 import { useShop } from '../context/ShopContext';
 import { Phone, Mail, MapPin, Instagram, Facebook, ShieldCheck, Truck, RefreshCw } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 export const Footer: React.FC = () => {
-  const { setActivePage, generateWhatsAppOrderUrl } = useShop();
+  const { generateWhatsAppOrderUrl } = useShop();
 
   return (
     <footer className="bg-[#382B1E] text-[#EBD9BC] pt-16 pb-12 border-t-2 border-[#B69A55]/30 relative overflow-hidden font-sans">
@@ -116,44 +117,34 @@ export const Footer: React.FC = () => {
             </h3>
             <ul className="space-y-2.5 text-sm text-[#EBD9BC]/80">
               <li>
-                <button
-                  onClick={() => setActivePage('home')}
-                  className="hover:text-[#FAF6F0] hover:underline underline-offset-4 transition-colors"
-                >
+                <Link to="/"
+                className="hover:text-[#FAF6F0] hover:underline underline-offset-4 transition-colors">
                   Home
-                </button>
+                </Link>
               </li>
               <li>
-                <button
-                  onClick={() => setActivePage('shop')}
-                  className="hover:text-[#FAF6F0] hover:underline underline-offset-4 transition-colors"
-                >
+                <Link to="/shop"
+                className="hover:text-[#FAF6F0] hover:underline underline-offset-4 transition-colors">
                   Shop All Spices
-                </button>
+                </Link>
               </li>
               <li>
-                <button
-                  onClick={() => setActivePage('about')}
-                  className="hover:text-[#FAF6F0] hover:underline underline-offset-4 transition-colors"
-                >
+                <Link to="/about"
+                className="hover:text-[#FAF6F0] hover:underline underline-offset-4 transition-colors">
                   Our Heritage Story
-                </button>
+                </Link>
               </li>
               <li>
-                <button
-                  onClick={() => setActivePage('recipes')}
-                  className="hover:text-[#FAF6F0] hover:underline underline-offset-4 transition-colors"
-                >
+                <Link to="/recipes"
+                className="hover:text-[#FAF6F0] hover:underline underline-offset-4 transition-colors">
                   Kitchen Recipes
-                </button>
+                </Link>
               </li>
               <li>
-                <button
-                  onClick={() => setActivePage('contact')}
-                  className="hover:text-[#FAF6F0] hover:underline underline-offset-4 transition-colors"
-                >
+                <Link to="/contact"
+                className="hover:text-[#FAF6F0] hover:underline underline-offset-4 transition-colors">
                   Contact & Support
-                </button>
+                </Link>
               </li>
             </ul>
           </div>
@@ -165,44 +156,34 @@ export const Footer: React.FC = () => {
             </h3>
             <ul className="space-y-2.5 text-sm text-[#EBD9BC]/80">
               <li>
-                <button
-                  onClick={() => setActivePage('shop')}
-                  className="hover:text-[#FAF6F0] hover:underline underline-offset-4 transition-colors text-left"
-                >
+                <Link to="/shop"
+                className="hover:text-[#FAF6F0] hover:underline underline-offset-4 transition-colors text-left">
                   Authentic Rasam Powder
-                </button>
+                </Link>
               </li>
               <li>
-                <button
-                  onClick={() => setActivePage('shop')}
-                  className="hover:text-[#FAF6F0] hover:underline underline-offset-4 transition-colors text-left"
-                >
+                <Link to="/shop"
+                className="hover:text-[#FAF6F0] hover:underline underline-offset-4 transition-colors text-left">
                   Temple Puliyogare Powder
-                </button>
+                </Link>
               </li>
               <li>
-                <button
-                  onClick={() => setActivePage('shop')}
-                  className="hover:text-[#FAF6F0] hover:underline underline-offset-4 transition-colors text-left"
-                >
+                <Link to="/shop"
+                className="hover:text-[#FAF6F0] hover:underline underline-offset-4 transition-colors text-left">
                   Home-Style Sambar Powder
-                </button>
+                </Link>
               </li>
               <li>
-                <button
-                  onClick={() => setActivePage('shop')}
-                  className="hover:text-[#FAF6F0] hover:underline underline-offset-4 transition-colors text-left"
-                >
+                <Link to="/shop"
+                className="hover:text-[#FAF6F0] hover:underline underline-offset-4 transition-colors text-left">
                   Idli Gunpowder Podi
-                </button>
+                </Link>
               </li>
               <li>
-                <button
-                  onClick={() => setActivePage('shop')}
-                  className="hover:text-[#FAF6F0] hover:underline underline-offset-4 transition-colors text-left"
-                >
+                <Link to="/shop"
+                className="hover:text-[#FAF6F0] hover:underline underline-offset-4 transition-colors text-left">
                   Festive Combo Gift Boxes
-                </button>
+                </Link>
               </li>
             </ul>
           </div>

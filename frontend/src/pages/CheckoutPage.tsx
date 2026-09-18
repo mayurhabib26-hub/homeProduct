@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useShop } from '../context/ShopContext';
 import { CheckCircle2, ShieldCheck, ArrowRight, Phone, Truck, CreditCard, QrCode, Banknote } from 'lucide-react';
 import { formatPaise } from '@sv/shared';
+import { Link } from 'react-router-dom';
 
 export const CheckoutPage: React.FC = () => {
   const {
@@ -12,7 +13,6 @@ export const CheckoutPage: React.FC = () => {
     appliedDiscount,
     couponCode,
     clearCart,
-    setActivePage,
     generateWhatsAppOrderUrl,
     showToast,
   } = useShop();
@@ -110,13 +110,10 @@ export const CheckoutPage: React.FC = () => {
                 <span>CONFIRM & TRACK ON WHATSAPP</span>
               </a>
 
-              <button
-                type="button"
-                onClick={() => setActivePage('home')}
-                className="w-full py-3 bg-[#FAF6F0] hover:bg-[#EBD9BC] text-[#483828] border border-[#EBD9BC] rounded-md text-xs font-bold tracking-widest uppercase transition-colors"
-              >
+              <Link to="/"
+                className="w-full py-3 bg-[#FAF6F0] hover:bg-[#EBD9BC] text-[#483828] border border-[#EBD9BC] rounded-md text-xs font-bold tracking-widest uppercase transition-colors">
                 RETURN TO HOMEPAGE
-              </button>
+              </Link>
             </div>
           </div>
         </div>
@@ -130,12 +127,10 @@ export const CheckoutPage: React.FC = () => {
         <div className="text-center max-w-md space-y-4">
           <h2 className="font-serif text-2xl font-bold text-[#483828]">No Items in Checkout</h2>
           <p className="text-xs text-[#483828]/70">Please add authentic spice blends to your cart first.</p>
-          <button
-            onClick={() => setActivePage('shop')}
-            className="px-6 py-2.5 bg-[#87380F] text-white text-xs font-semibold rounded uppercase tracking-wider"
-          >
+          <Link to="/shop"
+                className="px-6 py-2.5 bg-[#87380F] text-white text-xs font-semibold rounded uppercase tracking-wider">
             Visit Spice Shop
-          </button>
+          </Link>
         </div>
       </div>
     );
