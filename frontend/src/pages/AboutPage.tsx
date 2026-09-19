@@ -96,7 +96,7 @@ export const AboutPage: React.FC = () => {
             <ScrollReveal animation="fade-up" delay={0.05}>
               <div className="bg-[#FAF6F0] p-6 rounded-xl border border-[#EBD9BC] text-center h-full">
                 <span className="font-serif text-3xl font-bold text-[#87380F] block mb-2">01</span>
-                <h4 className="font-serif text-lg font-bold text-[#483828] mb-2">Single-Origin Sourcing</h4>
+                <h3 className="font-serif text-lg font-bold text-[#483828] mb-2">Single-Origin Sourcing</h3>
                 <p className="text-xs text-[#483828]/75 leading-relaxed">
                   Byadagi chillies from Karnataka, Tellicherry black pepper from Kerala, and coriander seeds from select traditional growers.
                 </p>
@@ -106,7 +106,7 @@ export const AboutPage: React.FC = () => {
             <ScrollReveal animation="fade-up" delay={0.1}>
               <div className="bg-[#FAF6F0] p-6 rounded-xl border border-[#EBD9BC] text-center h-full">
                 <span className="font-serif text-3xl font-bold text-[#87380F] block mb-2">02</span>
-                <h4 className="font-serif text-lg font-bold text-[#483828] mb-2">Gentle Sun-Drying</h4>
+                <h3 className="font-serif text-lg font-bold text-[#483828] mb-2">Gentle Sun-Drying</h3>
                 <p className="text-xs text-[#483828]/75 leading-relaxed">
                   Whole spices are naturally sun-warmed on clean cotton sheets to eliminate moisture while preserving volatile aromatic oils.
                 </p>
@@ -116,7 +116,7 @@ export const AboutPage: React.FC = () => {
             <ScrollReveal animation="fade-up" delay={0.15}>
               <div className="bg-[#FAF6F0] p-6 rounded-xl border border-[#EBD9BC] text-center h-full">
                 <span className="font-serif text-3xl font-bold text-[#87380F] block mb-2">03</span>
-                <h4 className="font-serif text-lg font-bold text-[#483828] mb-2">Slow Kadai Roasting</h4>
+                <h3 className="font-serif text-lg font-bold text-[#483828] mb-2">Slow Kadai Roasting</h3>
                 <p className="text-xs text-[#483828]/75 leading-relaxed">
                   Each spice is roasted individually at low temperatures to its optimal aroma point — never burned or flash-heated.
                 </p>
@@ -126,7 +126,7 @@ export const AboutPage: React.FC = () => {
             <ScrollReveal animation="fade-up" delay={0.2}>
               <div className="bg-[#FAF6F0] p-6 rounded-xl border border-[#EBD9BC] text-center h-full">
                 <span className="font-serif text-3xl font-bold text-[#87380F] block mb-2">04</span>
-                <h4 className="font-serif text-lg font-bold text-[#483828] mb-2">Coarse Fresh Milling</h4>
+                <h3 className="font-serif text-lg font-bold text-[#483828] mb-2">Coarse Fresh Milling</h3>
                 <p className="text-xs text-[#483828]/75 leading-relaxed">
                   Ground into a slightly textured grain (not an overly fine dusty powder) to ensure deep, lingering flavor when simmered.
                 </p>

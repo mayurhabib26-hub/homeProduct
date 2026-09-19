@@ -26,7 +26,7 @@ export const Footer: React.FC = () => {
               <ShieldCheck size={22} />
             </div>
             <div>
-              <h4 className="font-serif text-base text-[#FAF6F0] font-semibold">100% Authentic</h4>
+              <h2 className="font-serif text-base text-[#FAF6F0] font-semibold">100% Authentic</h2>
               <p className="text-xs text-[#EBD9BC]/70 mt-0.5">No artificial colors, MSG, or chemicals</p>
             </div>
           </div>
@@ -36,7 +36,7 @@ export const Footer: React.FC = () => {
               <Truck size={22} />
             </div>
             <div>
-              <h4 className="font-serif text-base text-[#FAF6F0] font-semibold">Pan-India Delivery</h4>
+              <h2 className="font-serif text-base text-[#FAF6F0] font-semibold">Pan-India Delivery</h2>
               <p className="text-xs text-[#EBD9BC]/70 mt-0.5">Free shipping on orders above ₹499</p>
             </div>
           </div>
@@ -46,7 +46,7 @@ export const Footer: React.FC = () => {
               <RefreshCw size={22} />
             </div>
             <div>
-              <h4 className="font-serif text-base text-[#FAF6F0] font-semibold">Fresh Small Batches</h4>
+              <h2 className="font-serif text-base text-[#FAF6F0] font-semibold">Fresh Small Batches</h2>
               <p className="text-xs text-[#EBD9BC]/70 mt-0.5">Slow-roasted & freshly milled to order</p>
             </div>
           </div>
@@ -56,7 +56,7 @@ export const Footer: React.FC = () => {
               <Phone size={22} />
             </div>
             <div>
-              <h4 className="font-serif text-base text-[#FAF6F0] font-semibold">Direct Kitchen Care</h4>
+              <h2 className="font-serif text-base text-[#FAF6F0] font-semibold">Direct Kitchen Care</h2>
               <p className="text-xs text-[#EBD9BC]/70 mt-0.5">WhatsApp support for easy repeat orders</p>
             </div>
           </div>
@@ -113,9 +113,9 @@ export const Footer: React.FC = () => {
 
           {/* Col 2: Navigation Links */}
           <div>
-            <h3 className="font-serif text-lg text-[#FAF6F0] tracking-wide font-semibold mb-4 border-b border-[#B69A55]/20 pb-2">
+            <h2 className="font-serif text-lg text-[#FAF6F0] tracking-wide font-semibold mb-4 border-b border-[#B69A55]/20 pb-2">
               Explore
-            </h3>
+            </h2>
             <ul className="space-y-2.5 text-sm text-[#EBD9BC]/80">
               <li>
                 <Link to="/"
@@ -152,9 +152,9 @@ export const Footer: React.FC = () => {
 
           {/* Col 3: Traditional Classics */}
           <div>
-            <h3 className="font-serif text-lg text-[#FAF6F0] tracking-wide font-semibold mb-4 border-b border-[#B69A55]/20 pb-2">
+            <h2 className="font-serif text-lg text-[#FAF6F0] tracking-wide font-semibold mb-4 border-b border-[#B69A55]/20 pb-2">
               Our Specialties
-            </h3>
+            </h2>
             <ul className="space-y-2.5 text-sm text-[#EBD9BC]/80">
               <li>
                 <Link to="/shop"
@@ -191,9 +191,9 @@ export const Footer: React.FC = () => {
 
           {/* Col 4: Customer Support & Contact */}
           <div>
-            <h3 className="font-serif text-lg text-[#FAF6F0] tracking-wide font-semibold mb-4 border-b border-[#B69A55]/20 pb-2">
+            <h2 className="font-serif text-lg text-[#FAF6F0] tracking-wide font-semibold mb-4 border-b border-[#B69A55]/20 pb-2">
               Customer Support
-            </h3>
+            </h2>
             <ul className="space-y-3 text-sm text-[#EBD9BC]/80">
               <li className="flex items-start gap-2.5">
                 <MapPin size={16} className="text-gold-on-dark shrink-0 mt-0.5" />

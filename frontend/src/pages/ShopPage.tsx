@@ -170,9 +170,9 @@ export const ShopPage: React.FC = () => {
           <ErrorState message={(error as Error)?.message} onRetry={() => refetch()} />
         ) : filteredProducts.length === 0 ? (
           <div className="text-center py-20 bg-white rounded-xl border border-[#EBD9BC] p-8">
-            <h3 className="font-serif text-2xl font-bold text-[#483828] mb-2">
+            <h2 className="font-serif text-2xl font-bold text-[#483828] mb-2">
               No matching spice powders found
-            </h3>
+            </h2>
             <p className="text-xs sm:text-sm text-[#483828]/70 max-w-sm mx-auto mb-6">
               Try adjusting your search keyword or clearing the filters to discover our traditional blends.
             </p>
@@ -189,6 +189,7 @@ export const ShopPage: React.FC = () => {
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+            <h2 className="sr-only">Products</h2>
             {filteredProducts.map((product, idx) => (
               <ScrollReveal key={product.slug} animation="fade-up" delay={Math.min(idx * 0.05, 0.25)}>
                 <ProductCard product={product} />

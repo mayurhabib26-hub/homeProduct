@@ -18,7 +18,7 @@ import { ScrollProgressBar } from './components/ScrollProgressBar';
 import { ScrollToTop } from './components/ScrollToTop';
 import { UpdatePrompt } from './components/UpdatePrompt';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence, MotionConfig } from 'motion/react';
 
 // Pages
 import { HomePage } from './pages/HomePage';
@@ -104,11 +104,19 @@ const queryClient = new QueryClient({
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <ShopProvider>
-          <AppContent />
-        </ShopProvider>
-      </BrowserRouter>
+      {/*
+        framer-motion animates through inline styles, so the reduced-motion
+        media query in index.css cannot reach the page transitions or the
+        scroll bar. reducedMotion="user" makes every motion component here
+        follow the operating system setting instead.
+      */}
+      <MotionConfig reducedMotion="user">
+        <BrowserRouter>
+          <ShopProvider>
+            <AppContent />
+          </ShopProvider>
+        </BrowserRouter>
+      </MotionConfig>
     </QueryClientProvider>
   );
 }

@@ -22,7 +22,7 @@ export const FloatingWhatsApp: React.FC = () => {
     <div className="fixed bottom-20 sm:bottom-6 right-5 z-40 font-sans">
       {/* Popover Card */}
       {isOpen && (
-        <div className="mb-3 w-80 bg-[#FAF6F0] rounded-xl shadow-2xl border border-[#EBD9BC] overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-200">
+        <div id="whatsapp-panel" className="mb-3 w-80 bg-[#FAF6F0] rounded-xl shadow-2xl border border-[#EBD9BC] overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-200">
           {/* Header */}
           <div className="bg-[#483828] text-[#F3E7D0] p-4 flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -93,6 +93,8 @@ export const FloatingWhatsApp: React.FC = () => {
         onClick={() => setIsOpen(!isOpen)}
         className="group relative flex items-center gap-2.5 px-4 py-3 bg-[#87380F] hover:bg-[#662707] text-[#FAF6F0] rounded-full shadow-lg hover:shadow-xl transition-all duration-300 cursor-pointer border border-[#B69A55]/40"
         aria-label="Chat on WhatsApp"
+        aria-expanded={isOpen}
+        aria-controls="whatsapp-panel"
       >
         <span className="relative flex h-3 w-3">
           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#B69A55] opacity-75"></span>

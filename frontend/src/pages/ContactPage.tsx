@@ -73,9 +73,9 @@ export const ContactPage: React.FC = () => {
           <div className="lg:col-span-5 space-y-6">
             <ScrollReveal animation="slide-right">
               <div className="bg-white p-6 sm:p-8 rounded-2xl border border-[#EBD9BC] shadow-xs space-y-6">
-                <h3 className="font-serif text-2xl font-bold text-[#483828]">
+                <h2 className="font-serif text-2xl font-bold text-[#483828]">
                   Kitchen & Workshop
-                </h3>
+                </h2>
 
                 <div className="space-y-4 text-xs sm:text-sm text-[#483828]/85">
                   <div className="flex items-start gap-3">

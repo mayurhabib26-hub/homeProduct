@@ -487,7 +487,7 @@ export const HomePage: React.FC = () => {
                   <ChefHat size={24} />
                 </div>
                 <h3 className="font-serif text-lg font-bold text-[#483828] mb-1">
-                  TRADITIONAL (recipeList ?? [])
+                  TRADITIONAL RECIPES
                 </h3>
                 <p className="text-xs text-[#483828]/80 leading-relaxed font-sans">
                   Inspired by authentic South Indian kitchens and time-tested ratios that celebrate natural taste.
@@ -764,7 +764,7 @@ export const HomePage: React.FC = () => {
               <Link to="/recipes"
                 id="how-to-use-recipes-cta"
                 className="px-8 py-3.5 bg-[#483828] hover:bg-[#87380F] text-white rounded-md font-sans text-xs font-semibold tracking-widest uppercase transition-colors inline-flex items-center gap-2 cursor-pointer shadow-sm">
-                <span>EXPLORE ALL (recipeList ?? [])</span>
+                <span>EXPLORE ALL RECIPES</span>
                 <ArrowRight size={16} />
               </Link>
             </div>
@@ -1035,7 +1035,7 @@ export const HomePage: React.FC = () => {
                   </div>
 
                   <div className="pt-3 border-t border-[#EBD9BC]/60">
-                    <h4 className="font-sans text-xs font-bold text-[#483828]">{rev.name}</h4>
+                    <h3 className="font-sans text-xs font-bold text-[#483828]">{rev.name}</h3>
                     <span className="text-[10px] text-[#483828]/60 block">{rev.location}</span>
                     <span className="text-[9px] text-[#647044] font-medium block mt-1">
                       Verified: {rev.productPurchased}

@@ -60,3 +60,22 @@
   font-family: var(--font-sans);
 }
 
+/**
+ * Reduced motion. WCAG 2.2 AA 2.3.3 Animation from Interactions.
+ *
+ * Durations go to 0.01ms rather than `none` so anything waiting on a
+ * transitionend or animationend event still fires — `animation: none` silently
+ * strands those listeners.
+ *
+ * This only reaches CSS. framer-motion animates through inline styles, so the
+ * page transitions and the scroll bar are handled by <MotionConfig
+ * reducedMotion="user"> in App.tsx; CSS cannot switch those off.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
