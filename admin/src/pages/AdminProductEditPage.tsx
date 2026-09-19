@@ -21,6 +21,7 @@ import { adminApi, AdminApiError, type AdminProduct, type AdminIdentity } from '
 import { PageHeader, Card, SectionTitle } from '../components/ui/Layout';
 import { Button } from '../components/ui/Button';
 import { Field, TextArea, Select, ListField } from '../components/ui/Field';
+import { VariantsCard } from '../components/VariantsCard';
 import { SkeletonCards, ErrorState } from '../components/ui/States';
 import { useToast } from '../components/ui/Toast';
 import { cn } from '../lib/cn';
@@ -289,6 +290,10 @@ export const AdminProductEditPage: React.FC = () => {
             </label>
           </div>
         </div>
+      </Card>
+
+      <Card>
+        <VariantsCard slug={slug} variants={data?.variants ?? []} isOwner={isOwner} />
       </Card>
 
       <Card>

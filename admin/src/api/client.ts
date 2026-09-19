@@ -76,6 +76,17 @@ export interface DashboardStats {
   failedJobs: { queue: string; payload: Record<string, unknown>; lastError: string | null }[];
 }
 
+export interface AdminVariant {
+  id: number;
+  weight: string;
+  pricePaise: number;
+  /** Struck-through "was" price. Null when there is no discount. */
+  mrpPaise: number | null;
+  stockQty: number;
+  sku: string | null;
+  active: boolean;
+}
+
 export interface AdminProduct {
   slug: string; name: string; regionalName?: string | null; shortDescription: string;
   category: string; categoryLabel: string; badge?: string | null; about: string;
@@ -83,7 +94,7 @@ export interface AdminProduct {
   nutrition: Record<string, string>; spiceLevel: string;
   image: string; gallery: string[]; featured: boolean; isSignature: boolean;
   published: boolean; hsnCode?: string | null;
-  variants: { id: number; weight: string; pricePaise: number; stockQty: number; active: boolean }[];
+  variants: AdminVariant[];
 }
 
 export interface AdminCoupon {
@@ -132,7 +143,13 @@ export const adminApi = {
   unpublishProduct: (slug: string) =>
     call<unknown>(`/admin/products/${slug}`, { method: 'DELETE' }),
   addVariant: (slug: string, body: Record<string, unknown>) =>
-    call<unknown>(`/admin/products/${slug}/variants`, { method: 'POST', body: JSON.stringify(body) }),
+    call<AdminVariant>(`/admin/products/${slug}/variants`, { method: 'POST', body: JSON.stringify(body) }),
+  /**
+   * There is no delete. A variant that has ever been ordered must survive, or
+   * its order_items snapshots stop reconciling — retire it with active:false.
+   */
+  updateVariantFull: (id: number, body: Record<string, unknown>) =>
+    call<AdminVariant>(`/admin/variants/${id}`, { method: 'PATCH', body: JSON.stringify(body) }),
 
   uploadImage: async (file: File) => {
     // FormData sets its own multipart boundary — do not send a content-type.
