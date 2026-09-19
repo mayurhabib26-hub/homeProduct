@@ -35,7 +35,8 @@
     "db:restore-drill": "tsx scripts/restore-drill.ts",
     "test:abandoned-cart": "tsx src/services/abandoned-cart.test.ts",
     "admin:list": "tsx src/db/list-admins.ts",
-    "test:customer-auth": "tsx src/services/customer-auth.test.ts"
+    "test:customer-auth": "tsx src/services/customer-auth.test.ts",
+    "test:saved-addresses": "tsx src/services/saved-addresses.test.ts"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.5.8",

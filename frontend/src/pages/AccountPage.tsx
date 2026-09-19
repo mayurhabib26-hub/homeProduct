@@ -10,6 +10,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { formatPaise } from '@sv/shared';
 import { api, ApiRequestError } from '../api/client';
+import { SavedAddresses } from '../components/SavedAddresses';
 
 const STATUS_LABEL: Record<string, string> = {
   pending: 'Awaiting payment', confirmed: 'Confirmed', packed: 'Packed',
@@ -148,6 +149,8 @@ export default function AccountPage() {
           ))}
         </ul>
       )}
+
+      <SavedAddresses />
     </div>
   );
 }

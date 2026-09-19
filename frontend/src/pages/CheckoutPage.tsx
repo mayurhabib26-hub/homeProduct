@@ -7,6 +7,7 @@ import { whatsappUrl } from '../lib/contact';
 import { api } from '../api/client';
 import { openCheckout } from '../lib/razorpay';
 import * as analytics from '../lib/analytics';
+import { AddressPicker } from '../components/AddressPicker';
 
 export const CheckoutPage: React.FC = () => {
   const {
@@ -216,6 +217,24 @@ export const CheckoutPage: React.FC = () => {
                   <Truck size={20} className="text-[#87380F]" />
                   <span>1. Delivery Address (Pan-India)</span>
                 </h3>
+
+                {/*
+                  Only shown to a signed-in customer with saved addresses.
+                  Guests see the form exactly as before — an account is an
+                  option, never a gate.
+                */}
+                <AddressPicker
+                  onPick={(a) => setFormData((f) => ({
+                    ...f,
+                    fullName: a.name,
+                    phone: a.phone,
+                    address: a.address,
+                    landmark: a.landmark ?? '',
+                    city: a.city,
+                    state: a.state,
+                    pincode: a.pincode,
+                  }))}
+                />
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
                   <div>

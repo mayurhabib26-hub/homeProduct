@@ -176,9 +176,22 @@ Backfill runs at first verify: every order whose phone matches and whose
 `customer_id` is null becomes theirs. Asserted in
 `customer-auth.test.ts`.
 
+`saved_addresses` is wired: managed from the account page, and offered at
+checkout to a signed-in customer who has one. Never written automatically
+from an order — an address typed once to send a gift is not somewhere the
+customer lives, and quietly keeping it means their next order defaults to the
+wrong house.
+
+Every address route resolves the customer from the session first and scopes
+the query to them, so an id belonging to someone else is a 404 rather than a
+403 that confirms it exists. `saved-addresses.test.ts` drives this over HTTP
+rather than against the service, because the scoping lives in the route —
+testing the query directly would prove nothing about whether the route applies
+it. Removing the ownership check from PATCH makes that test fail, which was
+checked.
+
 Still to do: moving the wishlist out of `localStorage` into a table so it
-syncs across devices, and a UI for `saved_addresses` — the table exists,
-nothing writes to it yet.
+syncs across devices.
 
 ---
 

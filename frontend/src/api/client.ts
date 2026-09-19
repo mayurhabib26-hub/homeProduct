@@ -57,6 +57,19 @@ export interface ProductListParams {
 
 export interface CustomerIdentity { phone: string; name: string | null; email: string | null }
 
+export interface SavedAddress {
+  id: number;
+  label: string | null;
+  name: string;
+  phone: string;
+  address: string;
+  landmark: string | null;
+  city: string;
+  state: string;
+  pincode: string;
+  isDefault: boolean;
+}
+
 export interface CustomerOrder {
   orderNumber: string;
   status: string;
@@ -80,6 +93,20 @@ export const api = {
   logout: () => request<{ data: { ok: boolean } }>('/auth/logout', { method: 'POST' }).then((r) => r.data),
   me: () => request<{ data: CustomerIdentity | null }>('/auth/me').then((r) => r.data),
   myOrders: () => request<{ data: CustomerOrder[] }>('/auth/orders').then((r) => r.data),
+
+  addresses: {
+    list: () => request<{ data: SavedAddress[] }>('/auth/addresses').then((r) => r.data),
+    create: (body: Omit<SavedAddress, 'id'>) =>
+      request<{ data: SavedAddress }>('/auth/addresses', {
+        method: 'POST', body: JSON.stringify(body),
+      }).then((r) => r.data),
+    update: (id: number, body: Partial<Omit<SavedAddress, 'id'>>) =>
+      request<{ data: SavedAddress }>(`/auth/addresses/${id}`, {
+        method: 'PATCH', body: JSON.stringify(body),
+      }).then((r) => r.data),
+    remove: (id: number) =>
+      request<{ data: { id: number } }>(`/auth/addresses/${id}`, { method: 'DELETE' }).then((r) => r.data),
+  },
 
   products: {
     list: (params: ProductListParams = {}) => {

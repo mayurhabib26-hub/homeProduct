@@ -8,10 +8,10 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import rateLimit from 'express-rate-limit';
-import { desc, eq } from 'drizzle-orm';
+import { and, desc, eq, ne } from 'drizzle-orm';
 import { asyncRoute } from '../middleware/error-handler.js';
 import { getDb } from '../db/client.js';
-import { orders, orderItems } from '../db/schema.js';
+import { orders, orderItems, savedAddresses } from '../db/schema.js';
 import { badRequest, ApiError } from '../lib/errors.js';
 import { env, isProduction } from '../lib/env.js';
 import { logger } from '../lib/logger.js';
@@ -169,5 +169,146 @@ customerAuthRouter.get(
 
     res.setHeader('Cache-Control', 'no-store');
     res.json({ data: detailed });
+  }),
+);
+
+/* ------------------------------------------------------------------ *
+ * Saved addresses
+ * ------------------------------------------------------------------ */
+
+/**
+ * Never written automatically from an order.
+ *
+ * An address typed once to send a gift to an aunt in Mysore is not somewhere
+ * the customer lives, and silently keeping it means their next order defaults
+ * to the wrong house. Saving is always an explicit act.
+ */
+const addressBody = z
+  .object({
+    label: z.string().max(40).nullable().optional(),
+    name: z.string().min(2).max(120),
+    phone: z.string().min(6).max(20),
+    address: z.string().min(5).max(300),
+    landmark: z.string().max(120).nullable().optional(),
+    city: z.string().min(2).max(80),
+    state: z.string().min(2).max(80),
+    pincode: z.string().regex(/^\d{6}$/, 'Enter a 6-digit pincode'),
+    isDefault: z.boolean().default(false),
+  })
+  .strict();
+
+/** Every address route resolves the customer first; none trusts an id alone. */
+async function requireCustomer(req: { cookies?: Record<string, string> }) {
+  const customer = await customerFromToken(req.cookies?.[CUSTOMER_COOKIE]);
+  if (!customer) throw new ApiError(401, 'NOT_AUTHENTICATED', 'Please sign in.');
+  return customer;
+}
+
+/** Exactly one default. Clearing the others is part of setting one. */
+async function clearOtherDefaults(customerId: number, keepId: number) {
+  const db = getDb();
+  await db
+    .update(savedAddresses)
+    .set({ isDefault: false })
+    .where(and(eq(savedAddresses.customerId, customerId), ne(savedAddresses.id, keepId)));
+}
+
+customerAuthRouter.get(
+  '/auth/addresses',
+  asyncRoute(async (req, res) => {
+    const customer = await requireCustomer(req);
+    const db = getDb();
+    const rows = await db
+      .select()
+      .from(savedAddresses)
+      .where(eq(savedAddresses.customerId, customer.id))
+      .orderBy(desc(savedAddresses.isDefault), desc(savedAddresses.createdAt));
+    res.setHeader('Cache-Control', 'no-store');
+    res.json({ data: rows });
+  }),
+);
+
+customerAuthRouter.post(
+  '/auth/addresses',
+  asyncRoute(async (req, res) => {
+    const customer = await requireCustomer(req);
+    const parsed = addressBody.safeParse(req.body);
+    if (!parsed.success) throw badRequest('Check the address.', parsed.error.flatten().fieldErrors);
+
+    const db = getDb();
+    const existing = await db
+      .select({ id: savedAddresses.id })
+      .from(savedAddresses)
+      .where(eq(savedAddresses.customerId, customer.id));
+
+    if (existing.length >= 10) {
+      throw new ApiError(422, 'TOO_MANY_ADDRESSES', 'You can save up to 10 addresses.');
+    }
+
+    const [created] = await db
+      .insert(savedAddresses)
+      // The first address saved is the default, whatever the request says —
+      // otherwise someone ends up with addresses and no default at all.
+      .values({ ...parsed.data, customerId: customer.id, isDefault: parsed.data.isDefault || existing.length === 0 })
+      .returning();
+
+    if (created!.isDefault) await clearOtherDefaults(customer.id, created!.id);
+    res.status(201).json({ data: created });
+  }),
+);
+
+customerAuthRouter.patch(
+  '/auth/addresses/:id',
+  asyncRoute(async (req, res) => {
+    const customer = await requireCustomer(req);
+    const parsed = addressBody.partial().safeParse(req.body);
+    if (!parsed.success) throw badRequest('Check the address.', parsed.error.flatten().fieldErrors);
+
+    const db = getDb();
+    const id = Number(req.params.id);
+
+    // Scoped by customer id, so an id belonging to someone else simply does
+    // not exist here — a 404, never a 403 that confirms it is real.
+    const [updated] = await db
+      .update(savedAddresses)
+      .set(parsed.data)
+      .where(and(eq(savedAddresses.id, id), eq(savedAddresses.customerId, customer.id)))
+      .returning();
+
+    if (!updated) throw new ApiError(404, 'NOT_FOUND', 'No such address.');
+    if (updated.isDefault) await clearOtherDefaults(customer.id, updated.id);
+    res.json({ data: updated });
+  }),
+);
+
+customerAuthRouter.delete(
+  '/auth/addresses/:id',
+  asyncRoute(async (req, res) => {
+    const customer = await requireCustomer(req);
+    const db = getDb();
+    const id = Number(req.params.id);
+
+    const [gone] = await db
+      .delete(savedAddresses)
+      .where(and(eq(savedAddresses.id, id), eq(savedAddresses.customerId, customer.id)))
+      .returning();
+
+    if (!gone) throw new ApiError(404, 'NOT_FOUND', 'No such address.');
+
+    // Deleting the default promotes the next one, so there is never a list
+    // with no default.
+    if (gone.isDefault) {
+      const [next] = await db
+        .select({ id: savedAddresses.id })
+        .from(savedAddresses)
+        .where(eq(savedAddresses.customerId, customer.id))
+        .orderBy(desc(savedAddresses.createdAt))
+        .limit(1);
+      if (next) {
+        await db.update(savedAddresses).set({ isDefault: true }).where(eq(savedAddresses.id, next.id));
+      }
+    }
+
+    res.json({ data: { id } });
   }),
 );
