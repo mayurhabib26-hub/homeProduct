@@ -19,6 +19,7 @@ import { logger } from '../lib/logger.js';
 import { createRazorpayOrder } from '../lib/razorpay.js';
 import { enqueue } from '../lib/queue.js';
 import { razorpayConfigured } from '../lib/env.js';
+import { markRecovered } from './abandoned-cart.js';
 
 export interface OrderRequestLine {
   productSlug: string;
@@ -251,6 +252,10 @@ export async function createOrder(input: CreateOrderInput) {
   // happens after the local transaction commits: a provider timeout must not
   // roll back an order we have already taken stock for — the stale-order
   // sweep releases it instead.
+  // Closes any open abandoned cart for this number so no reminder goes out
+  // about something they have now bought.
+  await markRecovered(created.phone, created.orderNumber);
+
   if (created.paymentMethod !== 'cod' && razorpayConfigured) {
     try {
       const rp = await createRazorpayOrder(created.totalPaise, created.orderNumber);

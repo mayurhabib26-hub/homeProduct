@@ -150,7 +150,14 @@ the infrastructure.
   nothing loads until the visitor opts in, and `scrub()` strips personal
   fields at the boundary rather than trusting call sites.
   `npm run test:analytics -w frontend`
-- Abandoned cart recovery over WhatsApp
+- **Abandoned cart recovery over WhatsApp** — backend built 19 Sep 2026,
+  **cannot be switched on yet.** The guards are done and tested
+  (`npm run test:abandoned-cart -w backend`): marketing consent, the
+  09:00–21:00 IST window, one reminder per cart, and stop-on-recovery. Three
+  things are outstanding and none is code — a Meta-approved MARKETING
+  template, a TRAI-registered header, and the frontend hook that captures a
+  phone number at checkout. Without `WHATSAPP_CART_TEMPLATE` the sweep skips
+  every cart and records why.
 - ~~Accessibility audit against WCAG 2.2 AA~~ — **storefront done 19 Sep 2026.**
   Measured in a real browser per route. Zero contrast failures, zero
   unlabelled controls, zero targets under the 24px WCAG minimum on home,

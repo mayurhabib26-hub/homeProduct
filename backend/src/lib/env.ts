@@ -62,6 +62,12 @@ const schema = z.object({
   /** WhatsApp Cloud API, direct. Unset logs instead of sending. */
   WHATSAPP_TOKEN: z.string().optional(),
   WHATSAPP_PHONE_ID: z.string().optional(),
+  /**
+   * Meta-approved template name for the abandoned-cart reminder, registered
+   * under MARKETING. Unset means no reminders go out — a promotional message
+   * without a registered template is not something to send by accident.
+   */
+  WHATSAPP_CART_TEMPLATE: z.string().optional(),
 
   SMTP_URL: z.string().optional(),
   EMAIL_FROM: z.string().optional(),

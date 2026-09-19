@@ -8,14 +8,16 @@ import { eq } from 'drizzle-orm';
 import { formatPaise } from '@sv/shared';
 import { getDb } from '../db/client.js';
 import { orders, orderItems } from '../db/schema.js';
-import { sendWhatsApp, sendEmail } from '../lib/notify.js';
+import { sendWhatsApp, sendEmail, sendWhatsAppTemplate } from '../lib/notify.js';
 import { bookShipment, shiprocketConfigured } from '../lib/shiprocket.js';
+import { sweepAbandonedCarts, recoveryConfigured } from '../services/abandoned-cart.js';
 import { logger } from '../lib/logger.js';
 import { enqueue, type QueueName } from '../lib/queue.js';
 import { issueInvoice } from '../services/invoices.js';
 import { renderInvoicePdf } from '../services/invoice-pdf.js';
 import { storeDocument } from '../lib/storage.js';
 import { invoices } from '../db/schema.js';
+import { env } from '../lib/env.js';
 
 type Handler = (payload: Record<string, unknown>) => Promise<void>;
 
@@ -56,6 +58,33 @@ const handlers: Record<string, Handler> = {
       { orderNumber: order.orderNumber, whatsapp: whatsapp.simulated ? 'simulated' : 'sent' },
       'confirmation processed',
     );
+  },
+
+  /**
+   * Abandoned cart sweep. Enqueued on a schedule, not by a user action.
+   *
+   * The sweep decides; this only delivers. A promotional message needs a
+   * Meta-approved MARKETING template on a TRAI-registered header — free text
+   * is not an option and would be rejected by the provider anyway, so an
+   * unconfigured template means the sweep skips every cart and says so.
+   */
+  'cart.sweep': async () => {
+    if (!recoveryConfigured) {
+      logger.info('abandoned cart recovery not configured — nothing sent');
+      return;
+    }
+
+    const result = await sweepAbandonedCarts(new Date(), async (phone, items) => {
+      // Template parameters only. The cart contents are not quoted back with
+      // prices: the server owns price, and a price in a message sent hours
+      // later is a price we have not re-checked.
+      await sendWhatsAppTemplate(phone, env.WHATSAPP_CART_TEMPLATE!, [
+        String(items.reduce((n, i) => n + i.quantity, 0)),
+      ]);
+    });
+
+    // Counts only — no phone numbers in a log line (hard rule 6).
+    logger.info({ ...result }, 'abandoned cart sweep complete');
   },
 
   /** Sent when an AWB is assigned. */

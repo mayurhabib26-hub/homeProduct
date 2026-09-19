@@ -64,6 +64,62 @@ export async function sendWhatsApp(toPhone: string, body: string): Promise<Deliv
   return { channel: 'whatsapp', delivered: true, simulated: false };
 }
 
+/**
+ * A pre-approved template message.
+ *
+ * Business-initiated WhatsApp cannot be free text — Meta requires a template
+ * approved under a category, and a promotional one (an abandoned-cart nudge)
+ * must additionally sit on a TRAI-registered header. Free text would be
+ * rejected by the provider, so this is not a stylistic choice.
+ *
+ * Parameters are positional and must match the approved body exactly.
+ */
+export async function sendWhatsAppTemplate(
+  toPhone: string,
+  template: string,
+  params: string[] = [],
+  language = 'en',
+): Promise<DeliveryResult> {
+  if (!whatsappConfigured) {
+    logger.info({ channel: 'whatsapp', template, simulated: true },
+      'template not sent (WhatsApp unconfigured)');
+    return { channel: 'whatsapp', delivered: false, simulated: true };
+  }
+
+  const digits = toPhone.replace(/\D/g, '');
+  const to = digits.length === 10 ? `91${digits}` : digits;
+
+  const res = await fetch(`https://graph.facebook.com/v21.0/${env.WHATSAPP_PHONE_ID}/messages`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${env.WHATSAPP_TOKEN}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      messaging_product: 'whatsapp',
+      to,
+      type: 'template',
+      template: {
+        name: template,
+        language: { code: language },
+        ...(params.length
+          ? { components: [{ type: 'body', parameters: params.map((text) => ({ type: 'text', text })) }] }
+          : {}),
+      },
+    }),
+    signal: AbortSignal.timeout(10_000),
+  });
+
+  if (!res.ok) {
+    const detail = await res.text().catch(() => '');
+    throw new Error(`WhatsApp template send failed (${res.status}): ${detail.slice(0, 200)}`);
+  }
+
+  // The template name is safe to log; the number is not.
+  logger.info({ channel: 'whatsapp', template }, 'template sent');
+  return { channel: 'whatsapp', delivered: true, simulated: false };
+}
+
 export async function sendEmail(to: string, subject: string, body: string): Promise<DeliveryResult> {
   if (!emailConfigured) {
     logger.info({ channel: 'email', simulated: true, subject }, 'notification not sent (SMTP unconfigured)');

@@ -488,6 +488,48 @@ export const invoices = pgTable(
 );
 
 /**
+ * Abandoned carts.
+ *
+ * Captured when someone reaches checkout and gives a phone number, so there
+ * is something to recover and someone to recover it from. A cart with no
+ * phone is not recorded — there would be nothing to do with it.
+ *
+ * An abandoned-cart nudge is a PROMOTIONAL message in India, not a
+ * transactional one. It needs marketing consent under the DPDP Act, a
+ * registered template on a registered header under TRAI's TCCCPA rules, and
+ * it may only be sent between 09:00 and 21:00 IST. See docs/COMPLIANCE.md.
+ */
+export const abandonedCarts = pgTable(
+  'abandoned_carts',
+  {
+    id: bigint('id', { mode: 'number' }).primaryKey().generatedAlwaysAsIdentity(),
+    /** The natural key: one open cart per person. */
+    phone: text('phone').notNull(),
+    /** Variant ids and quantities only. Price is resolved when the message is
+     *  built, never stored here — the server owns price (hard rule 1). */
+    items: jsonb('items').notNull(),
+    /** For reporting only. Never quoted back to the customer. */
+    valuePaise: bigint('value_paise', { mode: 'number' }).notNull().default(0),
+
+    /** Set when an order from this phone is placed. Stops the reminder. */
+    recoveredAt: timestamp('recovered_at', { withTimezone: true }),
+    recoveredOrderNumber: text('recovered_order_number'),
+
+    /** Set once a reminder actually goes out. One per cart, ever. */
+    remindedAt: timestamp('reminded_at', { withTimezone: true }),
+    /** Why a reminder was not sent, when it was not. Makes the guards visible. */
+    skippedReason: text('skipped_reason'),
+
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex('abandoned_carts_phone_idx').on(t.phone),
+    index('abandoned_carts_sweep_idx').on(t.recoveredAt, t.remindedAt, t.updatedAt),
+  ],
+);
+
+/**
  * Marketing consent, separate from the transaction and never pre-ticked.
  * Recorded with a timestamp because consent must be demonstrable.
  * See docs/COMPLIANCE.md §6.

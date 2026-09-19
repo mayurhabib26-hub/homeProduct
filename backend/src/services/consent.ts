@@ -7,7 +7,7 @@
  */
 import { desc, eq, sql } from 'drizzle-orm';
 import { getDb } from '../db/client.js';
-import { marketingConsent, orders } from '../db/schema.js';
+import { marketingConsent, orders, abandonedCarts } from '../db/schema.js';
 import { logger } from '../lib/logger.js';
 
 export async function recordMarketingConsent(
@@ -36,6 +36,7 @@ export async function hasMarketingConsent(phone: string): Promise<boolean> {
 }
 
 export interface ErasureResult {
+  abandonedCartsRemoved?: number;
   ordersAnonymised: number;
   consentRecordsRemoved: number;
 }
@@ -69,13 +70,28 @@ export async function erasePersonalData(phone: string, reason: string): Promise<
     .where(eq(marketingConsent.phone, phone))
     .returning({ id: marketingConsent.id });
 
+  /**
+   * An abandoned cart holds a phone number and a shopping history. Erasure
+   * that leaves it behind is not erasure, and this one is easy to forget
+   * because nothing references it.
+   */
+  const carts = await db
+    .delete(abandonedCarts)
+    .where(eq(abandonedCarts.phone, phone))
+    .returning({ id: abandonedCarts.id });
+
   // No PII in the log line — that would defeat the erasure.
   logger.info(
-    { ordersAnonymised: result.length, consentRecordsRemoved: removed.length, reason },
+    { ordersAnonymised: result.length, consentRecordsRemoved: removed.length,
+      abandonedCartsRemoved: carts.length, reason },
     'personal data erased on request',
   );
 
-  return { ordersAnonymised: result.length, consentRecordsRemoved: removed.length };
+  return {
+    ordersAnonymised: result.length,
+    consentRecordsRemoved: removed.length,
+    abandonedCartsRemoved: carts.length,
+  };
 }
 
 /** What we hold about a phone number, for a subject access request. */

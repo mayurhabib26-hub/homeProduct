@@ -43,6 +43,13 @@
       "when": 1789738983065,
       "tag": "0005_flaky_bushwacker",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1789790732412,
+      "tag": "0006_thick_kree",
+      "breakpoints": true
     }
   ]
 }

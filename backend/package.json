@@ -32,7 +32,8 @@
     "test:seed-safety": "tsx src/db/seed-safety.test.ts",
     "admin:remove": "tsx src/db/remove-admin.ts",
     "db:verify-restore": "tsx src/db/verify-restore.ts",
-    "db:restore-drill": "tsx scripts/restore-drill.ts"
+    "db:restore-drill": "tsx scripts/restore-drill.ts",
+    "test:abandoned-cart": "tsx src/services/abandoned-cart.test.ts"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.5.8",
