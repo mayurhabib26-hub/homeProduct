@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ShopProvider } from './context/ShopContext';
@@ -19,6 +19,8 @@ import { ScrollToTop } from './components/ScrollToTop';
 import { UpdatePrompt } from './components/UpdatePrompt';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { motion, AnimatePresence, MotionConfig } from 'motion/react';
+import ConsentBanner from './components/ConsentBanner';
+import { initAnalytics, pageView } from './lib/analytics';
 
 // Pages
 import { HomePage } from './pages/HomePage';
@@ -35,6 +37,11 @@ import { PolicyPage } from './pages/PolicyPage';
 
 const AppContent: React.FC = () => {
   const location = useLocation();
+
+  // The tag is configured with send_page_view: false, so a route change is
+  // counted here and nowhere else — otherwise the first load is counted twice.
+  useEffect(() => { initAnalytics(); }, []);
+  useEffect(() => { pageView(location.pathname, document.title); }, [location.pathname]);
 
   return (
     <div className="min-h-screen flex flex-col bg-[#FAF6F0] text-[#483828] font-sans antialiased selection:bg-[#EBD9BC] selection:text-[#87380F]">
@@ -78,6 +85,7 @@ const AppContent: React.FC = () => {
 
       {/* Footer */}
       <Footer />
+      <ConsentBanner />
 
       {/* Overlays, Drawers & Scroll To Top */}
       <CartDrawer />

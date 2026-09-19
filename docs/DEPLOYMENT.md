@@ -198,7 +198,13 @@ and a stronger reason than convenience.
 VITE_API_URL=/api
 VITE_RAZORPAY_KEY_ID=rzp_live_xxx
 VITE_SENTRY_DSN=
+VITE_GA4_MEASUREMENT_ID=G-XXXXXXXXXX
 ```
+
+A GA4 measurement id is public by design — it is visible in the source of
+every GA4-instrumented page on the web. Hard rule 5 holds because there is no
+secret here, not because one is hidden. Leave it unset and analytics is inert:
+no tag, no consent banner, no warnings.
 
 **`backend/` — never public:**
 ```

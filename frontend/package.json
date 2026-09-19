@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "lint": "tsc --noEmit",
     "prerender": "tsx scripts/prerender.ts",
-    "test:pwa": "tsx pwa/runtime-caching.test.ts"
+    "test:pwa": "tsx pwa/runtime-caching.test.ts",
+    "test:analytics": "tsx src/lib/analytics.test.ts"
   },
   "dependencies": {
     "@sv/shared": "*",

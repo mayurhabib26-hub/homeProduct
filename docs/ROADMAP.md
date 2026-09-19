@@ -145,7 +145,10 @@ the infrastructure.
   8601 durations parsed from the human-written times.
 - ~~Sitemap, canonical URLs, per-page meta~~ — **done.** Plus `robots.txt`,
   which disallows `/cart`, `/checkout`, `/order/` and `/track`.
-- GA4 with e-commerce events
+- ~~GA4 with e-commerce events~~ — **done 19 Sep 2026.** Consent-gated:
+  nothing loads until the visitor opts in, and `scrub()` strips personal
+  fields at the boundary rather than trusting call sites.
+  `npm run test:analytics -w frontend`
 - Abandoned cart recovery over WhatsApp
 - ~~Accessibility audit against WCAG 2.2 AA~~ — **storefront done 19 Sep 2026.**
   Measured in a real browser per route. Zero contrast failures, zero

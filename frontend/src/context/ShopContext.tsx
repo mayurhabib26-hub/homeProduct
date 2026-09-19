@@ -3,6 +3,7 @@ import { type ProductSummary, CartItem, StoredCartItem, rupees, percentOf, forma
 import { useProducts } from '../api/queries';
 import { api } from '../api/client';
 import { whatsappUrl } from '../lib/contact';
+import * as analytics from '../lib/analytics';
 
 interface ShopContextType {
   cart: CartItem[];
@@ -156,6 +157,15 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const weight = product.variants.some((v) => v.weight === selectedWeight)
       ? selectedWeight
       : product.variants[0].weight;
+
+    // Fires only with consent and a measurement id; a no-op otherwise.
+    const variant = product.variants.find((v) => v.weight === weight);
+    if (variant) {
+      analytics.addToCart({
+        slug: product.slug, name: product.name, weight,
+        pricePaise: variant.pricePaise, quantity,
+      });
+    }
 
     setStoredCart((prev) => {
       const existing = prev.find(

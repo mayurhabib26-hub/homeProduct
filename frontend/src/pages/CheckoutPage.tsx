@@ -6,6 +6,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { whatsappUrl } from '../lib/contact';
 import { api } from '../api/client';
 import { openCheckout } from '../lib/razorpay';
+import * as analytics from '../lib/analytics';
 
 export const CheckoutPage: React.FC = () => {
   const {
@@ -155,6 +156,22 @@ export const CheckoutPage: React.FC = () => {
    * after navigating — the URL changed while the old screen stayed mounted.
    */
   const finishOrder = (number: string) => {
+    /**
+     * Before clearCart(), because the items are gone afterwards. The order
+     * number is the only identifier sent — no name, phone or address ever
+     * reaches Google. analytics.scrub() enforces that at the boundary.
+     */
+    analytics.purchase(
+      number,
+      cartTotal,
+      cart.map((line) => ({
+        slug: line.productId,
+        name: line.product.name,
+        weight: line.selectedWeight,
+        pricePaise: line.pricePaise,
+        quantity: line.quantity,
+      })),
+    );
     clearCart();
     setSubmitting(false);
     showToast('Order placed. Thank you!');

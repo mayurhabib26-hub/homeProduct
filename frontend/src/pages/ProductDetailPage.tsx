@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useShop } from '../context/ShopContext';
 import { ProductCard } from '../components/ProductCard';
 import { ScrollReveal } from '../components/ScrollReveal';
@@ -21,6 +21,7 @@ import {
   Check,
   Share2,
 } from 'lucide-react';
+import * as analytics from '../lib/analytics';
 
 /**
  * Resolves the slug, then renders. Split so the not-found case can return
@@ -33,6 +34,18 @@ import {
 export const ProductDetailPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
   const { data: product, isLoading, isError, error, refetch } = useProduct(slug);
+
+  // Once per product, after it resolves. No-op without consent.
+  useEffect(() => {
+    if (!product) return;
+    const cheapest = [...product.variants].sort((a, b) => a.pricePaise - b.pricePaise)[0];
+    if (cheapest) {
+      analytics.viewItem({
+        slug: product.slug, name: product.name,
+        weight: cheapest.weight, pricePaise: cheapest.pricePaise,
+      });
+    }
+  }, [product]);
 
   if (isLoading) {
     return (
