@@ -22,6 +22,11 @@ export class ApiRequestError extends Error {
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
     ...init,
+    // The customer session is an HttpOnly cookie, and in production the API
+    // lives on api.<domain> while the shop is on <domain>. 'include' is what
+    // carries it across that subdomain boundary; it stays SameSite=Lax
+    // because those are the same *site*. See docs/AUTH.md §2.
+    credentials: 'include',
     headers: { 'content-type': 'application/json', ...init?.headers },
   });
 
@@ -50,7 +55,32 @@ export interface ProductListParams {
   limit?: number;
 }
 
+export interface CustomerIdentity { phone: string; name: string | null; email: string | null }
+
+export interface CustomerOrder {
+  orderNumber: string;
+  status: string;
+  paymentStatus: string;
+  totalPaise: number;
+  createdAt: string;
+  trackingNumber: string | null;
+  courier: string | null;
+  items: { productName: string; weight: string; quantity: number; unitPricePaise: number }[];
+}
+
 export const api = {
+  requestOtp: (phone: string) =>
+    request<{ data: { retryAfterSeconds: number; simulated: boolean } }>('/auth/otp/request', {
+      method: 'POST', body: JSON.stringify({ phone }),
+    }).then((r) => r.data),
+  verifyOtp: (phone: string, code: string) =>
+    request<{ data: { phone: string; isNew: boolean; ordersLinked: number } }>('/auth/otp/verify', {
+      method: 'POST', body: JSON.stringify({ phone, code }),
+    }).then((r) => r.data),
+  logout: () => request<{ data: { ok: boolean } }>('/auth/logout', { method: 'POST' }).then((r) => r.data),
+  me: () => request<{ data: CustomerIdentity | null }>('/auth/me').then((r) => r.data),
+  myOrders: () => request<{ data: CustomerOrder[] }>('/auth/orders').then((r) => r.data),
+
   products: {
     list: (params: ProductListParams = {}) => {
       const q = new URLSearchParams();

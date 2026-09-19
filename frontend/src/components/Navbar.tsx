@@ -9,6 +9,7 @@ import {
   Menu,
   X,
   ArrowRight,
+  User,
 } from 'lucide-react';
 
 /** 'home' is the only nav id whose path is not just /<id>. */
@@ -139,6 +140,12 @@ export const Navbar: React.FC = () => {
                 <Search size={20} />
               </button>
 
+              <Link
+                to="/account"
+                className="relative hidden sm:grid place-items-center min-h-11 min-w-11 text-[#483828] hover:text-[#87380F] hover:bg-[#F3E7D0]/40 rounded-full transition-colors cursor-pointer"
+                aria-label="Your account">
+                <User size={20} />
+              </Link>
               <Link to="/shop"
                 id="navbar-wishlist-btn"
                 className="relative hidden sm:grid place-items-center min-h-11 min-w-11 text-[#483828] hover:text-[#87380F] hover:bg-[#F3E7D0]/40 rounded-full transition-colors cursor-pointer"

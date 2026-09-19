@@ -194,6 +194,13 @@ export const orders = pgTable(
     couponCode: text('coupon_code'),
 
     /**
+     * Nullable on purpose. Guest checkout stays permanently, so most orders
+     * have no customer. Set at first login by matching on phone, which is why
+     * customers.phone and orders.phone share a format.
+     */
+    customerId: bigint('customer_id', { mode: 'number' }),
+
+    /**
      * Idempotency key from the client. UNIQUE, so a double-clicked "Place
      * Order" or a retried request cannot create a second order — enforced by
      * the database rather than by hoping the application checks first.
@@ -412,6 +419,124 @@ export const jobs = pgTable(
     index('jobs_claim_idx').on(t.status, t.runAfter),
     uniqueIndex('jobs_dedupe_idx').on(t.dedupeKey),
   ],
+);
+
+/* ------------------------------------------------------------------ *
+ * Customer accounts — Phase 8
+ * ------------------------------------------------------------------ */
+
+/**
+ * A customer.
+ *
+ * The phone number is the identity: it is already on every order, the courier
+ * needs it, and guest tracking already authenticates with it. A password would
+ * be a second credential for no gain — see docs/AUTH.md §4.
+ *
+ * Accounts are an option, never a gate. Guest checkout stays permanently.
+ */
+export const customers = pgTable(
+  'customers',
+  {
+    id: bigint('id', { mode: 'number' }).primaryKey().generatedAlwaysAsIdentity(),
+    /** 10 digits, no country code. Matches orders.phone so backfill works. */
+    phone: text('phone').notNull(),
+    name: text('name'),
+    email: text('email'),
+    lastLoginAt: timestamp('last_login_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [uniqueIndex('customers_phone_idx').on(t.phone)],
+);
+
+export const customerSessions = pgTable(
+  'customer_sessions',
+  {
+    id: bigint('id', { mode: 'number' }).primaryKey().generatedAlwaysAsIdentity(),
+    customerId: bigint('customer_id', { mode: 'number' })
+      .notNull()
+      .references(() => customers.id, { onDelete: 'cascade' }),
+    /** Hashed, like admin sessions: a database dump must not hand over logins. */
+    tokenHash: text('token_hash').notNull(),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    revokedAt: timestamp('revoked_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex('customer_sessions_token_idx').on(t.tokenHash),
+    index('customer_sessions_customer_idx').on(t.customerId),
+  ],
+);
+
+/**
+ * One live OTP per phone.
+ *
+ * docs/AUTH.md §4 specifies Redis, whose native TTL makes expiry free. Redis
+ * is deliberately not in this stack yet (SCALING.md defers it to Stage 2), so
+ * this is Postgres with an explicit expires_at. Expiry is therefore checked in
+ * the query and never inferred from the row existing — a row past its
+ * expires_at is dead whether or not anything has swept it.
+ *
+ * The CODE IS NEVER STORED. Only an HMAC of it, so a database dump cannot
+ * hand anyone a working login.
+ */
+export const otpCodes = pgTable(
+  'otp_codes',
+  {
+    id: bigint('id', { mode: 'number' }).primaryKey().generatedAlwaysAsIdentity(),
+    phone: text('phone').notNull(),
+    codeHash: text('code_hash').notNull(),
+    /** Verify attempts used. At 3 the code is dead, right or wrong. */
+    attempts: integer('attempts').notNull().default(0),
+    expiresAt: timestamp('expires_at', { withTimezone: true }).notNull(),
+    consumedAt: timestamp('consumed_at', { withTimezone: true }),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    uniqueIndex('otp_codes_phone_idx').on(t.phone),
+    index('otp_codes_expiry_idx').on(t.expiresAt),
+  ],
+);
+
+/**
+ * Every OTP send, for quota enforcement.
+ *
+ * Counted from rows rather than an in-memory counter, so restarting the
+ * process does not hand everyone a fresh budget. Rows older than a day are
+ * only useful for abuse investigation and can be pruned.
+ */
+export const otpSendLog = pgTable(
+  'otp_send_log',
+  {
+    id: bigint('id', { mode: 'number' }).primaryKey().generatedAlwaysAsIdentity(),
+    phone: text('phone').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index('otp_send_log_phone_idx').on(t.phone, t.createdAt)],
+);
+
+/**
+ * Addresses a customer has saved. Never auto-saved from an order — an address
+ * typed once for a gift is not somewhere they live.
+ */
+export const savedAddresses = pgTable(
+  'saved_addresses',
+  {
+    id: bigint('id', { mode: 'number' }).primaryKey().generatedAlwaysAsIdentity(),
+    customerId: bigint('customer_id', { mode: 'number' })
+      .notNull()
+      .references(() => customers.id, { onDelete: 'cascade' }),
+    label: text('label'),
+    name: text('name').notNull(),
+    phone: text('phone').notNull(),
+    address: text('address').notNull(),
+    landmark: text('landmark'),
+    city: text('city').notNull(),
+    state: text('state').notNull(),
+    pincode: text('pincode').notNull(),
+    isDefault: boolean('is_default').notNull().default(false),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index('saved_addresses_customer_idx').on(t.customerId)],
 );
 
 /* ------------------------------------------------------------------ *

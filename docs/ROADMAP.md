@@ -210,7 +210,7 @@ Decisions, not oversights. Revisit when there is evidence, not appetite.
 
 | Deferred | Revisit when |
 |---|---|
-| Customer accounts and OTP login | Repeat-purchase rate justifies the OTP cost |
+| ~~Customer accounts and OTP login~~ | **Built 19 Sep 2026** — guest checkout unchanged. Needs a Meta AUTHENTICATION template and DLT registration before codes can actually be delivered. |
 | Subscriptions | Customers ask for recurring delivery |
 | Multi-language (Kannada UI) | Regional traffic justifies translation upkeep |
 | Native app | The mobile web experience is measurably the ceiling |

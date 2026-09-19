@@ -17,9 +17,11 @@ import { ScrollProgressBar } from './components/ScrollProgressBar';
 import { ScrollToTop } from './components/ScrollToTop';
 import { UpdatePrompt } from './components/UpdatePrompt';
 import { ErrorBoundary } from './components/ErrorBoundary';
-import { motion, AnimatePresence, MotionConfig } from 'motion/react';
+import { MotionConfig } from 'motion/react';
 import ConsentBanner from './components/ConsentBanner';
 import { ScrollReset } from './components/ScrollReset';
+import LoginPage from './pages/LoginPage';
+import AccountPage from './pages/AccountPage';
 import { initAnalytics, pageView } from './lib/analytics';
 
 // Pages
@@ -53,18 +55,23 @@ const AppContent: React.FC = () => {
       {/* Top sticky navigation */}
       <Navbar />
 
-      {/* Main page view with smooth transition.
-          Keyed on pathname so the transition survives the move off the old
-          activePage string — same animation, real URLs underneath. */}
-      <AnimatePresence mode="wait">
-        <motion.main
-          key={location.pathname}
-          initial={{ opacity: 0, y: 8 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -8 }}
-          transition={{ duration: 0.28, ease: 'easeOut' }}
-          className="flex-1"
-        >
+      {/*
+        No page transition.
+
+        This was <AnimatePresence mode="wait"> around a motion.main keyed on
+        pathname. Under React 19 StrictMode the entering page mounted at its
+        `initial` state — opacity 0 — and the enter animation never fired, so
+        every client-side navigation left the PREVIOUS page on screen while
+        the URL changed underneath it. The new page was in the DOM the whole
+        time, invisible.
+
+        Replacing it with a CSS fade fixed the routing but kept the shape of
+        the problem: anything that stops the animation advancing leaves the
+        page at opacity 0. A 280ms fade is not worth a failure mode where the
+        site appears blank, so navigation is now plain. The page is visible
+        because it is rendered, not because something animated it.
+      */}
+      <main className="flex-1">
           <ErrorBoundary area="page">
           <Routes location={location}>
             <Route path="/" element={<HomePage />} />
@@ -78,12 +85,13 @@ const AppContent: React.FC = () => {
             <Route path="/checkout" element={<CheckoutPage />} />
             <Route path="/order/:orderNumber" element={<OrderConfirmationPage />} />
             <Route path="/track" element={<TrackOrderPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/account" element={<AccountPage />} />
             <Route path="/policies/:slug" element={<PolicyPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
           </ErrorBoundary>
-        </motion.main>
-      </AnimatePresence>
+      </main>
 
       {/* Footer */}
       <Footer />

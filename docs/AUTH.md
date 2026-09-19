@@ -97,8 +97,20 @@ countdown when locked, not a dead button.
 
 ## 4. Customer authentication
 
-**Not in v1.** Guest checkout only — see §7. This section is the design for
-when it ships.
+**Built, 19 September 2026.** Guest checkout is untouched and stays — see §7.
+An account is an option, never a gate.
+
+Two deviations from the design below, both deliberate:
+
+- **Postgres, not Redis.** Redis is still Stage 2 (SCALING.md), so OTPs live
+  in `otp_codes` with an explicit `expires_at`. Expiry is checked in the query
+  and never inferred from a row existing, so a code past its expiry is dead
+  whether or not anything has swept it. `purgeExpiredOtps()` is housekeeping,
+  not correctness.
+- **`customers` and `orders.customer_id` did not already exist.** This section
+  claimed they were anticipated in DATABASE.md; they were not. Both were added
+  in the same migration, `customer_id` nullable exactly as described so guest
+  orders stay valid and backfill works.
 
 ### Phone + OTP, no password
 
@@ -154,13 +166,19 @@ No password field on either screen.
 
 ### Schema
 
-Already anticipated in [DATABASE.md](./DATABASE.md): `customers`
-(`id`, `phone` unique, `name`, `email`, `created_at`) exists, and
-`orders.customer_id` is nullable **specifically so this backfill works later**
-without a painful migration. Match on phone, link historical orders.
+Migration `0007`: `customers` (`phone` unique), `customer_sessions` (token
+stored hashed, like admin sessions), `otp_codes` (one live code per phone,
+HMAC only), `otp_send_log` (quota counted from rows, so a restart does not
+hand everyone a fresh budget), `saved_addresses`, and `orders.customer_id`
+nullable.
 
-Additions when this ships: `saved_addresses`, and moving the wishlist out of
-`localStorage` into a table so it syncs across devices.
+Backfill runs at first verify: every order whose phone matches and whose
+`customer_id` is null becomes theirs. Asserted in
+`customer-auth.test.ts`.
+
+Still to do: moving the wishlist out of `localStorage` into a table so it
+syncs across devices, and a UI for `saved_addresses` — the table exists,
+nothing writes to it yet.
 
 ---
 

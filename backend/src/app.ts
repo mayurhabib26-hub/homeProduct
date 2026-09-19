@@ -10,6 +10,7 @@ import { errorHandler, notFoundHandler } from './middleware/error-handler.js';
 import { catalogueRouter } from './routes/catalogue.js';
 import { ordersRouter } from './routes/orders.js';
 import { adminAuthRouter } from './routes/admin-auth.js';
+import { customerAuthRouter } from './routes/customer-auth.js';
 import { adminRouter } from './routes/admin.js';
 import { adminProductsRouter } from './routes/admin-products.js';
 import { metricsRouter } from './routes/metrics.js';
@@ -81,6 +82,7 @@ export function createApp() {
 
   app.use('/api', catalogueRouter);
   app.use('/api', ordersRouter);
+  app.use('/api', customerAuthRouter);
   app.use('/api', adminAuthRouter);
   app.use('/api', adminRouter);
   app.use('/api', adminProductsRouter);

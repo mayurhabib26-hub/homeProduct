@@ -68,6 +68,13 @@ const schema = z.object({
    * without a registered template is not something to send by accident.
    */
   WHATSAPP_CART_TEMPLATE: z.string().optional(),
+  /**
+   * Meta-approved AUTHENTICATION-category template for the sign-in code.
+   * Unset falls back to a free-text message, which only reaches someone
+   * already inside a 24-hour session window — fine for testing, not for
+   * production sign-in.
+   */
+  WHATSAPP_OTP_TEMPLATE: z.string().optional(),
 
   SMTP_URL: z.string().optional(),
   EMAIL_FROM: z.string().optional(),

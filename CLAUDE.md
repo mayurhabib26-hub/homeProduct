@@ -124,6 +124,9 @@ are easy to get wrong:
 - **The OTP provider is a delivery pipe, nothing more.** We generate, store
   the HMAC, count attempts, and verify. Turnkey provider OTP APIs move those
   security properties somewhere we cannot audit them.
+- **The OTP code is never stored and never logged in production.** Only an
+  HMAC of it. `customer-auth.test.ts` asserts the code appears nowhere on the
+  row; the dev-only log line that prints it is gated on `isProduction`.
 
 ## Before you change service worker or cache config
 
