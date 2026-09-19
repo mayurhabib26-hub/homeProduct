@@ -9,7 +9,18 @@ import type { OrderTotals } from '@sv/shared';
 const BASE = import.meta.env.VITE_API_URL ?? 'http://localhost:4000/api';
 
 export class AdminApiError extends Error {
-  constructor(readonly code: string, message: string) {
+  constructor(
+    readonly code: string,
+    message: string,
+    /**
+     * Per-field validation errors from the server, keyed by field name.
+     *
+     * Carried through rather than flattened into the message: a form can put
+     * "Lowercase letters, numbers and hyphens only" next to the slug input,
+     * which is worth far more than a toast listing six problems at once.
+     */
+    readonly details?: Record<string, string[]>,
+  ) {
     super(message);
   }
 }
@@ -26,8 +37,8 @@ async function call<T>(path: string, init?: RequestInit): Promise<T> {
   });
   const body = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const e = (body as { error?: { code?: string; message?: string } }).error;
-    throw new AdminApiError(e?.code ?? 'NETWORK_ERROR', e?.message ?? 'Something went wrong.');
+    const e = (body as { error?: { code?: string; message?: string; details?: Record<string, string[]> } }).error;
+    throw new AdminApiError(e?.code ?? 'NETWORK_ERROR', e?.message ?? 'Something went wrong.', e?.details);
   }
   return (body as { data: T }).data;
 }
@@ -111,8 +122,17 @@ export const adminApi = {
   product: (slug: string) => call<AdminProduct>(`/admin/products/${slug}`),
   updateProduct: (slug: string, body: Record<string, unknown>) =>
     call<AdminProduct>(`/admin/products/${slug}`, { method: 'PATCH', body: JSON.stringify(body) }),
+  createProduct: (body: Record<string, unknown>) =>
+    call<AdminProduct>('/admin/products', { method: 'POST', body: JSON.stringify(body) }),
+  /**
+   * DELETE unpublishes; it does not destroy the row. A product with order
+   * history must survive being discontinued or its invoices stop reconciling
+   * — the same reason order_items are snapshots.
+   */
   unpublishProduct: (slug: string) =>
     call<unknown>(`/admin/products/${slug}`, { method: 'DELETE' }),
+  addVariant: (slug: string, body: Record<string, unknown>) =>
+    call<unknown>(`/admin/products/${slug}/variants`, { method: 'POST', body: JSON.stringify(body) }),
 
   uploadImage: async (file: File) => {
     // FormData sets its own multipart boundary — do not send a content-type.
@@ -125,7 +145,7 @@ export const adminApi = {
     credentials: 'include', body });
     const json = await res.json().catch(() => ({}));
     if (!res.ok) {
-      const e = (json as { error?: { code?: string; message?: string } }).error;
+      const e = (json as { error?: { code?: string; message?: string; details?: Record<string, string[]> } }).error;
       throw new AdminApiError(e?.code ?? 'UPLOAD_FAILED', e?.message ?? 'Upload failed.');
     }
     return (json as { data: { url: string; bytes: number } }).data;

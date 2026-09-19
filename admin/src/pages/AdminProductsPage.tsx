@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useOutletContext } from 'react-router-dom';
+import { useOutletContext, Link } from 'react-router-dom';
 import { Upload, Info } from 'lucide-react';
 import { formatPaise } from '@sv/shared';
 import { adminApi, type AdminIdentity, type AdminProduct } from '../api/client';
@@ -143,7 +143,18 @@ export const AdminProductsPage: React.FC = () => {
 
   return (
     <>
-      <PageHeader title="Products" subtitle="Manage your catalogue. Keep your range fresh and findable." />
+      <PageHeader
+        title="Products"
+        subtitle="Manage your catalogue. Keep your range fresh and findable."
+        actions={
+          <Link
+            to="/products/new"
+            className="inline-flex min-h-11 items-center rounded-md bg-[#87380F] px-4 text-xs font-semibold tracking-wider text-[#FAF6F0] transition-colors hover:bg-[#6D2D0C]"
+          >
+            Add product
+          </Link>
+        }
+      />
 
       <div className="flex flex-col gap-3 mb-4">
         <SearchField
@@ -196,13 +207,13 @@ export const AdminProductsPage: React.FC = () => {
                 {rows.map((p) => (
                   <tr key={p.slug} className={cn('hover:bg-[#F3E7D0]/40', !p.published && 'bg-[#B69A55]/6')}>
                     <td className="px-4 py-2">
-                      <div className="flex items-center gap-3">
+                      <Link to={`/products/${p.slug}/edit`} className="flex items-center gap-3 min-h-11 hover:text-[#87380F]">
                         <img src={p.image} alt="" className="w-9 h-9 rounded object-cover bg-[#F3E7D0]" />
                         <div>
                           <div className="font-medium">{p.name}</div>
                           <div className="font-mono text-[11px] text-[#483828]/45">{p.slug}</div>
                         </div>
-                      </div>
+                      </Link>
                     </td>
                     <td className="px-4 py-2 text-[#483828]/70">{p.categoryLabel}</td>
                     <td className="px-4 py-2 text-center tabular">{p.variants.length}</td>
@@ -212,6 +223,12 @@ export const AdminProductsPage: React.FC = () => {
                     </td>
                     <td className="px-4 py-2">
                       <div className="flex items-center justify-end gap-2">
+                        <Link
+                          to={`/products/${p.slug}/edit`}
+                          className="inline-flex min-h-11 items-center px-2 text-xs font-semibold text-[#87380F] hover:underline"
+                        >
+                          Edit
+                        </Link>
                         <ImageUpload product={p} />
                         <PublishToggle product={p} canPublish={me?.role === 'owner'} />
                       </div>
@@ -228,7 +245,9 @@ export const AdminProductsPage: React.FC = () => {
                 <div className="flex items-start gap-3">
                   <img src={p.image} alt="" className="w-11 h-11 rounded object-cover bg-[#F3E7D0] shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold truncate">{p.name}</p>
+                    <Link to={`/products/${p.slug}/edit`} className="block text-sm font-semibold truncate hover:text-[#87380F]">
+                      {p.name}
+                    </Link>
                     <p className="font-mono text-[11px] text-[#483828]/45">{p.slug}</p>
                     <p className="tabular text-xs text-[#483828]/70 mt-0.5">
                       {priceRange(p)} · {p.variants.length} pack{p.variants.length === 1 ? '' : 's'}

@@ -8,6 +8,7 @@ import { AdminOrdersPage } from './pages/AdminOrdersPage';
 import { AdminOrderDetailPage } from './pages/AdminOrderDetailPage';
 import { AdminInventoryPage } from './pages/AdminInventoryPage';
 import { AdminProductsPage } from './pages/AdminProductsPage';
+import { AdminProductEditPage } from './pages/AdminProductEditPage';
 import { AdminCouponsPage } from './pages/AdminCouponsPage';
 import { AdminReviewsPage } from './pages/AdminReviewsPage';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -36,6 +37,9 @@ export const App: React.FC = () => (
           <Route path="orders" element={<AdminOrdersPage />} />
           <Route path="orders/:orderNumber" element={<AdminOrderDetailPage />} />
           <Route path="products" element={<AdminProductsPage />} />
+          {/* "new" before ":slug" — otherwise /products/new is read as a slug. */}
+          <Route path="products/new" element={<AdminProductEditPage />} />
+          <Route path="products/:slug/edit" element={<AdminProductEditPage />} />
           <Route path="inventory" element={<AdminInventoryPage />} />
           <Route path="coupons" element={<AdminCouponsPage />} />
           <Route path="reviews" element={<AdminReviewsPage />} />
