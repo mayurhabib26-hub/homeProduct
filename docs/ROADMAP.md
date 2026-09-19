@@ -147,7 +147,11 @@ the infrastructure.
   which disallows `/cart`, `/checkout`, `/order/` and `/track`.
 - GA4 with e-commerce events
 - Abandoned cart recovery over WhatsApp
-- Accessibility audit against WCAG 2.2 AA
+- ~~Accessibility audit against WCAG 2.2 AA~~ — **storefront done 19 Sep 2026.**
+  Measured in a real browser per route. Zero contrast failures, zero
+  unlabelled controls, zero targets under the 24px WCAG minimum on home,
+  shop, product, cart, contact, about and recipes. Remaining: heading order
+  on two pages, one `<button>` used for navigation, and reduced-motion.
 
 ---
 

@@ -13,8 +13,24 @@
   --color-cream: #EBD9BC;
   --color-cream-soft: #F7EFE1;
   --color-olive: #647044;
+  /**
+   * Decorative only — borders, dots, gradient stops, icon fills on dark.
+   * At 2.52:1 against the cream page it is not legible as text. The two
+   * tokens below exist so nothing has to choose between the brand gold and
+   * being readable.
+   */
   --color-gold: #B69A55;
   --color-gold-light: #D4BD7E;
+
+  /** Gold TEXT on a light surface. 5.23:1 on ivory-light, 4.60:1 on ivory. */
+  --color-gold-ink: #7E6420;
+  /**
+   * Gold TEXT on a dark surface. Set by the tightest of the three it has to
+   * work on: 4.80:1 on brand #87380F, 6.68:1 on earth, higher on earth-dark.
+   * The brand terracotta is the constraint — a gold that looks fine on the
+   * brown bar fails on it.
+   */
+  --color-gold-on-dark: #DCC68D;
 }
 
 /* Custom scrollbar and delicate styling */

@@ -14,7 +14,7 @@ export const AboutPage: React.FC = () => {
         <ScrollReveal animation="fade-up">
           <div className="max-w-3xl mx-auto text-center space-y-4 mb-16">
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#F3E7D0] border border-[#B69A55]/40 text-xs font-semibold tracking-wider uppercase text-[#87380F]">
-              <Sparkles size={14} className="text-[#B69A55]" />
+              <Sparkles size={14} className="text-gold-ink" />
               <span>Our Heritage & Journey</span>
             </div>
 
@@ -163,7 +163,7 @@ export const AboutPage: React.FC = () => {
 
           <ScrollReveal animation="fade-up" delay={0.25}>
             <div className="bg-white p-8 rounded-xl border border-[#EBD9BC] shadow-xs space-y-3 h-full">
-              <div className="w-12 h-12 rounded-full bg-[#B69A55]/15 text-[#B69A55] flex items-center justify-center">
+              <div className="w-12 h-12 rounded-full bg-[#B69A55]/15 text-gold-ink flex items-center justify-center">
                 <Heart size={24} />
               </div>
               <h3 className="font-serif text-xl font-bold text-[#483828]">Heirloom Family Recipes</h3>

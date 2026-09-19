@@ -79,7 +79,7 @@ export const SearchModal: React.FC = () => {
         {/* Quick Suggestion Chips */}
         <div className="px-5 py-3 bg-[#F3E7D0]/50 border-b border-[#EBD9BC] flex items-center gap-2 overflow-x-auto text-xs">
           <span className="text-[#483828]/70 font-medium shrink-0 flex items-center gap-1">
-            <Sparkles size={12} className="text-[#B69A55]" /> Popular:
+            <Sparkles size={12} className="text-gold-ink" /> Popular:
           </span>
           {quickKeywords.map((kw) => (
             <button

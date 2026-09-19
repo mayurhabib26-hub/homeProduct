@@ -178,7 +178,7 @@ export const RecipesPage: React.FC = () => {
                 </button>
 
                 <div className="absolute bottom-4 left-6 right-6 text-white">
-                  <span className="text-xs uppercase tracking-widest font-semibold text-[#B69A55]">
+                  <span className="text-xs uppercase tracking-widest font-semibold text-gold-ink">
                     Traditional South Indian Dish
                   </span>
                   <h2 className="font-serif text-2xl sm:text-3xl font-bold leading-tight">

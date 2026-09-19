@@ -33,7 +33,7 @@ export const FloatingWhatsApp: React.FC = () => {
                 <h4 className="font-serif text-sm font-bold text-[#FAF6F0] leading-tight">
                   S V Home Products
                 </h4>
-                <span className="text-[10px] text-[#B69A55] flex items-center gap-1">
+                <span className="text-[10px] text-gold-on-dark flex items-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block"></span>
                   Family Kitchen Support
                 </span>

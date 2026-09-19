@@ -22,7 +22,7 @@ export const Footer: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12 border-b border-[#5E4A35]">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 text-center sm:text-left">
           <div className="flex items-center gap-4 bg-[#2C2117]/60 p-4 rounded-lg border border-[#B69A55]/15">
-            <div className="w-11 h-11 rounded-full bg-[#87380F]/20 text-[#B69A55] flex items-center justify-center shrink-0">
+            <div className="w-11 h-11 rounded-full bg-[#87380F]/20 text-gold-on-dark flex items-center justify-center shrink-0">
               <ShieldCheck size={22} />
             </div>
             <div>
@@ -32,7 +32,7 @@ export const Footer: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-4 bg-[#2C2117]/60 p-4 rounded-lg border border-[#B69A55]/15">
-            <div className="w-11 h-11 rounded-full bg-[#87380F]/20 text-[#B69A55] flex items-center justify-center shrink-0">
+            <div className="w-11 h-11 rounded-full bg-[#87380F]/20 text-gold-on-dark flex items-center justify-center shrink-0">
               <Truck size={22} />
             </div>
             <div>
@@ -42,7 +42,7 @@ export const Footer: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-4 bg-[#2C2117]/60 p-4 rounded-lg border border-[#B69A55]/15">
-            <div className="w-11 h-11 rounded-full bg-[#87380F]/20 text-[#B69A55] flex items-center justify-center shrink-0">
+            <div className="w-11 h-11 rounded-full bg-[#87380F]/20 text-gold-on-dark flex items-center justify-center shrink-0">
               <RefreshCw size={22} />
             </div>
             <div>
@@ -52,7 +52,7 @@ export const Footer: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-4 bg-[#2C2117]/60 p-4 rounded-lg border border-[#B69A55]/15">
-            <div className="w-11 h-11 rounded-full bg-[#87380F]/20 text-[#B69A55] flex items-center justify-center shrink-0">
+            <div className="w-11 h-11 rounded-full bg-[#87380F]/20 text-gold-on-dark flex items-center justify-center shrink-0">
               <Phone size={22} />
             </div>
             <div>
@@ -72,7 +72,7 @@ export const Footer: React.FC = () => {
               size="md"
               showText={true}
               textColor="text-[#FAF6F0]"
-              subtextColor="text-[#B69A55]"
+              subtextColor="text-gold-on-dark"
             />
             <p className="text-sm text-[#EBD9BC]/80 leading-relaxed max-w-sm pt-2">
               Authentic flavours inspired by the warmth of South Indian kitchens.
@@ -196,18 +196,18 @@ export const Footer: React.FC = () => {
             </h3>
             <ul className="space-y-3 text-sm text-[#EBD9BC]/80">
               <li className="flex items-start gap-2.5">
-                <MapPin size={16} className="text-[#B69A55] shrink-0 mt-0.5" />
+                <MapPin size={16} className="text-gold-on-dark shrink-0 mt-0.5" />
                 <span>Handcrafted in Karnataka & Tamil Nadu kitchens, delivering across India.</span>
               </li>
               <li className="flex items-center gap-2.5">
-                <Phone size={16} className="text-[#B69A55] shrink-0" />
-                <a href={telHref()} className="hover:text-[#FAF6F0] transition-colors">
+                <Phone size={16} className="text-gold-on-dark shrink-0" />
+                <a href={telHref()} className="inline-flex items-center min-h-11 hover:text-[#FAF6F0] transition-colors">
                   {formatPhoneForDisplay()}
                 </a>
               </li>
               <li className="flex items-center gap-2.5">
-                <Mail size={16} className="text-[#B69A55] shrink-0" />
-                <a href="mailto:care@svhomeproducts.com" className="hover:text-[#FAF6F0] transition-colors">
+                <Mail size={16} className="text-gold-on-dark shrink-0" />
+                <a href="mailto:care@svhomeproducts.com" className="inline-flex items-center min-h-11 hover:text-[#FAF6F0] transition-colors">
                   care@svhomeproducts.com
                 </a>
               </li>
@@ -257,11 +257,11 @@ export const Footer: React.FC = () => {
             <span className="font-mono">{FSSAI_LICENCE}</span>
           </p>
           <nav className="flex flex-wrap gap-x-4 gap-y-1" aria-label="Policies">
-            <Link to="/policies/shipping" className="hover:text-[#FAF6F0] transition-colors">Shipping</Link>
-            <Link to="/policies/refunds" className="hover:text-[#FAF6F0] transition-colors">Refunds &amp; Cancellation</Link>
-            <Link to="/policies/privacy" className="hover:text-[#FAF6F0] transition-colors">Privacy</Link>
-            <Link to="/policies/terms" className="hover:text-[#FAF6F0] transition-colors">Terms</Link>
-            <Link to="/policies/grievance" className="hover:text-[#FAF6F0] transition-colors">Grievances</Link>
+            <Link to="/policies/shipping" className="inline-flex items-center min-h-11 hover:text-[#FAF6F0] transition-colors">Shipping</Link>
+            <Link to="/policies/refunds" className="inline-flex items-center min-h-11 hover:text-[#FAF6F0] transition-colors">Refunds &amp; Cancellation</Link>
+            <Link to="/policies/privacy" className="inline-flex items-center min-h-11 hover:text-[#FAF6F0] transition-colors">Privacy</Link>
+            <Link to="/policies/terms" className="inline-flex items-center min-h-11 hover:text-[#FAF6F0] transition-colors">Terms</Link>
+            <Link to="/policies/grievance" className="inline-flex items-center min-h-11 hover:text-[#FAF6F0] transition-colors">Grievances</Link>
           </nav>
         </div>
       </div>

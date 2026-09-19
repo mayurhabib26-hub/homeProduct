@@ -80,6 +80,7 @@ export const ShopPage: React.FC = () => {
                 />
                 <input
                   type="text"
+                  aria-label="Search products"
                   placeholder="Search rasam, sambar, podi..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -93,6 +94,7 @@ export const ShopPage: React.FC = () => {
                   <SlidersHorizontal size={14} className="text-[#87380F]" />
                   <span className="font-medium hidden sm:inline">Price:</span>
                   <select
+                    aria-label="Price"
                     value={priceFilter}
                     onChange={(e) => setPriceFilter(e.target.value as any)}
                     className="bg-white border border-[#EBD9BC] rounded px-2.5 py-1.5 text-xs text-[#483828] focus:outline-none focus:border-[#87380F]"
@@ -108,6 +110,7 @@ export const ShopPage: React.FC = () => {
                   <ArrowUpDown size={14} className="text-[#87380F]" />
                   <span className="font-medium hidden sm:inline">Sort:</span>
                   <select
+                    aria-label="Sort"
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value as any)}
                     className="bg-white border border-[#EBD9BC] rounded px-2.5 py-1.5 text-xs text-[#483828] focus:outline-none focus:border-[#87380F]"

@@ -130,12 +130,12 @@ const ProductDetail: React.FC<{ product: ProductDetailData }> = ({ product }) =>
     <div className="bg-[#FAF6F0] min-h-screen py-8 md:py-14 font-sans pb-24 lg:pb-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Breadcrumb Navigation */}
-        <nav className="flex items-center gap-2 text-xs text-[#483828]/70 mb-6 sm:mb-8 font-sans">
-          <Link to="/" className="hover:text-[#87380F]">
+        <nav className="flex items-center gap-2 text-xs text-[#483828]/70 mb-4 sm:mb-6 font-sans">
+          <Link to="/" className="inline-flex items-center min-h-11 hover:text-[#87380F]">
             Home
           </Link>
           <span>/</span>
-          <Link to="/shop" className="hover:text-[#87380F]">
+          <Link to="/shop" className="inline-flex items-center min-h-11 hover:text-[#87380F]">
             Shop All
           </Link>
           <span>/</span>
@@ -203,7 +203,7 @@ const ProductDetail: React.FC<{ product: ProductDetailData }> = ({ product }) =>
                 </span>
                 <button
                   onClick={handleShare}
-                  className="text-xs text-[#483828]/60 hover:text-[#87380F] flex items-center gap-1"
+                  className="text-xs text-[#483828]/60 hover:text-[#87380F] inline-flex items-center gap-1 min-h-11 px-2 -mx-2"
                 >
                   <Share2 size={14} />
                   <span>Share</span>
@@ -215,19 +215,19 @@ const ProductDetail: React.FC<{ product: ProductDetailData }> = ({ product }) =>
               </h1>
 
               {product.regionalName && (
-                <p className="text-base font-serif text-[#B69A55] font-semibold mt-1">
+                <p className="text-base font-serif text-gold-ink font-semibold mt-1">
                   {product.regionalName}
                 </p>
               )}
 
               {/* Rating */}
               <div className="flex items-center gap-2 mt-3">
-                <div className="flex text-[#B69A55]">
+                <div className="flex text-gold-ink">
                   {[...Array(5)].map((_, i) => (
                     <Star
                       key={i}
                       size={15}
-                      className={i < Math.floor(product.rating) ? 'fill-[#B69A55]' : 'fill-none'}
+                      className={i < Math.floor(product.rating) ? 'fill-[#7E6420]' : 'fill-none'}
                     />
                   ))}
                 </div>
@@ -361,7 +361,7 @@ const ProductDetail: React.FC<{ product: ProductDetailData }> = ({ product }) =>
                 <span className="text-[9px] text-[#483828]/60">Fast Dispatch</span>
               </div>
               <div className="p-2">
-                <ShieldCheck size={18} className="text-[#B69A55] mx-auto mb-1" />
+                <ShieldCheck size={18} className="text-gold-ink mx-auto mb-1" />
                 <span className="text-[10px] font-semibold text-[#483828] block">Family Kitchen</span>
                 <span className="text-[9px] text-[#483828]/60">Fresh Small Batch</span>
               </div>
@@ -539,8 +539,8 @@ const ProductDetail: React.FC<{ product: ProductDetailData }> = ({ product }) =>
                   <h3 className="font-serif text-2xl font-bold text-[#483828]">
                     Customer Impressions
                   </h3>
-                  <div className="flex items-center gap-1 text-[#B69A55] font-bold text-sm">
-                    <Star size={16} className="fill-[#B69A55]" />
+                  <div className="flex items-center gap-1 text-gold-ink font-bold text-sm">
+                    <Star size={16} className="fill-[#7E6420]" />
                     <span>{product.rating} out of 5</span>
                   </div>
                 </div>
@@ -551,9 +551,9 @@ const ProductDetail: React.FC<{ product: ProductDetailData }> = ({ product }) =>
                       <h4 className="font-sans text-xs font-bold text-[#483828]">Vasantha R.</h4>
                       <span className="text-[10px] text-[#483828]/50">3 weeks ago</span>
                     </div>
-                    <div className="flex text-[#B69A55] mb-2">
+                    <div className="flex text-gold-ink mb-2">
                       {[...Array(5)].map((_, i) => (
-                        <Star key={i} size={12} className="fill-[#B69A55]" />
+                        <Star key={i} size={12} className="fill-[#7E6420]" />
                       ))}
                     </div>
                     <p className="text-xs text-[#483828]/80 leading-relaxed font-serif italic">
@@ -566,9 +566,9 @@ const ProductDetail: React.FC<{ product: ProductDetailData }> = ({ product }) =>
                       <h4 className="font-sans text-xs font-bold text-[#483828]">Raghavendra K.</h4>
                       <span className="text-[10px] text-[#483828]/50">1 month ago</span>
                     </div>
-                    <div className="flex text-[#B69A55] mb-2">
+                    <div className="flex text-gold-ink mb-2">
                       {[...Array(5)].map((_, i) => (
-                        <Star key={i} size={12} className="fill-[#B69A55]" />
+                        <Star key={i} size={12} className="fill-[#7E6420]" />
                       ))}
                     </div>
                     <p className="text-xs text-[#483828]/80 leading-relaxed font-serif italic">

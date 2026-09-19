@@ -51,7 +51,7 @@ export const Navbar: React.FC = () => {
   return (
     <>
       {/* Top Announcement Bar */}
-      <div className="bg-[#483828] text-[#F3E7D0] text-xs py-2 px-4 border-b border-[#B69A55]/20">
+      <div className="bg-[#483828] text-[#F3E7D0] text-xs px-4 border-b border-[#B69A55]/20">
         <div className="max-w-7xl mx-auto flex justify-between items-center tracking-wider font-sans">
           <div className="flex items-center gap-2">
             <span className="inline-block w-1.5 h-1.5 rounded-full bg-[#B69A55] animate-pulse"></span>
@@ -66,7 +66,7 @@ export const Navbar: React.FC = () => {
               href={generateWhatsAppOrderUrl()}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1.5 text-[#B69A55] hover:text-white transition-colors text-[11px] font-medium"
+              className="inline-flex items-center gap-1.5 min-h-11 px-2 -mx-2 text-gold-on-dark hover:text-white transition-colors text-[11px] font-medium"
             >
               <Phone size={12} />
               <span>WhatsApp Orders</span>
@@ -118,16 +118,20 @@ export const Navbar: React.FC = () => {
                     key={link.id}
                     id={`nav-${link.id}`}
                     to={linkPath(link.id)}
-                    className={`relative text-sm font-sans font-medium tracking-wider uppercase transition-colors py-1 cursor-pointer ${
+                    className={`inline-flex items-center min-h-11 text-sm font-sans font-medium tracking-wider uppercase transition-colors cursor-pointer ${
                       isActive
                         ? 'text-[#87380F] font-semibold'
                         : 'text-[#483828] hover:text-[#87380F]'
                     }`}
                   >
-                    {link.label}
-                    {isActive && (
-                      <span className="absolute bottom-0 left-0 w-full h-[2px] bg-[#87380F] rounded-full transition-all duration-300" />
-                    )}
+                    {/* The hit area is 44px; the underline stays tight to the
+                        text rather than dropping to the bottom of the box. */}
+                    <span className="relative py-1">
+                      {link.label}
+                      {isActive && (
+                        <span className="absolute bottom-0 left-0 w-full h-[2px] bg-[#87380F] rounded-full transition-all duration-300" />
+                      )}
+                    </span>
                   </Link>
                 );
               })}
@@ -139,7 +143,7 @@ export const Navbar: React.FC = () => {
                 type="button"
                 id="navbar-search-btn"
                 onClick={() => setIsSearchOpen(true)}
-                className="p-2.5 text-[#483828] hover:text-[#87380F] hover:bg-[#F3E7D0]/40 rounded-full transition-colors cursor-pointer"
+                className="grid place-items-center min-h-11 min-w-11 text-[#483828] hover:text-[#87380F] hover:bg-[#F3E7D0]/40 rounded-full transition-colors cursor-pointer"
                 title="Search products & recipes"
                 aria-label="Search"
               >
@@ -148,7 +152,7 @@ export const Navbar: React.FC = () => {
 
               <Link to="/shop"
                 id="navbar-wishlist-btn"
-                className="relative hidden sm:flex p-2.5 text-[#483828] hover:text-[#87380F] hover:bg-[#F3E7D0]/40 rounded-full transition-colors cursor-pointer"
+                className="relative hidden sm:grid place-items-center min-h-11 min-w-11 text-[#483828] hover:text-[#87380F] hover:bg-[#F3E7D0]/40 rounded-full transition-colors cursor-pointer"
                 title="Favorites"
                 aria-label="Favorites">
                 <Heart size={20} className={wishlist.length > 0 ? 'fill-[#87380F] text-[#87380F]' : ''} />
@@ -163,7 +167,7 @@ export const Navbar: React.FC = () => {
                 type="button"
                 id="navbar-cart-btn"
                 onClick={() => setIsCartDrawerOpen(true)}
-                className="relative p-2.5 bg-[#87380F] hover:bg-[#483828] text-[#F3E7D0] rounded-full transition-colors duration-200 cursor-pointer shadow-sm flex items-center justify-center"
+                className="relative min-h-11 min-w-11 bg-[#87380F] hover:bg-[#483828] text-[#F3E7D0] rounded-full transition-colors duration-200 cursor-pointer shadow-sm flex items-center justify-center"
                 aria-label={`Cart with ${cartItemCount} items`}
               >
                 <ShoppingBag size={19} />

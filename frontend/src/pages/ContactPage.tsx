@@ -173,10 +173,11 @@ export const ContactPage: React.FC = () => {
                   <form onSubmit={handleSubmit} className="space-y-4 text-xs">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block font-semibold text-[#483828] mb-1">
+                        <label htmlFor="contact-name" className="block font-semibold text-[#483828] mb-1">
                           Your Full Name *
                         </label>
                         <input
+                          id="contact-name"
                           type="text"
                           required
                           value={formData.name}
@@ -187,10 +188,11 @@ export const ContactPage: React.FC = () => {
                       </div>
 
                       <div>
-                        <label className="block font-semibold text-[#483828] mb-1">
+                        <label htmlFor="contact-phone" className="block font-semibold text-[#483828] mb-1">
                           Phone / WhatsApp Number *
                         </label>
                         <input
+                          id="contact-phone"
                           type="tel"
                           required
                           value={formData.phone}
@@ -203,10 +205,11 @@ export const ContactPage: React.FC = () => {
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block font-semibold text-[#483828] mb-1">
+                        <label htmlFor="contact-email" className="block font-semibold text-[#483828] mb-1">
                           Email Address
                         </label>
                         <input
+                          id="contact-email"
                           type="email"
                           value={formData.email}
                           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
@@ -216,10 +219,11 @@ export const ContactPage: React.FC = () => {
                       </div>
 
                       <div>
-                        <label className="block font-semibold text-[#483828] mb-1">
+                        <label htmlFor="contact-subject" className="block font-semibold text-[#483828] mb-1">
                           Subject
                         </label>
                         <select
+                          id="contact-subject"
                           value={formData.subject}
                           onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
                           className="w-full bg-[#FAF6F0] border border-[#EBD9BC] rounded-md px-3.5 py-2.5 text-[#483828] focus:outline-none focus:border-[#87380F]"
@@ -234,10 +238,11 @@ export const ContactPage: React.FC = () => {
                     </div>
 
                     <div>
-                      <label className="block font-semibold text-[#483828] mb-1">
+                      <label htmlFor="contact-message" className="block font-semibold text-[#483828] mb-1">
                         Your Message *
                       </label>
                       <textarea
+                        id="contact-message"
                         rows={4}
                         required
                         value={formData.message}

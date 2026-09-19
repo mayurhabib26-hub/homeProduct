@@ -75,8 +75,8 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, className = '
         <div>
           {/* Rating */}
           <div className="flex items-center gap-1.5 mb-1.5">
-            <div className="flex items-center text-[#B69A55]">
-              <Star size={13} className="fill-[#B69A55]" />
+            <div className="flex items-center text-gold-ink">
+              <Star size={13} className="fill-[#7E6420]" />
             </div>
             <span className="text-xs font-semibold text-[#483828]">{product.rating}</span>
             <span className="text-[11px] text-[#483828]/60">({product.reviewsCount})</span>
@@ -93,7 +93,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, className = '
           </h3>
 
           {product.regionalName && (
-            <p className="text-[11px] font-serif text-[#B69A55] font-medium mt-0.5">
+            <p className="text-[11px] font-serif text-gold-ink font-medium mt-0.5">
               {product.regionalName}
             </p>
           )}
@@ -115,7 +115,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product, className = '
                 key={v.weight}
                 type="button"
                 onClick={() => setSelectedWeight(v.weight)}
-                className={`text-[11px] font-medium px-2 py-0.5 rounded-sm border transition-all cursor-pointer ${
+                className={`inline-flex items-center justify-center min-h-11 min-w-11 text-[11px] font-medium px-2 rounded-sm border transition-all cursor-pointer ${
                   selectedWeight === v.weight
                     ? 'border-[#87380F] bg-[#87380F] text-white font-semibold'
                     : 'border-[#EBD9BC] bg-[#F7EFE1] text-[#483828] hover:border-[#B69A55]'

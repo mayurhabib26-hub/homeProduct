@@ -92,7 +92,7 @@ export const HomePage: React.FC = () => {
             >
               {/* Trust Tag */}
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#F3E7D0] border border-[#B69A55]/40 text-xs font-semibold tracking-wider uppercase text-[#87380F]">
-                <Sparkles size={14} className="text-[#B69A55]" />
+                <Sparkles size={14} className="text-gold-ink" />
                 <span>Handcrafted South Indian Spice House</span>
               </div>
 
@@ -128,9 +128,9 @@ export const HomePage: React.FC = () => {
               {/* Trust Line */}
               <div className="pt-4 flex items-center justify-center lg:justify-start gap-3 text-xs sm:text-sm text-[#483828]/80 font-serif italic border-t border-[#EBD9BC]/60">
                 <span>Traditional Recipes</span>
-                <span className="text-[#B69A55]">•</span>
+                <span className="text-gold-ink">•</span>
                 <span>Carefully Selected Spices</span>
-                <span className="text-[#B69A55]">•</span>
+                <span className="text-gold-ink">•</span>
                 <span>Made with Love</span>
               </div>
             </motion.div>
@@ -166,7 +166,7 @@ export const HomePage: React.FC = () => {
                     </div>
                     <Link
                       to="/product/rasam-powder"
-                      className="text-xs text-[#87380F] font-semibold hover:underline flex items-center gap-1 font-sans"
+                      className="text-xs text-[#87380F] font-semibold hover:underline inline-flex items-center gap-1 font-sans min-h-11"
                     >
                       <span>Explore</span>
                       <ArrowRight size={13} />
@@ -189,7 +189,7 @@ export const HomePage: React.FC = () => {
 
                 {/* Decorative Bottom Floating Badge */}
                 <div className="hidden sm:flex absolute -bottom-5 -right-5 bg-[#FAF6F0] px-4 py-2.5 rounded-xl border border-[#B69A55]/40 shadow-xl items-center gap-2 text-xs font-serif text-[#483828]">
-                  <span className="text-[#B69A55] font-bold">★ 4.9</span>
+                  <span className="text-gold-ink font-bold">★ 4.9</span>
                   <span>Loved by 1,200+ South Indian Homes</span>
                 </div>
               </div>
@@ -256,7 +256,7 @@ export const HomePage: React.FC = () => {
                   <div className="pt-2">
                     <Link to="/about"
                 id="brand-intro-story-cta"
-                className="inline-flex items-center gap-2 text-sm font-semibold tracking-wider uppercase text-[#87380F] hover:text-[#662707] transition-colors group cursor-pointer">
+                className="inline-flex items-center gap-2 min-h-11 text-sm font-semibold tracking-wider uppercase text-[#87380F] hover:text-[#662707] transition-colors group cursor-pointer">
                       <span>Read our full family story</span>
                       <ArrowRight size={16} className="transform group-hover:translate-x-1 transition-transform" />
                     </Link>
@@ -579,7 +579,7 @@ export const HomePage: React.FC = () => {
                         <h3 className="font-serif text-lg font-bold text-[#483828]">
                           {item.name}
                         </h3>
-                        <p className="text-xs text-[#B69A55] font-serif font-medium">
+                        <p className="text-xs text-gold-ink font-serif font-medium">
                           {item.regionalName}
                         </p>
                       </div>
@@ -633,7 +633,7 @@ export const HomePage: React.FC = () => {
 
                   {/* Floating badge */}
                   <div className="absolute -bottom-4 -left-4 bg-[#483828] text-[#F3E7D0] p-4 rounded-xl border border-[#B69A55]/40 shadow-xl">
-                    <span className="text-[10px] uppercase tracking-widest font-sans text-[#B69A55] font-bold">
+                    <span className="text-[10px] uppercase tracking-widest font-sans text-gold-on-dark font-bold">
                       HERITAGE BLEND
                     </span>
                     <p className="font-serif text-sm font-bold">100g • 250g • 500g</p>
@@ -646,7 +646,7 @@ export const HomePage: React.FC = () => {
             <div className="lg:col-span-6 space-y-6 text-center lg:text-left">
               <ScrollReveal animation="slide-left">
                 <div className="space-y-6">
-                  <div className="inline-block text-xs uppercase tracking-widest font-sans font-semibold text-[#B69A55] border-b border-[#B69A55] pb-1">
+                  <div className="inline-block text-xs uppercase tracking-widest font-sans font-semibold text-gold-on-dark border-b border-[#B69A55] pb-1">
                     SIGNATURE CREATION
                   </div>
 
@@ -661,15 +661,15 @@ export const HomePage: React.FC = () => {
 
                   <div className="space-y-3 text-xs sm:text-sm text-[#FAF6F0]/80 font-sans">
                     <div className="flex items-center gap-2 justify-center lg:justify-start">
-                      <CheckCircle2 size={16} className="text-[#B69A55]" />
+                      <CheckCircle2 size={16} className="text-gold-ink" />
                       <span>Slow-roasted coriander seeds & Byadagi chillies for vibrant color</span>
                     </div>
                     <div className="flex items-center gap-2 justify-center lg:justify-start">
-                      <CheckCircle2 size={16} className="text-[#B69A55]" />
+                      <CheckCircle2 size={16} className="text-gold-ink" />
                       <span>Tellicherry black pepper for throat-soothing digestive clarity</span>
                     </div>
                     <div className="flex items-center gap-2 justify-center lg:justify-start">
-                      <CheckCircle2 size={16} className="text-[#B69A55]" />
+                      <CheckCircle2 size={16} className="text-gold-ink" />
                       <span>Serving suggestion: Simmer with ripe tomatoes, finish with ghee tadka</span>
                     </div>
                   </div>
@@ -817,7 +817,7 @@ export const HomePage: React.FC = () => {
               {/* Floating Banner Details */}
               <div className="absolute bottom-4 sm:bottom-8 left-4 sm:left-8 right-4 sm:right-8 flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4 text-white">
                 <div className="space-y-1 max-w-xl">
-                  <span className="text-[10px] sm:text-xs uppercase tracking-widest font-semibold text-[#B69A55]">
+                  <span className="text-[10px] sm:text-xs uppercase tracking-widest font-semibold text-gold-on-dark">
                     THE GRANDMOTHER'S STANDARD
                   </span>
                   <h3 className="font-serif text-xl sm:text-2xl lg:text-3xl font-bold text-[#FAF6F0]">
@@ -919,7 +919,7 @@ export const HomePage: React.FC = () => {
                 <div className="bg-white/80 p-6 rounded-xl border border-red-200/80 space-y-4">
                   <div className="flex items-center justify-between border-b border-[#EBD9BC] pb-3">
                     <span className="font-serif font-bold text-base text-[#483828]">Commercial Factory Spices</span>
-                    <span className="text-[11px] font-bold text-red-600 bg-red-50 px-2.5 py-0.5 rounded">Mass Produced</span>
+                    <span className="text-[11px] font-bold text-red-700 bg-red-50 px-2.5 py-0.5 rounded">Mass Produced</span>
                   </div>
                   <ul className="space-y-3 text-xs text-[#483828]/80">
                     <li className="flex items-start gap-2.5">
@@ -974,7 +974,7 @@ export const HomePage: React.FC = () => {
               {/* Bottom Quick Action Strip */}
               <div className="mt-8 pt-6 border-t border-[#EBD9BC] flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
                 <div className="flex items-center gap-2 text-xs text-[#483828] font-medium">
-                  <Award size={18} className="text-[#B69A55]" />
+                  <Award size={18} className="text-gold-ink" />
                   <span>Taste the difference in your very first meal or request a custom gift pack.</span>
                 </div>
                 <div className="flex items-center gap-3">
@@ -1024,9 +1024,9 @@ export const HomePage: React.FC = () => {
                   className="bg-[#F7EFE1] p-6 rounded-xl border border-[#EBD9BC] flex flex-col justify-between h-full"
                 >
                   <div>
-                    <div className="flex items-center gap-1 text-[#B69A55] mb-3">
+                    <div className="flex items-center gap-1 text-gold-ink mb-3">
                       {[...Array(rev.rating)].map((_, i) => (
-                        <Star key={i} size={14} className="fill-[#B69A55]" />
+                        <Star key={i} size={14} className="fill-[#7E6420]" />
                       ))}
                     </div>
                     <p className="font-serif italic text-sm text-[#483828] leading-relaxed mb-4">
@@ -1080,6 +1080,7 @@ export const HomePage: React.FC = () => {
                   <input
                     type="email"
                     required
+                    aria-label="Email address for recipe newsletter"
                     placeholder="Enter your email address"
                     value={newsletterEmail}
                     onChange={(e) => setNewsletterEmail(e.target.value)}
