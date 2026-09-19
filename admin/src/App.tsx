@@ -9,6 +9,7 @@ import { AdminOrderDetailPage } from './pages/AdminOrderDetailPage';
 import { AdminInventoryPage } from './pages/AdminInventoryPage';
 import { AdminProductsPage } from './pages/AdminProductsPage';
 import { AdminProductEditPage } from './pages/AdminProductEditPage';
+import { ScrollReset } from './components/ScrollReset';
 import { AdminCouponsPage } from './pages/AdminCouponsPage';
 import { AdminReviewsPage } from './pages/AdminReviewsPage';
 import { ErrorBoundary } from './components/ErrorBoundary';
@@ -30,6 +31,7 @@ export const App: React.FC = () => (
   <QueryClientProvider client={queryClient}>
     <BrowserRouter>
       <ErrorBoundary area="admin">
+      <ScrollReset />
       <Routes>
         <Route path="/login" element={<AdminLoginPage />} />
         <Route path="/" element={<AdminLayout />}>

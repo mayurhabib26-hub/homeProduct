@@ -19,6 +19,7 @@ import { UpdatePrompt } from './components/UpdatePrompt';
 import { ErrorBoundary } from './components/ErrorBoundary';
 import { motion, AnimatePresence, MotionConfig } from 'motion/react';
 import ConsentBanner from './components/ConsentBanner';
+import { ScrollReset } from './components/ScrollReset';
 import { initAnalytics, pageView } from './lib/analytics';
 
 // Pages
@@ -45,6 +46,8 @@ const AppContent: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col bg-[#FAF6F0] text-[#483828] font-sans antialiased selection:bg-[#EBD9BC] selection:text-[#87380F]">
       {/* Scroll indicator bar on top */}
+      <ScrollReset />
+
       <ScrollProgressBar />
 
       {/* Top sticky navigation */}
