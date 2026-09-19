@@ -412,6 +412,36 @@ Two mitigations, both compatible with the fixed stack:
 
 Run both. (1) is the durable fix; (2) closes the gap between deploys.
 
+**(1) is built** — `frontend/scripts/prerender.ts`, run automatically after
+`vite build`. It writes one real HTML file per route with the correct title,
+description, canonical, Open Graph, Twitter card and JSON-LD, plus
+`sitemap.xml` and `robots.txt`. The SPA hydrates over it unchanged.
+
+Scope worth being precise about: **it injects `<head>`, not rendered body
+markup.** That is the whole fix for WhatsApp, Facebook and Instagram, which
+read the head and never execute JavaScript. Google executes JavaScript and
+gets the body either way. Body prerendering through `renderToString` is a
+larger, riskier step — every component has to become SSR-safe — and is worth
+doing only if rankings show it is needed. Head-first is not a shortcut past
+the problem; it is the part of the problem that cannot be solved any other
+way.
+
+Two properties it has to have, and does:
+
+- **Idempotent.** The homepage is written to `dist/index.html`, which is the
+  same shell every other page is built from, so the injector strips everything
+  it emits — including the canonical link and the JSON-LD — before writing.
+  Without that, a second run stacks a second `<link rel="canonical">` and a
+  second `Product` schema onto every page.
+- **Loud when it cannot work.** With no catalogue API reachable it degrades to
+  the static routes so a build never fails on a transient network error — but
+  `PRERENDER_STRICT=1`, which CI and production builds set, turns that into a
+  hard failure. A deploy that silently ships every product page carrying the
+  homepage's meta is the exact bug this replaces.
+
+(2), the Cloudflare Worker, is still to do. It only matters once products are
+created between deploys.
+
 This is a genuine cost of the stack decision, and it is worth stating plainly:
 an SSR framework would make this a non-issue. The mitigation is good, not free.
 

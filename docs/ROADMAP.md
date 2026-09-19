@@ -132,12 +132,16 @@ the infrastructure.
 
 ## Phase 7 — Growth · 1 week, ongoing
 
-- Build-time prerender + edge meta injection for SEO
+- ~~Build-time prerender~~ — **done 19 Sep 2026.** `frontend/scripts/prerender.ts`,
+  27 routes. Edge meta injection (the Worker) still to do
   ([ARCHITECTURE.md §9](./ARCHITECTURE.md))
 - **PWA caching and polish** — per-route strategies, install-prompt timing,
   update flow with checkout suppression ([PWA.md](./PWA.md))
-- JSON-LD `Product` / `Offer` / `Recipe` schema
-- Sitemap, canonical URLs, per-page meta
+- ~~JSON-LD `Product` / `Offer` schema~~ — **done.** One `Offer` per variant
+  with real price and availability; `aggregateRating` only where reviews
+  actually exist. `Recipe` schema still to do.
+- ~~Sitemap, canonical URLs, per-page meta~~ — **done.** Plus `robots.txt`,
+  which disallows `/cart`, `/checkout`, `/order/` and `/track`.
 - GA4 with e-commerce events
 - Abandoned cart recovery over WhatsApp
 - Accessibility audit against WCAG 2.2 AA

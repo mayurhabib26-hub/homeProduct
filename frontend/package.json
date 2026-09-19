@@ -5,9 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite --port=5173",
-    "build": "vite build",
+    "build": "vite build && npm run prerender",
     "preview": "vite preview",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "prerender": "tsx scripts/prerender.ts"
   },
   "dependencies": {
     "@sv/shared": "*",

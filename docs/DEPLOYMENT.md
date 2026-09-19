@@ -210,6 +210,19 @@ SMTP_URL  WHATSAPP_API_KEY  SHIPROCKET_EMAIL  SHIPROCKET_PASSWORD
 ADMIN_ALERT_EMAIL  SENTRY_DSN  APP_URL
 ```
 
+**Frontend build only — not in the bundle, read by `scripts/prerender.ts`:**
+```
+SITE_URL=https://<production domain>     # absolute origin for canonical, og:url, sitemap
+PRERENDER_API_URL=https://api.<domain>/api
+PRERENDER_STRICT=1                       # set in CI and production
+```
+
+These are build-time, not runtime, so they are not `VITE_`-prefixed and never
+reach the browser. `SITE_URL` is not optional in production: WhatsApp will not
+render a preview from a relative `og:image`, so without it every shared link
+previews as a blank grey box. `PRERENDER_STRICT=1` makes the build fail rather
+than ship a site whose product pages all carry the homepage's meta.
+
 Validated with Zod **at boot**. A missing `RAZORPAY_KEY_SECRET` must crash on
 startup with a clear message, not surface as a confusing 500 during someone's
 first checkout.
