@@ -190,8 +190,14 @@ testing the query directly would prove nothing about whether the route applies
 it. Removing the ownership check from PATCH makes that test fail, which was
 checked.
 
-Still to do: moving the wishlist out of `localStorage` into a table so it
-syncs across devices.
+The wishlist syncs. Guests keep theirs in `localStorage` and always will;
+signing in **merges** the local list into the account rather than replacing
+it, because losing someone's saved products as a reward for making an account
+is exactly backwards. The unique index on `(customer_id, product_slug)` makes
+repeating the merge a no-op, so a retry is safe.
+
+`wishlist.test.ts` asserts the merge keeps what the account already had, and
+making the route replace instead of merge fails it — checked.
 
 ---
 

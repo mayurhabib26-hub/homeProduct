@@ -11,7 +11,7 @@ import rateLimit from 'express-rate-limit';
 import { and, desc, eq, ne } from 'drizzle-orm';
 import { asyncRoute } from '../middleware/error-handler.js';
 import { getDb } from '../db/client.js';
-import { orders, orderItems, savedAddresses } from '../db/schema.js';
+import { orders, orderItems, savedAddresses, wishlistItems } from '../db/schema.js';
 import { badRequest, ApiError } from '../lib/errors.js';
 import { env, isProduction } from '../lib/env.js';
 import { logger } from '../lib/logger.js';
@@ -310,5 +310,77 @@ customerAuthRouter.delete(
     }
 
     res.json({ data: { id } });
+  }),
+);
+
+/* ------------------------------------------------------------------ *
+ * Wishlist
+ * ------------------------------------------------------------------ */
+
+const slug = z.string().regex(/^[a-z0-9-]{1,80}$/, 'Invalid product');
+
+customerAuthRouter.get(
+  '/auth/wishlist',
+  asyncRoute(async (req, res) => {
+    const customer = await requireCustomer(req);
+    const db = getDb();
+    const rows = await db
+      .select({ productSlug: wishlistItems.productSlug })
+      .from(wishlistItems)
+      .where(eq(wishlistItems.customerId, customer.id))
+      .orderBy(desc(wishlistItems.createdAt));
+    res.setHeader('Cache-Control', 'no-store');
+    res.json({ data: rows.map((r) => r.productSlug) });
+  }),
+);
+
+/**
+ * Add one, or merge a whole list.
+ *
+ * The merge is what runs at sign-in: whatever a guest saved in localStorage
+ * is folded in rather than replacing what the account already had. Repeating
+ * it is harmless, which the unique index guarantees.
+ */
+customerAuthRouter.post(
+  '/auth/wishlist',
+  asyncRoute(async (req, res) => {
+    const customer = await requireCustomer(req);
+    const parsed = z
+      .object({ slugs: z.array(slug).max(200) })
+      .strict()
+      .safeParse(req.body);
+    if (!parsed.success) throw badRequest('Invalid wishlist.');
+
+    const db = getDb();
+    if (parsed.data.slugs.length) {
+      await db
+        .insert(wishlistItems)
+        .values(parsed.data.slugs.map((productSlug) => ({ customerId: customer.id, productSlug })))
+        .onConflictDoNothing();
+    }
+
+    const rows = await db
+      .select({ productSlug: wishlistItems.productSlug })
+      .from(wishlistItems)
+      .where(eq(wishlistItems.customerId, customer.id))
+      .orderBy(desc(wishlistItems.createdAt));
+    res.json({ data: rows.map((r) => r.productSlug) });
+  }),
+);
+
+customerAuthRouter.delete(
+  '/auth/wishlist/:slug',
+  asyncRoute(async (req, res) => {
+    const customer = await requireCustomer(req);
+    const parsed = slug.safeParse(req.params.slug);
+    if (!parsed.success) throw badRequest('Invalid product');
+
+    const db = getDb();
+    // Scoped by customer, like every other route here: an id or slug from the
+    // URL never reaches another customer's row.
+    await db
+      .delete(wishlistItems)
+      .where(and(eq(wishlistItems.customerId, customer.id), eq(wishlistItems.productSlug, parsed.data)));
+    res.json({ data: { slug: parsed.data } });
   }),
 );

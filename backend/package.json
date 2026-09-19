@@ -36,7 +36,8 @@
     "test:abandoned-cart": "tsx src/services/abandoned-cart.test.ts",
     "admin:list": "tsx src/db/list-admins.ts",
     "test:customer-auth": "tsx src/services/customer-auth.test.ts",
-    "test:saved-addresses": "tsx src/services/saved-addresses.test.ts"
+    "test:saved-addresses": "tsx src/services/saved-addresses.test.ts",
+    "test:wishlist": "tsx src/services/wishlist.test.ts"
   },
   "dependencies": {
     "@electric-sql/pglite": "^0.5.8",

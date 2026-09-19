@@ -94,6 +94,17 @@ export const api = {
   me: () => request<{ data: CustomerIdentity | null }>('/auth/me').then((r) => r.data),
   myOrders: () => request<{ data: CustomerOrder[] }>('/auth/orders').then((r) => r.data),
 
+  wishlist: {
+    list: () => request<{ data: string[] }>('/auth/wishlist').then((r) => r.data),
+    /** Also the merge used at sign-in — repeating it is a no-op. */
+    add: (slugs: string[]) =>
+      request<{ data: string[] }>('/auth/wishlist', {
+        method: 'POST', body: JSON.stringify({ slugs }),
+      }).then((r) => r.data),
+    remove: (slug: string) =>
+      request<{ data: { slug: string } }>(`/auth/wishlist/${slug}`, { method: 'DELETE' }).then((r) => r.data),
+  },
+
   addresses: {
     list: () => request<{ data: SavedAddress[] }>('/auth/addresses').then((r) => r.data),
     create: (body: Omit<SavedAddress, 'id'>) =>

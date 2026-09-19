@@ -8,12 +8,14 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { api, ApiRequestError } from '../api/client';
+import { useShop } from '../context/ShopContext';
 
 const RESEND_SECONDS = 30;
 
 export default function LoginPage() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
+  const { syncWishlist } = useShop();
   const next = params.get('next') ?? '/account';
 
   const [step, setStep] = useState<'phone' | 'code'>('phone');
@@ -60,6 +62,11 @@ export default function LoginPage() {
     setBusy(true);
     try {
       const r = await api.verifyOtp(phone, value);
+
+      // Before navigating: anything saved as a guest is merged into the
+      // account now, or it is lost the moment this page unmounts.
+      await syncWishlist();
+
       navigate(next, {
         replace: true,
         state: { justSignedIn: true, ordersLinked: r.ordersLinked },

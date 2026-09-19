@@ -498,6 +498,34 @@ export const otpCodes = pgTable(
 );
 
 /**
+ * A signed-in customer's wishlist.
+ *
+ * Guests keep theirs in localStorage and always will — an account is an
+ * option, never a gate. Signing in MERGES the local list in rather than
+ * replacing it, so saving things before making an account never loses them.
+ *
+ * Stores the slug, not a variant or a price: a wishlist is "I want this
+ * eventually", and resolving it against the catalogue at read time means a
+ * repriced or renamed product still shows correctly.
+ */
+export const wishlistItems = pgTable(
+  'wishlist_items',
+  {
+    id: bigint('id', { mode: 'number' }).primaryKey().generatedAlwaysAsIdentity(),
+    customerId: bigint('customer_id', { mode: 'number' })
+      .notNull()
+      .references(() => customers.id, { onDelete: 'cascade' }),
+    productSlug: text('product_slug').notNull(),
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [
+    // Adding the same product twice is not an error, it is a no-op — the
+    // unique index is what makes the merge on sign-in safe to repeat.
+    uniqueIndex('wishlist_customer_product_idx').on(t.customerId, t.productSlug),
+  ],
+);
+
+/**
  * Every OTP send, for quota enforcement.
  *
  * Counted from rows rather than an in-memory counter, so restarting the

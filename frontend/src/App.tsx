@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ShopProvider } from './context/ShopContext';
@@ -20,22 +20,36 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { MotionConfig } from 'motion/react';
 import ConsentBanner from './components/ConsentBanner';
 import { ScrollReset } from './components/ScrollReset';
-import LoginPage from './pages/LoginPage';
-import AccountPage from './pages/AccountPage';
 import { initAnalytics, pageView } from './lib/analytics';
 
 // Pages
 import { HomePage } from './pages/HomePage';
 import { ShopPage } from './pages/ShopPage';
 import { ProductDetailPage } from './pages/ProductDetailPage';
-import { AboutPage } from './pages/AboutPage';
-import { RecipesPage } from './pages/RecipesPage';
-import { ContactPage } from './pages/ContactPage';
 import { CartPage } from './pages/CartPage';
-import { CheckoutPage } from './pages/CheckoutPage';
-import { OrderConfirmationPage, TrackOrderPage } from './pages/OrderConfirmationPage';
-import { PolicyPage } from './pages/PolicyPage';
 
+
+/**
+ * Routes off the first-paint path are code-split.
+ *
+ * Someone landing on the homepage or a product page does not need checkout,
+ * the policies, or the account screens in their first download. Home, shop,
+ * product and cart stay eager because that is the path to a purchase and a
+ * spinner there would cost orders.
+ *
+ * This is also what keeps the bundle under the 200 KB budget — it was at
+ * 195.8 KB before the split, which is one feature away from failing the
+ * build rather than a comfortable margin.
+ */
+const AboutPage = lazy(() => import('./pages/AboutPage').then(m => ({ default: m.AboutPage })));
+const RecipesPage = lazy(() => import('./pages/RecipesPage').then(m => ({ default: m.RecipesPage })));
+const ContactPage = lazy(() => import('./pages/ContactPage').then(m => ({ default: m.ContactPage })));
+const CheckoutPage = lazy(() => import('./pages/CheckoutPage').then(m => ({ default: m.CheckoutPage })));
+const PolicyPage = lazy(() => import('./pages/PolicyPage').then(m => ({ default: m.PolicyPage })));
+const LoginPage = lazy(() => import('./pages/LoginPage'));
+const AccountPage = lazy(() => import('./pages/AccountPage'));
+const OrderConfirmationPage = lazy(() => import('./pages/OrderConfirmationPage').then(m => ({ default: m.OrderConfirmationPage })));
+const TrackOrderPage = lazy(() => import('./pages/OrderConfirmationPage').then(m => ({ default: m.TrackOrderPage })));
 
 const AppContent: React.FC = () => {
   const location = useLocation();
@@ -73,6 +87,12 @@ const AppContent: React.FC = () => {
       */}
       <main className="flex-1">
           <ErrorBoundary area="page">
+          {/*
+            A quiet placeholder, not a spinner. These chunks load in
+            milliseconds on any real connection, and a spinner that flashes
+            for 80ms reads as jank rather than progress.
+          */}
+          <Suspense fallback={<div className="min-h-[60vh]" aria-busy="true" aria-live="polite" />}>
           <Routes location={location}>
             <Route path="/" element={<HomePage />} />
             <Route path="/shop" element={<ShopPage />} />
@@ -90,6 +110,7 @@ const AppContent: React.FC = () => {
             <Route path="/policies/:slug" element={<PolicyPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
+          </Suspense>
           </ErrorBoundary>
       </main>
 

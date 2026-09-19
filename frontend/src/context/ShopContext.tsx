@@ -20,6 +20,8 @@ interface ShopContextType {
   clearCart: () => void;
   toggleWishlist: (productId: string) => void;
   isWishlisted: (productId: string) => boolean;
+  /** Called after sign-in so a guest's saved products are merged, not lost. */
+  syncWishlist: () => Promise<void>;
   setIsCartDrawerOpen: (isOpen: boolean) => void;
   setIsSearchOpen: (isOpen: boolean) => void;
   setSearchQuery: (query: string) => void;
@@ -137,7 +139,11 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, [storedCart]);
 
-  // Sync wishlist to localStorage
+  /**
+   * localStorage is the source of truth for a guest and the offline copy for
+   * everyone. It is written unconditionally so signing out does not wipe what
+   * someone saved, and so the list is on screen before any request resolves.
+   */
   useEffect(() => {
     try {
       localStorage.setItem('sv_wishlist', JSON.stringify(wishlist));
@@ -145,6 +151,47 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error(e);
     }
   }, [wishlist]);
+
+  /**
+   * Sync with the account, once, when one is present.
+   *
+   * MERGE, never replace. Whatever a guest saved before signing in is folded
+   * in rather than discarded — losing someone's saved products as a reward
+   * for making an account is exactly backwards. The server's unique index
+   * makes repeating this harmless.
+   */
+  const syncedRef = React.useRef(false);
+
+  /**
+   * Runs at mount for someone with an existing session, and again from the
+   * login page the moment a code is accepted.
+   *
+   * The mount pass alone is not enough: signing in is a client-side
+   * navigation, so an effect with no dependencies has already run and
+   * concluded "signed out" long before the session exists. That silently lost
+   * every wishlist saved before making an account, which is precisely the
+   * thing the merge is for.
+   */
+  const syncWishlist = React.useCallback(async () => {
+    try {
+      const me = await api.me();
+      if (!me) return;
+      syncedRef.current = true;
+
+      // Read localStorage rather than the closed-over state: this is called
+      // from outside the render that created it.
+      let local: string[] = [];
+      try { local = JSON.parse(localStorage.getItem('sv_wishlist') ?? '[]'); } catch { /* unreadable */ }
+
+      const merged = local.length ? await api.wishlist.add(local) : await api.wishlist.list();
+      setWishlist(merged);
+    } catch {
+      // Signed out, offline, or the API is down. The local list keeps
+      // working; a wishlist is not worth an error message.
+    }
+  }, []);
+
+  useEffect(() => { void syncWishlist(); }, [syncWishlist]);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -207,13 +254,20 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const toggleWishlist = (productId: string) => {
     setWishlist((prev) => {
-      if (prev.includes(productId)) {
-        showToast('Removed from your favorites');
-        return prev.filter((id) => id !== productId);
-      } else {
-        showToast('Saved to your favorites');
-        return [...prev, productId];
+      const removing = prev.includes(productId);
+
+      /**
+       * Fire and forget. The local list updates immediately either way, so a
+       * failed sync costs a device out of step rather than a broken tap — and
+       * the next sign-in merge repairs it.
+       */
+      if (syncedRef.current) {
+        const call = removing ? api.wishlist.remove(productId) : api.wishlist.add([productId]);
+        call.catch(() => {});
       }
+
+      showToast(removing ? 'Removed from your favorites' : 'Saved to your favorites');
+      return removing ? prev.filter((id) => id !== productId) : [...prev, productId];
     });
   };
 
@@ -298,6 +352,7 @@ export const ShopProvider: React.FC<{ children: React.ReactNode }> = ({ children
         clearCart,
         toggleWishlist,
         isWishlisted,
+        syncWishlist,
         setIsCartDrawerOpen,
         setIsSearchOpen,
         setSearchQuery,
