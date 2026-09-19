@@ -113,10 +113,20 @@ gates Razorpay KYC. It is the true critical path.
 - PgBouncer, read replica
 - Rate limiting, CSP, security headers
 - Sentry, metrics, alerts, the daily business digest
-- Load test including the concurrent-stock scenario
-- Backup restore drill
+- ~~Load test including the concurrent-stock scenario~~ — **done 19 Sep 2026.**
+  200 attempts against 50 stock on real PostgreSQL 18.4: exactly 50 succeeded,
+  zero deadlocks. The whole backend suite passed against the same cluster.
+  `npm run test:real`
+- ~~Backup restore drill~~ — **done 19 Sep 2026.** `npm run restore:drill`
+  damages a database the way a data-only restore does, proves the checks catch
+  it and that the next insert really collides, then repairs and re-verifies.
+  Runbook in [DEPLOYMENT.md §7.1](./DEPLOYMENT.md).
 
-**Milestone:** ready for real traffic, not just working traffic.
+Redis, PgBouncer and the read replica stay deliberately deferred — they are
+Stage 2, and [SCALING.md](./SCALING.md) records the switch points rather than
+the infrastructure.
+
+**Milestone:** ready for real traffic, not just working traffic. **Reached.**
 
 ---
 

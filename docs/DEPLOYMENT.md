@@ -246,6 +246,61 @@ Write a corrective migration instead — always.
 
 ---
 
+## 7.1 Restoring from a backup
+
+Railway snapshots Postgres daily. Restoring is not the hard part — **believing
+the restored database** is.
+
+A restore loads rows. It does not necessarily advance the sequences that own
+those rows, and nothing looks wrong until the next insert fails on a duplicate
+key. For this project that is worse than a crash: `order_number_seq` going
+backwards means two customers get the same order number, and an invoice
+sequence going backwards means a duplicate invoice number, which is a GST
+problem, not a bug report.
+
+**Never point the API at a restored database before this passes:**
+
+```bash
+DATABASE_URL=<restored> npm run db:verify-restore -w backend
+```
+
+It checks five things: every identity sequence is ahead of the largest id it
+owns, `order_number_seq` has been advanced, invoice numbering is gap-free
+within each financial year, every order still has its line items, and order
+subtotals still reconcile against those items. It exits non-zero and says
+which check failed.
+
+To repair a sequence the restore left behind:
+
+```sql
+select setval(pg_get_serial_sequence('orders', 'id'),
+              greatest((select coalesce(max(id), 0) from orders), 1));
+```
+
+### The drill
+
+A verifier nobody has watched fail is a verifier nobody should trust, so the
+drill damages a database on purpose and asserts the checks catch it:
+
+```bash
+npm run restore:drill
+```
+
+It seeds a real Postgres, places orders, confirms a healthy database passes
+every check, rewinds `orders_id_seq` and `invoices_id_seq` the way a data-only
+restore does, confirms the checks now fail, **confirms the next insert really
+does collide** — so the damage is proven real rather than cosmetic — then
+repairs the sequences and confirms everything passes again.
+
+Run it after any change to the schema, the seed, or invoice numbering.
+
+**Last run: 19 September 2026, PostgreSQL 18.4 — pass.** Healthy database
+clean; damage caught on both sequences; the next order failed with a duplicate
+key as predicted; clean again after repair. Invoice numbering verified
+gap-free across `2026-27`, range 1..3.
+
+---
+
 ## 8. Runbooks
 
 ### Site down

@@ -14,7 +14,9 @@
     "build": "npm run build -w shared && npm run build -w frontend && npm run build -w admin",
     "lint": "npm run lint -w shared && npm run lint -w frontend && npm run lint -w admin && npm run lint -w backend",
     "clean": "rm -rf frontend/dist admin/dist backend/dist shared/dist",
-    "dev:admin": "npm run dev -w admin"
+    "dev:admin": "npm run dev -w admin",
+    "test:real": "node backend/scripts/with-postgres.mjs sh -c \"npm run db:migrate -w backend && npm run db:seed -w backend && npm run test:concurrency -w backend\"",
+    "restore:drill": "node backend/scripts/with-postgres.mjs sh -c \"npm run db:migrate -w backend && npm run db:seed -w backend && npm run db:restore-drill -w backend\""
   },
   "devDependencies": {
     "typescript": "~5.8.2"

@@ -71,21 +71,42 @@ and taken server-side, COD works end to end, the admin panel runs the
 business, fulfilment is queued, and GST invoices are issued with gap-free
 sequential numbering.
 
-**Three things gate release, and none of them is code:**
+Phase 6 is done: the concurrency test and the backup restore drill have both
+been run against a real, multi-process Postgres.
+
+**Two things gate release, and neither is code:**
 
 1. **No live Razorpay call has ever run.** Signature verification is fully
    tested, but order creation against their API needs keys, which needs KYC.
-2. **The concurrency test has never run against a real Postgres.** PGlite is
-   single-connection, so it proves the arithmetic and not contention. The
-   commands are in the header of `backend/src/services/concurrency.test.ts`.
-   A pass on PGlite is not a pass.
-
-3. **Compliance values are not set, and invoicing refuses to run without
+2. **Compliance values are not set, and invoicing refuses to run without
    them.** SELLER_ADDRESS, SELLER_GSTIN, FSSAI_LICENCE, GRIEVANCE_OFFICER and
    GRIEVANCE_EMAIL come from real registrations. The policy pages in
    `frontend/src/content/policies.ts` are drafts and need a lawyer's review.
    HSN codes and GST rates need confirming per product with a CA — every
    product is currently seeded at 0910 / 5%, which is a guess.
+
+## Running against a real Postgres
+
+PGlite cannot produce lock contention, so anything whose correctness depends
+on it must also run against a real server. There is no Docker here and none is
+needed — `embedded-postgres` downloads the official binaries and starts an
+actual multi-process cluster on an ephemeral port:
+
+```bash
+npm run test:real       # the concurrency test, for real
+npm run restore:drill   # damage a database on purpose, prove the checks catch it
+```
+
+`backend/scripts/with-postgres.mjs` boots the cluster, hands the child a
+`DATABASE_URL` and removes the data directory afterwards. Use it to run
+anything else against real Postgres:
+
+```bash
+node backend/scripts/with-postgres.mjs sh -c '<your commands>'
+```
+
+Never point the API at a restored backup before `npm run db:verify-restore -w
+backend` passes — see [DEPLOYMENT.md §7.1](./docs/DEPLOYMENT.md).
 
 Local development uses PGlite when `DATABASE_URL` is unset — real Postgres
 compiled to WASM, but **single-process**: stop the API before `db:migrate`,

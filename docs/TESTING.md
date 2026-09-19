@@ -115,6 +115,34 @@ Run it in CI on every push. If it ever reports 51, everything else stops until
 it is fixed. This test is the difference between believing the stock logic is
 correct and knowing it.
 
+**A pass on PGlite is not a pass.** PGlite is genuinely Postgres, but it runs
+in one process on one connection: requests interleave without ever contending
+for a row lock, so it proves the guard's arithmetic and cannot surface a
+deadlock from inconsistent lock ordering.
+
+There is no Docker on every machine, so the real run goes through
+`embedded-postgres`, which downloads the official binaries and starts an actual
+multi-process server on an ephemeral port:
+
+```bash
+npm run test:real
+```
+
+`backend/scripts/with-postgres.mjs` boots the cluster, hands the child a
+`DATABASE_URL`, and removes the data directory afterwards. The pool is
+`max: 10`, so 200 transactions genuinely queue on real row locks.
+
+**Result, 19 September 2026, PostgreSQL 18.4:**
+
+```
+engine=postgres  attempts=200  stock=50
+  succeeded=50  sold-out=150  other-failures=0  remaining=0
+```
+
+Exactly 50 of 200, stock landed on zero, no deadlocks. The full backend suite
+was run against the same real cluster at the same time and passed in full, so
+PGlite had not been hiding anything.
+
 ---
 
 ## 4. E2E tests
