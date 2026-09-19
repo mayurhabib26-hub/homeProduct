@@ -62,6 +62,31 @@ design — the CDN carries `s-maxage=60, stale-while-revalidate=300`. The
 service worker extends an existing, accepted window. It does not introduce a
 new one.
 
+### Implemented
+
+`frontend/pwa/runtime-caching.ts`, imported by `vite.config.ts`. It lives in
+its own module for one reason: so it can be tested.
+
+**Order is the safety property.** Workbox takes the first rule whose pattern
+matches, so every never-cache route is listed before any rule that could also
+match it. Lifting the catalogue rule above the NetworkOnly block would undo
+hard rule 1 with no error, no failing build and no visible symptom — just a
+customer paying last week's price.
+
+That is exactly the kind of bug a code review does not catch twice, so
+`npm run test:pwa -w frontend` asserts it three ways:
+
+1. Each never-cache route resolves to `NetworkOnly` — orders, payments,
+   coupon validation, cart hydration, auth, admin, webhooks, and Razorpay's
+   `checkout.js`.
+2. Every `NetworkOnly` rule sits before every caching rule in the array, so a
+   reordering fails even for a URL nobody thought to list.
+3. No caching rule matches a never-cache route *at all*, which catches the
+   case where the ordering is the only thing keeping it safe.
+
+The test has been shown to fail: moving a broad `/api/` rule to the top
+produces `POST /api/orders must be NetworkOnly, got StaleWhileRevalidate`.
+
 ---
 
 ## 3. No offline checkout

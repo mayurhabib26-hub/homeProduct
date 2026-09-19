@@ -77,7 +77,11 @@ interface Product {
   categoryLabel: string; image: string; rating: number; reviewsCount: number;
   variants: Variant[];
 }
-interface Recipe { slug: string; title: string; summary?: string; image?: string }
+interface Recipe {
+  slug: string; title: string; subtitle: string; description: string; image: string;
+  prepTime: string; cookTime: string; servings: string; difficulty: string;
+  ingredients: string[]; instructions: string[];
+}
 
 interface Page {
   route: string;
@@ -154,6 +158,50 @@ function productJsonLd(p: Product) {
         }
       : {}),
     ...(prices.length ? { additionalProperty: [] } : {}),
+  };
+}
+
+/**
+ * "15 mins" / "1 hr 20 min" -> ISO 8601 duration.
+ *
+ * schema.org wants PT15M; the database stores what a cook would write. An
+ * unparseable value is omitted rather than guessed — Google drops a recipe
+ * with a malformed duration, so a wrong value is worse than no value.
+ */
+function isoDuration(text: string): string | undefined {
+  const h = /(\d+)\s*(?:h|hr|hour)/i.exec(text);
+  const m = /(\d+)\s*(?:m|min|minute)/i.exec(text);
+  // A bare number with no unit is minutes by convention in a recipe card.
+  const bare = !h && !m ? /^\s*(\d+)\s*$/.exec(text) : null;
+  const hours = h ? Number(h[1]) : 0;
+  const mins = m ? Number(m[1]) : bare ? Number(bare[1]) : 0;
+  if (!hours && !mins) return undefined;
+  return `PT${hours ? `${hours}H` : ''}${mins ? `${mins}M` : ''}`;
+}
+
+function recipeJsonLd(r: Recipe) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Recipe',
+    name: r.title,
+    description: r.description || r.subtitle,
+    image: r.image ? abs(r.image) : undefined,
+    author: { '@type': 'Organization', name: BRAND },
+    recipeCuisine: 'South Indian',
+    recipeCategory: 'Main course',
+    prepTime: isoDuration(r.prepTime),
+    cookTime: isoDuration(r.cookTime),
+    recipeYield: r.servings || undefined,
+    recipeIngredient: r.ingredients?.length ? r.ingredients : undefined,
+    // HowToStep rather than a plain string array: it is what earns the
+    // step-by-step treatment in results and in Google Assistant.
+    recipeInstructions: r.instructions?.length
+      ? r.instructions.map((text, i) => ({
+          '@type': 'HowToStep',
+          position: i + 1,
+          text,
+        }))
+      : undefined,
   };
 }
 
@@ -251,9 +299,11 @@ const recipes = await fetchAll<Recipe>('/recipes');
 for (const r of recipes) {
   pages.push({
     route: `/recipes/${r.slug}`,
-    title: `${r.title} | ${BRAND}`,
-    description: r.summary ?? `${r.title} — a recipe from ${BRAND}.`,
+    title: `${r.title} Recipe | ${BRAND}`,
+    description: r.description || r.subtitle || `${r.title} — a recipe from ${BRAND}.`,
     image: r.image,
+    ogType: 'article',
+    jsonLd: recipeJsonLd(r),
   });
 }
 console.log(`prerender: ${recipes.length} recipe routes`);

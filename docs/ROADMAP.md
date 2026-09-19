@@ -135,11 +135,14 @@ the infrastructure.
 - ~~Build-time prerender~~ — **done 19 Sep 2026.** `frontend/scripts/prerender.ts`,
   27 routes. Edge meta injection (the Worker) still to do
   ([ARCHITECTURE.md §9](./ARCHITECTURE.md))
-- **PWA caching and polish** — per-route strategies, install-prompt timing,
-  update flow with checkout suppression ([PWA.md](./PWA.md))
+- ~~PWA per-route caching~~ — **done 19 Sep 2026.** Strategies declared
+  explicitly and asserted by `npm run test:pwa -w frontend`. Install-prompt
+  timing and the update flow with checkout suppression still to do
+  ([PWA.md](./PWA.md))
 - ~~JSON-LD `Product` / `Offer` schema~~ — **done.** One `Offer` per variant
   with real price and availability; `aggregateRating` only where reviews
-  actually exist. `Recipe` schema still to do.
+  actually exist. `Recipe` schema done too: HowToStep instructions with ISO
+  8601 durations parsed from the human-written times.
 - ~~Sitemap, canonical URLs, per-page meta~~ — **done.** Plus `robots.txt`,
   which disallows `/cart`, `/checkout`, `/order/` and `/track`.
 - GA4 with e-commerce events

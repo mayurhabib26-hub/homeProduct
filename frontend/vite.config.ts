@@ -3,6 +3,7 @@ import react from '@vitejs/plugin-react';
 import path from 'path';
 import { defineConfig } from 'vite';
 import { VitePWA } from 'vite-plugin-pwa';
+import { runtimeCaching } from './pwa/runtime-caching.js';
 
 export default defineConfig({
   plugins: [
@@ -39,12 +40,10 @@ export default defineConfig({
         ],
       },
       workbox: {
-        // Phase 0 is installability only: precache the shell, cache nothing
-        // else. The per-route runtime strategies land in Phase 7, once the
-        // catalogue is served over HTTP and there are API routes to classify.
         globPatterns: ['**/*.{js,css,html,woff2}'],
         navigateFallbackDenylist: [/^\/api\//, /^\/admin\//],
-        runtimeCaching: [],
+
+        runtimeCaching,
       },
       devOptions: { enabled: false },
     }),

@@ -8,7 +8,8 @@
     "build": "vite build && npm run prerender",
     "preview": "vite preview",
     "lint": "tsc --noEmit",
-    "prerender": "tsx scripts/prerender.ts"
+    "prerender": "tsx scripts/prerender.ts",
+    "test:pwa": "tsx pwa/runtime-caching.test.ts"
   },
   "dependencies": {
     "@sv/shared": "*",
