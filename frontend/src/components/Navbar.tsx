@@ -8,7 +8,6 @@ import {
   Heart,
   Menu,
   X,
-  Phone,
   ArrowRight,
 } from 'lucide-react';
 
@@ -21,7 +20,6 @@ export const Navbar: React.FC = () => {
     setIsCartDrawerOpen,
     setIsSearchOpen,
     wishlist,
-    generateWhatsAppOrderUrl,
   } = useShop();
   const { pathname } = useLocation();
 
@@ -62,15 +60,6 @@ export const Navbar: React.FC = () => {
             <span className="hidden md:inline text-[#EBD9BC]">
               Free Shipping on Orders Above ₹499
             </span>
-            <a
-              href={generateWhatsAppOrderUrl()}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 min-h-11 px-2 -mx-2 text-gold-on-dark hover:text-white transition-colors text-[11px] font-medium"
-            >
-              <Phone size={12} />
-              <span>WhatsApp Orders</span>
-            </a>
           </div>
         </div>
       </div>
@@ -225,15 +214,6 @@ export const Navbar: React.FC = () => {
             </div>
 
             <div className="border-t border-[#EBD9BC] pt-6 space-y-4">
-              <a
-                href={generateWhatsAppOrderUrl()}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full flex items-center justify-center gap-2 bg-[#87380F] text-[#FAF6F0] py-3 rounded-md text-sm font-medium hover:bg-[#483828] transition-colors"
-              >
-                <Phone size={16} />
-                <span>Order on WhatsApp</span>
-              </a>
               <p className="text-xs text-center text-[#483828]/70">
                 Traditional South Indian flavours, crafted with love.
               </p>

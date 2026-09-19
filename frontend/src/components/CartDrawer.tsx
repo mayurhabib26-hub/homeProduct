@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useShop } from '../context/ShopContext';
-import { X, Trash2, Plus, Minus, ShoppingBag, ArrowRight, ShieldCheck, Tag, Phone } from 'lucide-react';
+import { X, Trash2, Plus, Minus, ShoppingBag, ArrowRight, ShieldCheck, Tag } from 'lucide-react';
 import { formatPaise } from '@sv/shared';
 import { useNavigate } from 'react-router-dom';
 
@@ -19,7 +19,6 @@ export const CartDrawer: React.FC = () => {
     couponCode,
     applyCoupon,
     removeCoupon,
-    generateWhatsAppOrderUrl,
   } = useShop();
   const navigate = useNavigate();
 
@@ -261,15 +260,6 @@ export const CartDrawer: React.FC = () => {
                   <ArrowRight size={16} />
                 </button>
 
-                <a
-                  href={generateWhatsAppOrderUrl()}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-full py-2.5 bg-transparent border border-[#87380F] text-[#87380F] hover:bg-[#87380F]/10 rounded-md font-sans text-xs font-semibold tracking-wider uppercase transition-colors flex items-center justify-center gap-2"
-                >
-                  <Phone size={14} />
-                  <span>Order Directly on WhatsApp</span>
-                </a>
               </div>
 
               <div className="flex items-center justify-center gap-2 text-[11px] text-[#483828]/70 pt-1">

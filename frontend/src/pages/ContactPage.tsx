@@ -45,7 +45,7 @@ export const ContactPage: React.FC = () => {
     },
     {
       q: 'Can I order directly on WhatsApp without paying on the website?',
-      a: 'Yes, absolutely. We welcome WhatsApp orders! You can click any "Order on WhatsApp" button, confirm your list with us, and pay via direct UPI or Cash on Delivery.',
+      a: 'Yes. Order through the site and choose Cash on Delivery, or pay by UPI or card at checkout. If you would rather talk to us first, message or call the number above and we will help you place it.',
     },
   ];
 

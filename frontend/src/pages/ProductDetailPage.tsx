@@ -11,7 +11,6 @@ import {
   Star,
   ShoppingBag,
   Heart,
-  Phone,
   ArrowRight,
   ShieldCheck,
   Truck,
@@ -97,7 +96,6 @@ const ProductDetail: React.FC<{ product: ProductDetailData }> = ({ product }) =>
     addToCart,
     toggleWishlist,
     isWishlisted,
-    generateWhatsAppOrderUrl,
     showToast,
   } = useShop();
   const navigate = useNavigate();
@@ -349,16 +347,6 @@ const ProductDetail: React.FC<{ product: ProductDetailData }> = ({ product }) =>
                 </button>
               </div>
 
-              {/* Order via WhatsApp Button with pre-filled message */}
-              <a
-                href={generateWhatsAppOrderUrl(product, selectedWeight, quantity)}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full py-3 bg-[#647044] hover:bg-[#4d5733] text-white rounded-md font-sans text-xs font-bold tracking-widest uppercase transition-colors flex items-center justify-center gap-2 shadow-xs"
-              >
-                <Phone size={15} />
-                <span>ORDER ON WHATSAPP (PRE-FILLED)</span>
-              </a>
             </div>
 
             {/* Trust highlights */}

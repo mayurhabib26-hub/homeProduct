@@ -6,8 +6,6 @@ import { Link } from 'react-router-dom';
 import { telHref, formatPhoneForDisplay, FSSAI_LICENCE, SELLER_LEGAL_NAME } from '../lib/contact';
 
 export const Footer: React.FC = () => {
-  const { generateWhatsAppOrderUrl } = useShop();
-
   return (
     <footer className="bg-[#382B1E] text-[#EBD9BC] pt-16 pb-12 border-t-2 border-[#B69A55]/30 relative overflow-hidden font-sans">
       {/* Decorative botanical background motifs inspired by logo */}
@@ -98,15 +96,6 @@ export const Footer: React.FC = () => {
                 aria-label="Facebook Profile"
               >
                 <Facebook size={17} />
-              </a>
-              <a
-                href={generateWhatsAppOrderUrl()}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-9 h-9 rounded-full bg-[#483828] border border-[#B69A55]/30 text-[#EBD9BC] hover:text-[#FAF6F0] hover:bg-[#87380F] flex items-center justify-center transition-colors"
-                aria-label="WhatsApp Us"
-              >
-                <Phone size={17} />
               </a>
             </div>
           </div>
@@ -209,17 +198,6 @@ export const Footer: React.FC = () => {
                 <Mail size={16} className="text-gold-on-dark shrink-0" />
                 <a href="mailto:care@svhomeproducts.com" className="inline-flex items-center min-h-11 hover:text-[#FAF6F0] transition-colors">
                   care@svhomeproducts.com
-                </a>
-              </li>
-              <li className="pt-2">
-                <a
-                  href={generateWhatsAppOrderUrl()}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#87380F] hover:bg-[#9E4515] text-[#FAF6F0] text-xs font-semibold rounded-md transition-colors"
-                >
-                  <Phone size={12} />
-                  <span>Chat on WhatsApp</span>
                 </a>
               </li>
             </ul>

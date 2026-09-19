@@ -11,7 +11,6 @@ import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { CartDrawer } from './components/CartDrawer';
 import { SearchModal } from './components/SearchModal';
-import { FloatingWhatsApp } from './components/FloatingWhatsApp';
 import { MobileBottomNav } from './components/MobileBottomNav';
 import { ToastNotification } from './components/ToastNotification';
 import { ScrollProgressBar } from './components/ScrollProgressBar';
@@ -90,7 +89,6 @@ const AppContent: React.FC = () => {
       {/* Overlays, Drawers & Scroll To Top */}
       <CartDrawer />
       <SearchModal />
-      <FloatingWhatsApp />
       <MobileBottomNav />
       <ToastNotification />
       <ScrollToTop />
