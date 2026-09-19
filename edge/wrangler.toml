@@ -1,0 +1,13 @@
+name = "sv-meta-injector"
+main = "meta-injector.ts"
+compatibility_date = "2026-09-01"
+
+# The prerendered build. Point this at the Pages project or bucket that
+# `npm run build -w frontend` publishes.
+# [[assets]]
+# directory = "../frontend/dist"
+# binding = "ASSETS"
+
+[vars]
+# API_BASE  = "https://api.<your-domain>/api"
+# SITE_URL  = "https://<your-domain>"

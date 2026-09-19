@@ -439,8 +439,20 @@ Two properties it has to have, and does:
   hard failure. A deploy that silently ships every product page carrying the
   homepage's meta is the exact bug this replaces.
 
-(2), the Cloudflare Worker, is still to do. It only matters once products are
-created between deploys.
+**(2) is written** — `edge/meta-injector.ts`. It only does work when the
+static asset is **missing**, so a prerendered page is served untouched at CDN
+speed and the Worker costs nothing on the hot path. When a product has no page
+yet it fetches the product, strips the shell's homepage tags — appending would
+leave both in the document and a crawler takes the first it finds — and serves
+the shell with the right head at 200.
+
+If the catalogue is slow or down it falls through to the shell rather than
+erroring: a human still gets a working page, and only a crawler loses its
+preview. Responses carry `x-meta-source: edge` so it is possible to tell which
+path served a page.
+
+It has never run against Cloudflare's runtime. Like Razorpay and Shiprocket,
+that stays true until it is deployed.
 
 This is a genuine cost of the stack decision, and it is worth stating plainly:
 an SSR framework would make this a non-issue. The mitigation is good, not free.

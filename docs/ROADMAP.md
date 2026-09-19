@@ -133,7 +133,8 @@ the infrastructure.
 ## Phase 7 — Growth · 1 week, ongoing
 
 - ~~Build-time prerender~~ — **done 19 Sep 2026.** `frontend/scripts/prerender.ts`,
-  27 routes. Edge meta injection (the Worker) still to do
+  27 routes, and the edge Worker in `edge/` covers products published between
+  deploys — written, not yet deployed
   ([ARCHITECTURE.md §9](./ARCHITECTURE.md))
 - ~~PWA per-route caching~~ — **done 19 Sep 2026.** Strategies declared
   explicitly and asserted by `npm run test:pwa -w frontend`. Install-prompt
